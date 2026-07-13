@@ -57,3 +57,14 @@
 - Número de adultos y niños
 - Enlaces personalizados
 - Confirmación RSVP
+
+## v0.6.0 - Invitados y pases ✅
+- Lista de invitados por invitación.
+- Adultos, niños, mesa y código único.
+- Enlaces públicos personalizados.
+
+## Próximo: v0.7.0 - Confirmaciones
+- Formulario RSVP dentro de la invitación.
+- Confirmar o rechazar asistencia.
+- Ajustar asistentes reales dentro del límite de pases.
+- Panel de respuestas y métricas.

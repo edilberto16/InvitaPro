@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+- Rediseño completo del formulario de invitados.
+- Formulario dividido en tres secciones claras.
+- Modal con altura controlada y desplazamiento interno.
+- Botones de acción fijos y diseño adaptable a celular.
+
 ## [0.4.0] - 2026-07-13
 
 ### Agregado
@@ -41,3 +47,14 @@
 - Selección de plantilla, color, mensaje, vestimenta, Maps y WhatsApp.
 - Vista pública dinámica con cuenta regresiva y diseño adaptable.
 - Persistencia local provisional mediante localStorage.
+
+## [0.6.0] - 2026-07-13
+### Agregado
+- Módulo funcional de invitados vinculado a invitaciones.
+- Pases separados para adultos y niños.
+- Código único y enlace privado para cada familia o invitado.
+- Asignación de mesa, datos de contacto, estado y notas internas.
+- Búsqueda y filtros por invitación y estado.
+- Copiado de enlace personalizado desde el panel.
+- Vista pública personalizada con nombre, lugares asignados, mesa y código de acceso.
+- Modal profesional de eliminación y persistencia local mediante localStorage.

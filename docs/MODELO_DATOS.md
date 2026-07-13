@@ -79,3 +79,16 @@ El módulo Clientes v0.3.0 guarda información en `localStorage` para validar la
 - creadoEn
 
 Relación: un Cliente puede tener muchos Eventos. En v0.4.0 se almacena localmente; posteriormente se migrará a PostgreSQL.
+
+## Invitado / Pase (v0.6.0)
+
+- `id`: identificador único.
+- `invitacionId`: invitación a la que pertenece.
+- `nombre`: persona, pareja o familia invitada.
+- `telefono`, `correo`: datos opcionales de contacto.
+- `adultos`, `ninos`: cantidad máxima de pases asignados.
+- `mesa`: mesa asignada, opcional.
+- `codigo`: token único usado en el enlace personalizado.
+- `estado`: pendiente, confirmado o declinado.
+- `notas`: información interna.
+- `creadoEn`: fecha de alta.
