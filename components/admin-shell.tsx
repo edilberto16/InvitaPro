@@ -49,7 +49,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="topbar-actions">
             <button type="button" className="icon-button" aria-label="Notificaciones">🔔</button>
-            <Link href="/admin/invitaciones/nueva" className="button button-primary">+ Nueva invitación</Link>
+            <Link href="/admin/invitaciones" className="button button-primary">+ Nueva invitación</Link>
           </div>
         </header>
         <main className="admin-content">{children}</main>

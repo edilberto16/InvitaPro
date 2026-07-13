@@ -45,3 +45,15 @@
 - [x] Búsqueda y validaciones.
 - [x] Modelo de datos documentado.
 - [ ] Migración a PostgreSQL/Supabase.
+
+### v0.5.0 — Invitaciones ✅
+- Relación con eventos
+- Edición y publicación
+- Enlace público dinámico
+- Plantillas iniciales
+
+### Siguiente: v0.6.0 — Invitados y pases
+- Lista de invitados por invitación
+- Número de adultos y niños
+- Enlaces personalizados
+- Confirmación RSVP
