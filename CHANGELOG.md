@@ -1,10 +1,11 @@
-# Historial de cambios
+# Changelog
 
-## 0.1.0 - Inicial
+## 0.2.0
+- Nuevo layout administrativo con menú lateral y barra superior.
+- Dashboard con tarjetas, tabla de invitaciones y actividad reciente.
+- Navegación inicial para Clientes, Invitaciones, Plantillas, Invitados, Confirmaciones y Configuración.
+- Diseño adaptable para escritorio, tableta y celular.
 
-- Se creó la base del proyecto con Next.js y TypeScript.
-- Se agregó una página principal.
-- Se agregó un panel administrativo de demostración.
-- Se agregó un formulario inicial para invitaciones.
-- Se agregó una invitación pública de demostración.
-- Se agregó el esquema inicial de Supabase.
+## 0.1.0
+- Base inicial de InvitaPro con Next.js.
+- Panel demostrativo y vista pública de invitación.
