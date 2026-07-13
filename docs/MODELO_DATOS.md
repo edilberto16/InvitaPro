@@ -63,3 +63,19 @@ Cliente 1 ─── N Evento 1 ─── 1 Invitación 1 ─── N Invitado 1 
 ## Etapa actual
 
 El módulo Clientes v0.3.0 guarda información en `localStorage` para validar la interfaz y el flujo de trabajo sin instalar todavía una base de datos. En la siguiente etapa se sustituirá esta capa por PostgreSQL/Supabase manteniendo la misma interfaz.
+
+
+### Evento
+- id
+- clienteId
+- nombre
+- tipo
+- fecha
+- hora
+- lugar
+- direccion
+- estado: borrador | confirmado | finalizado
+- notas
+- creadoEn
+
+Relación: un Cliente puede tener muchos Eventos. En v0.4.0 se almacena localmente; posteriormente se migrará a PostgreSQL.

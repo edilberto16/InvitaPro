@@ -3,6 +3,7 @@ import Link from "next/link";
 const menu = [
   ["Dashboard", "/admin", "⌂"],
   ["Clientes", "/admin/clientes", "♙"],
+  ["Eventos", "/admin/eventos", "◷"],
   ["Invitaciones", "/admin/invitaciones", "✉"],
   ["Plantillas", "/admin/plantillas", "▦"],
   ["Invitados", "/admin/invitados", "♚"],

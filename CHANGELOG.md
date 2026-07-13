@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-07-13
+
+### Agregado
+- Módulo funcional de Eventos asociado a Clientes.
+- Crear, editar, buscar, filtrar y eliminar eventos.
+- Estados borrador, confirmado y finalizado.
+- Agenda local persistente mediante localStorage.
+- Confirmación profesional antes de eliminar un evento.
+- Acceso a Eventos desde el menú administrativo.
+
 ## 0.3.1 - Confirmación de eliminación
 
 - Se reemplazó la alerta nativa del navegador por un modal profesional.

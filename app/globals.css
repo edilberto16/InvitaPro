@@ -235,3 +235,35 @@ a { color: inherit; }
   .delete-actions .button { width: 100%; }
   .delete-client-summary { align-items: center; }
 }
+
+/* Eventos v0.4.0 */
+.events-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.events-toolbar { align-items: center; gap: 24px; }
+.events-filters { display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: min(700px, 100%); }
+.events-filters .search-field { flex: 1 1 360px; }
+.status-filter { width: 190px; padding: 11px 12px; border: 1px solid var(--admin-border); border-radius: 10px; background: #fff; color: var(--admin-text); }
+.events-table td { vertical-align: middle; }
+.event-name-cell { display: flex; align-items: center; gap: 12px; min-width: 220px; }
+.event-name-cell > div { display: grid; gap: 3px; }
+.event-name-cell span:not(.event-avatar) { color: var(--admin-muted); font-size: 12px; }
+.event-avatar { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; flex: 0 0 auto; color: #fff; background: linear-gradient(145deg, #a36a42, #75472b); font-weight: 850; font-size: 12px; box-shadow: 0 7px 16px rgba(117, 71, 43, .18); }
+.event-status { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+.event-status-borrador { background: #f1eee9; color: #6f675f; }
+.event-status-confirmado { background: #e4f4e8; color: #267039; }
+.event-status-finalizado { background: #e9edf5; color: #425779; }
+.event-form-modal { width: min(760px, 100%); }
+.event-form textarea { resize: vertical; }
+.event-no-clients { padding: 34px 20px; border: 1px dashed var(--admin-border); border-radius: 14px; background: #faf8f6; text-align: center; }
+.event-no-clients p { margin: 8px auto 18px; color: var(--admin-muted); max-width: 430px; line-height: 1.5; }
+
+@media (max-width: 1050px) {
+  .events-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .events-toolbar { align-items: stretch; flex-direction: column; }
+  .events-filters { width: 100%; justify-content: stretch; }
+}
+
+@media (max-width: 700px) {
+  .events-stats { grid-template-columns: 1fr; }
+  .events-filters { align-items: stretch; flex-direction: column; }
+  .events-filters .search-field, .status-filter { width: 100%; flex: auto; }
+}

@@ -24,7 +24,7 @@
 - [ ] Música.
 - [ ] Varias ubicaciones.
 
-## v0.4.0 — Invitados y RSVP
+## v0.4.0 ✅ — Invitados y RSVP
 
 - [ ] Lista de invitados.
 - [ ] Pases personalizados.
