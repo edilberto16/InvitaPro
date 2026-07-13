@@ -12,7 +12,7 @@
 
 ## v0.2.0 — Administración
 
-- [ ] CRUD de clientes.
+- [x] CRUD de clientes.
 - [ ] CRUD de invitaciones.
 - [ ] Estados borrador y publicada.
 - [ ] Vista previa.
@@ -37,3 +37,11 @@
 - [ ] Publicación en Vercel.
 - [ ] Dominio personalizado opcional.
 - [ ] Seguridad y respaldos.
+
+
+## v0.3.0 — Clientes funcionales
+
+- [x] Alta, edición y eliminación local.
+- [x] Búsqueda y validaciones.
+- [x] Modelo de datos documentado.
+- [ ] Migración a PostgreSQL/Supabase.
