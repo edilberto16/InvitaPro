@@ -58,3 +58,14 @@
 - Copiado de enlace personalizado desde el panel.
 - Vista pública personalizada con nombre, lugares asignados, mesa y código de acceso.
 - Modal profesional de eliminación y persistencia local mediante localStorage.
+
+## [0.7.0] - 2026-07-13
+
+### Agregado
+- Formulario RSVP integrado en cada pase personalizado.
+- Confirmación de adultos y niños respetando los pases asignados.
+- Mensaje opcional para los anfitriones.
+- Módulo administrativo de confirmaciones con búsqueda y filtros.
+- Estadísticas de respuestas, asistentes, negativas y pendientes.
+- Actualización automática del estado del invitado.
+- Edición de respuestas y eliminación con confirmación profesional.
