@@ -69,3 +69,12 @@
 - Estadísticas de respuestas, asistentes, negativas y pendientes.
 - Actualización automática del estado del invitado.
 - Edición de respuestas y eliminación con confirmación profesional.
+
+## [0.8.0] - Centro de notificaciones y dashboard RSVP
+
+- Campana con contador de respuestas nuevas.
+- Panel desplegable con confirmaciones recientes.
+- Dashboard alimentado por los datos reales guardados localmente.
+- Porcentaje de respuesta y resumen de confirmados, declinados y pendientes.
+- Actividad RSVP reciente y accesos rápidos.
+- Actualización automática dentro de la misma computadora y navegador.

@@ -85,6 +85,7 @@ export default function InvitacionPersonalizada() {
     const invitadosActualizados = invitados.map((item) => item.id === invitado.id ? { ...item, estado: asistencia } : item);
     localStorage.setItem(INVITADOS_KEY, JSON.stringify(invitadosActualizados));
     setInvitado({ ...invitado, estado: asistencia });
+    window.dispatchEvent(new CustomEvent("invitapro:confirmacion", { detail: respuesta }));
     setConfirmacion(respuesta); setError(""); setGuardado(true);
     setTimeout(() => setGuardado(false), 3500);
   }
