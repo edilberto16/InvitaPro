@@ -44,7 +44,7 @@
 - [x] Alta, edición y eliminación local.
 - [x] Búsqueda y validaciones.
 - [x] Modelo de datos documentado.
-- [ ] Migración a PostgreSQL/Supabase.
+- [x] Migración completa a Supabase.
 
 ### v0.5.0 — Invitaciones ✅
 - Relación con eventos
@@ -68,3 +68,11 @@
 - Confirmar o rechazar asistencia.
 - Ajustar asistentes reales dentro del límite de pases.
 - Panel de respuestas y métricas.
+
+
+## Limpieza v1.2.0
+
+- [x] Eliminar el asistente temporal de migración.
+- [x] Eliminar la navegación hacia `/admin/migracion`.
+- [x] Dejar Supabase como fuente única de datos.
+- [x] Mantener el formulario profesional de invitados.

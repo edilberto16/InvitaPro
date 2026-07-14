@@ -1,60 +1,7 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-
-type Evento = { id: string; clienteId: string; nombre: string; tipo: string; fecha: string; hora: string; lugar: string; direccion: string };
-type Invitacion = { id: string; eventoId: string; titulo: string; slug: string; plantilla: string; estado: "borrador" | "publicada" | "pausada"; mensaje: string; mapaUrl: string; whatsapp: string; vestimenta: string; colorPrincipal: string };
-const EVENTOS_KEY = "invitapro_eventos_v1";
-const INVITACIONES_KEY = "invitapro_invitaciones_v1";
-
-function dateLong(value: string) {
-  if (!value) return "Fecha por confirmar";
-  return new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
-}
-
-export default function InvitacionPublica() {
-  const params = useParams<{ slug: string }>();
-  const [invitacion, setInvitacion] = useState<Invitacion | null>(null);
-  const [evento, setEvento] = useState<Evento | null>(null);
-  const [cargado, setCargado] = useState(false);
-  const [faltan, setFaltan] = useState("");
-
-  useEffect(() => {
-    try {
-      const invitaciones = JSON.parse(localStorage.getItem(INVITACIONES_KEY) || "[]") as Invitacion[];
-      const encontrada = invitaciones.find((item) => item.slug === params.slug) || null;
-      const eventos = JSON.parse(localStorage.getItem(EVENTOS_KEY) || "[]") as Evento[];
-      setInvitacion(encontrada);
-      setEvento(encontrada ? eventos.find((item) => item.id === encontrada.eventoId) || null : null);
-    } catch { setInvitacion(null); setEvento(null); }
-    setCargado(true);
-  }, [params.slug]);
-
-  useEffect(() => {
-    if (!evento?.fecha) return;
-    const target = new Date(`${evento.fecha}T${evento.hora || "00:00"}:00`).getTime();
-    const update = () => {
-      const diff = target - Date.now();
-      if (diff <= 0) return setFaltan("¡Hoy es el gran día!");
-      const days = Math.floor(diff / 86400000);
-      const hours = Math.floor((diff / 3600000) % 24);
-      const minutes = Math.floor((diff / 60000) % 60);
-      setFaltan(`${days} días · ${hours} horas · ${minutes} minutos`);
-    };
-    update(); const timer = setInterval(update, 60000); return () => clearInterval(timer);
-  }, [evento]);
-
-  const whatsappHref = useMemo(() => invitacion?.whatsapp ? `https://wa.me/${invitacion.whatsapp}?text=${encodeURIComponent(`Confirmo mi asistencia a ${invitacion.titulo}`)}` : "", [invitacion]);
-  if (!cargado) return <main className="public-invite-loading">Preparando invitación…</main>;
-  if (!invitacion || !evento) return <main className="public-invite-error"><h1>Invitación no encontrada</h1><p>El enlace no existe en esta computadora o fue eliminado.</p></main>;
-  if (invitacion.estado !== "publicada") return <main className="public-invite-error"><h1>Invitación no disponible</h1><p>Esta invitación se encuentra en estado {invitacion.estado}.</p></main>;
-
-  return <main className={`public-invite theme-${invitacion.plantilla}`} style={{ "--invite-color": invitacion.colorPrincipal } as React.CSSProperties}>
-    <section className="public-hero"><span className="public-kicker">{evento.tipo}</span><h1>{invitacion.titulo}</h1><p>{dateLong(evento.fecha)}</p><div className="public-scroll">Desliza para ver los detalles ↓</div></section>
-    <section className="public-section public-intro"><p className="public-small-title">Estás cordialmente invitado</p><h2>Queremos compartir contigo este momento</h2><p>{invitacion.mensaje}</p><div className="public-countdown">{faltan}</div></section>
-    <section className="public-section public-details"><article><span>Fecha</span><strong>{dateLong(evento.fecha)}</strong><p>{evento.hora ? `${evento.hora} h` : "Hora por confirmar"}</p></article><article><span>Lugar</span><strong>{evento.lugar || "Por confirmar"}</strong><p>{evento.direccion || "La dirección se compartirá próximamente"}</p></article><article><span>Vestimenta</span><strong>{invitacion.vestimenta || "Libre"}</strong><p>Gracias por ser parte de nuestra celebración</p></article></section>
-    <section className="public-section public-actions"><h2>¿Nos acompañas?</h2><p>Confirma tu asistencia y guarda la ubicación del evento.</p><div>{invitacion.mapaUrl && <a href={invitacion.mapaUrl} target="_blank" rel="noreferrer">Abrir ubicación</a>}{whatsappHref && <a href={whatsappHref} target="_blank" rel="noreferrer">Confirmar por WhatsApp</a>}</div></section>
-    <footer className="public-footer">Creado con InvitaPro</footer>
-  </main>;
-}
+'use client';
+import { FormEvent,useEffect,useMemo,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';
+type PublicData={invitacion:{id:string;titulo:string;slug:string;modalidad:'simple'|'rsvp'|'pases';design_json:Record<string,unknown>;color_principal:string|null;musica_url:string|null;whatsapp:string|null;fecha_expiracion:string|null};evento:{nombre:string;tipo:string;fecha:string;hora:string|null;zona_horaria:string;lugar:string|null;direccion:string|null;maps_url:string|null};invitado:null};
+function longDate(v:string){return new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${v}T00:00:00Z`))}
+export default function PublicInvite(){const params=useParams<{slug:string}>();const supabase=useMemo(()=>createClient(),[]);const[data,setData]=useState<PublicData|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState('');const[name,setName]=useState('');const[phone,setPhone]=useState('');const[attendance,setAttendance]=useState(true);const[adults,setAdults]=useState(1);const[children,setChildren]=useState(0);const[message,setMessage]=useState('');const[sent,setSent]=useState(false);const[countdown,setCountdown]=useState('');
+useEffect(()=>{supabase.rpc('obtener_invitacion_publica',{p_slug:params.slug,p_codigo:null}).then(({data,error})=>{if(error||!data)setError('La invitación no existe o no está publicada.');else setData(data as PublicData);setLoading(false)})},[params.slug]);useEffect(()=>{if(!data)return;const target=new Date(`${data.evento.fecha}T${data.evento.hora||'00:00'}:00`).getTime();const tick=()=>{const d=target-Date.now();if(d<=0)return setCountdown('¡Hoy es el gran día!');setCountdown(`${Math.floor(d/86400000)} días · ${Math.floor((d/3600000)%24)} horas · ${Math.floor((d/60000)%60)} minutos`)};tick();const id=setInterval(tick,60000);return()=>clearInterval(id)},[data]);async function submit(e:FormEvent){e.preventDefault();setError('');const r=await supabase.rpc('registrar_confirmacion',{p_slug:params.slug,p_asistira:attendance,p_adultos:attendance?adults:0,p_ninos:attendance?children:0,p_nombre:name,p_telefono:phone||null,p_mensaje:message||null,p_codigo:null});if(r.error)setError(r.error.message);else setSent(true)}
+if(loading)return <main className="public-invite-loading">Preparando invitación…</main>;if(!data)return <main className="public-invite-error"><h1>Invitación no disponible</h1><p>{error}</p></main>;const design=data.invitacion.design_json||{};const plantilla=String(design.plantilla||'elegante');const intro=String(design.mensaje||'Será un honor contar con tu presencia.');const dress=String(design.vestimenta||'Libre');return <main className={`public-invite theme-${plantilla}`} style={{'--invite-color':data.invitacion.color_principal||'#8f5c38'} as React.CSSProperties}><section className="public-hero"><span className="public-kicker">{data.evento.tipo}</span><h1>{data.invitacion.titulo}</h1><p>{longDate(data.evento.fecha)}</p><div className="public-scroll">Desliza para ver los detalles ↓</div></section><section className="public-section public-intro"><p className="public-small-title">Estás cordialmente invitado</p><h2>Queremos compartir contigo este momento</h2><p>{intro}</p><div className="public-countdown">{countdown}</div></section><section className="public-section public-details"><article><span>Fecha</span><strong>{longDate(data.evento.fecha)}</strong><p>{data.evento.hora||'Hora por confirmar'}</p></article><article><span>Lugar</span><strong>{data.evento.lugar||'Por confirmar'}</strong><p>{data.evento.direccion||'Dirección por confirmar'}</p></article><article><span>Vestimenta</span><strong>{dress}</strong><p>Gracias por acompañarnos</p></article></section>{data.invitacion.modalidad==='rsvp'&&<section className="public-section public-rsvp"><div className="rsvp-public-card"><p className="public-small-title">Confirmación de asistencia</p><h2>¿Nos acompañas?</h2>{sent?<div className="rsvp-success">✓ Tu respuesta se guardó correctamente.</div>:<form className="rsvp-public-form" onSubmit={submit}><label className="rsvp-message-field"><span>Nombre *</span><input value={name} onChange={e=>setName(e.target.value)} required/></label><label className="rsvp-message-field"><span>Teléfono</span><input value={phone} onChange={e=>setPhone(e.target.value)}/></label><div className="rsvp-choice-grid"><button type="button" className={`rsvp-choice ${attendance?'selected':''}`} onClick={()=>setAttendance(true)}>✓ <strong>Sí, asistiré</strong></button><button type="button" className={`rsvp-choice decline ${!attendance?'selected':''}`} onClick={()=>setAttendance(false)}>× <strong>No podré asistir</strong></button></div>{attendance&&<div className="rsvp-attendee-grid"><label><span>Adultos</span><input type="number" min="0" value={adults} onChange={e=>setAdults(Number(e.target.value))}/></label><label><span>Niños</span><input type="number" min="0" value={children} onChange={e=>setChildren(Number(e.target.value))}/></label></div>}<label className="rsvp-message-field"><span>Mensaje</span><textarea rows={3} value={message} onChange={e=>setMessage(e.target.value)}/></label>{error&&<p className="form-error">{error}</p>}<button className="rsvp-submit">Enviar confirmación</button></form>}</div></section>}<section className="public-section public-actions"><h2>Información del evento</h2><div>{data.evento.maps_url&&<a href={data.evento.maps_url} target="_blank">Abrir ubicación</a>}{data.invitacion.whatsapp&&<a href={`https://wa.me/${data.invitacion.whatsapp}`} target="_blank">Contactar por WhatsApp</a>}</div></section><footer className="public-footer">Creado con InvitaPro</footer></main>}

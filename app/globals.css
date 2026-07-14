@@ -578,3 +578,34 @@ a { color: inherit; }
 @media (max-width: 1200px) { .dashboard-live-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dashboard-progress-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .quick-action-grid { grid-template-columns: 1fr; } .notification-popover { position: fixed; top: 72px; right: 12px; left: 12px; width: auto; } .notification-popover::before { display: none; } }
 @media (max-width: 560px) { .dashboard-live-stats { grid-template-columns: 1fr; } }
+
+/* Supabase login y migración v0.9.0 */
+.login-page { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; background: radial-gradient(circle at top left, #f3e8dc, transparent 42%), #f6f7f9; }
+.login-card { width: min(460px, 100%); padding: 34px; border: 1px solid #e3e6ea; border-radius: 24px; background: #fff; box-shadow: 0 24px 70px rgba(30, 38, 50, .12); }
+.login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 34px; }
+.login-brand > span { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: #a8683d; color: #fff; font-weight: 800; }
+.login-brand div { display: grid; gap: 2px; }
+.login-brand strong { font-size: 18px; }
+.login-brand small { color: #7b8490; }
+.login-heading h1 { margin: 6px 0 8px; font-size: 32px; }
+.login-heading > p:last-child { color: #69727e; margin-bottom: 26px; }
+.login-form { display: grid; gap: 18px; }
+.login-form label { display: grid; gap: 8px; color: #323945; font-weight: 700; font-size: 14px; }
+.login-form input { width: 100%; padding: 13px 14px; border: 1px solid #d9dee5; border-radius: 11px; font: inherit; outline: none; }
+.login-form input:focus { border-color: #a8683d; box-shadow: 0 0 0 3px rgba(168, 104, 61, .12); }
+.login-button { width: 100%; justify-content: center; min-height: 46px; }
+.login-help { margin: 20px 0 0; text-align: center; color: #7a838e; font-size: 13px; }
+.form-error { padding: 11px 12px; border-radius: 10px; background: #fff0f0; color: #a82d2d; font-size: 14px; }
+.migration-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.migration-panel { display: grid; gap: 24px; padding: 28px; }
+.migration-panel h2 { margin: 10px 0 7px; }
+.migration-panel > div > p { color: #69727e; }
+.migration-status { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: #f0f1f3; color: #5f6874; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.migration-completo { background: #e8f7ee; color: #17723a; }
+.migration-error { background: #fff0f0; color: #aa2d2d; }
+.migration-migrando { background: #fff5df; color: #8a5a06; }
+.migration-steps { margin: 0; padding: 20px 24px 20px 42px; border: 1px solid #e4e7eb; border-radius: 14px; background: #fafbfc; display: grid; gap: 11px; color: #4e5864; }
+.migration-steps code { padding: 2px 6px; border-radius: 6px; background: #eceff3; color: #313844; }
+.migration-actions { display: flex; justify-content: flex-end; gap: 12px; }
+@media (max-width: 1050px) { .migration-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .migration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .migration-actions { flex-direction: column; } .migration-actions .button { width: 100%; justify-content: center; } .login-card { padding: 25px; } }

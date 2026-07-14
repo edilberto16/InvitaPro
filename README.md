@@ -1,37 +1,64 @@
-# InvitaPro Starter
+# InvitaPro
 
-Primera versión de un sistema para crear invitaciones digitales.
+InvitaPro es una plataforma para crear y administrar invitaciones digitales, eventos, invitados y confirmaciones RSVP.
 
-## Incluye
+## Arquitectura actual
 
-- Página de inicio.
-- Panel administrativo de demostración.
-- Formulario para crear una invitación.
-- API de validación inicial.
-- Invitación pública adaptable a celular.
-- Cuenta regresiva y confirmación por WhatsApp.
-- Esquema SQL para Supabase con políticas RLS.
+- Next.js
+- TypeScript
+- Supabase Auth
+- Supabase PostgreSQL
+- Supabase Realtime
+- Supabase Storage
 
-## Ejecutar localmente
+Supabase es la única fuente operativa de datos. Los módulos administrativos ya no dependen de `localStorage`.
 
-1. Instala Node.js 20 o superior.
-2. Abre una terminal dentro de esta carpeta.
-3. Ejecuta:
+## Configuración local
 
-```bash
+1. Instala las dependencias:
+
+```powershell
 npm install
+```
+
+2. Crea `.env.local` en la raíz del proyecto:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://TU-PROYECTO.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=TU_LLAVE_PUBLICABLE
+```
+
+3. Inicia el proyecto:
+
+```powershell
 npm run dev
 ```
 
-4. Abre `http://localhost:3000`.
+4. Abre:
 
-## Configurar Supabase
+```text
+http://localhost:3000/login
+```
 
-1. Crea un proyecto en Supabase.
-2. Abre SQL Editor y ejecuta `supabase/schema.sql`.
-3. Copia `.env.example` como `.env.local`.
-4. Coloca la URL y las claves de tu proyecto.
+## Módulos conectados a Supabase
 
-## Estado actual
+- Dashboard
+- Clientes
+- Eventos
+- Invitaciones
+- Plantillas
+- Invitados y pases
+- Confirmaciones
+- Notificaciones
+- Invitación pública
+- RSVP
 
-El diseño y flujo principal ya funcionan como demostración. El formulario valida los datos mediante una API, pero todavía no inserta registros en Supabase. La siguiente etapa es conectar autenticación, almacenamiento y CRUD real.
+## Base de datos
+
+El esquema definitivo se encuentra en:
+
+```text
+supabase/schema-v1.sql
+```
+
+No debes ejecutar nuevamente el esquema sobre una base que ya contiene datos sin revisar previamente los cambios.

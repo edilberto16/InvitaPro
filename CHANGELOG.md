@@ -1,4 +1,38 @@
+## 1.2.0 - Limpieza definitiva de Supabase
+
+- Elimina la pantalla `/admin/migracion`.
+- Elimina la opción Migración del menú administrativo.
+- Elimina la documentación y el esquema temporal de migración.
+- Supabase queda como única fuente operativa de datos.
+- Conserva el formulario profesional de nuevo/editar invitado.
+- Actualiza README, Roadmap y documentación técnica.
+
+## 1.1.1 - Formulario de invitados mejorado
+
+- Rediseño del modal de nuevo/editar invitado.
+- Secciones claras para datos, lugares y acceso.
+- Distribución compacta en columnas.
+- Pie fijo con acciones visibles.
+- Mejor adaptación a pantallas pequeñas.
+
 # Changelog
+
+## 1.0.0 - Migración completa a Supabase
+
+- Motor de migración compatible con `schema-v1.sql`.
+- Migra clientes, eventos, invitaciones, invitados y confirmaciones respetando relaciones.
+- Mapa persistente de identificadores para evitar duplicados al repetir la migración.
+- Validación de sesión, tablas y errores por módulo.
+- Conserva `localStorage` como respaldo hasta completar la validación.
+
+## 0.9.0 - Base de migración a Supabase
+
+- Agrega clientes Supabase para navegador y servidor.
+- Agrega inicio de sesión por correo y contraseña.
+- Protege las rutas administrativas cuando Supabase está configurado.
+- Incorpora un esquema PostgreSQL completo con RLS y función pública RSVP.
+- Agrega el asistente para migrar datos desde localStorage.
+- Prepara confirmaciones para Supabase Realtime.
 
 ## 0.6.1
 - Rediseño completo del formulario de invitados.
@@ -78,3 +112,12 @@
 - Porcentaje de respuesta y resumen de confirmados, declinados y pendientes.
 - Actividad RSVP reciente y accesos rápidos.
 - Actualización automática dentro de la misma computadora y navegador.
+
+## 1.1.0 - Supabase CRUD completo
+
+- Clientes, eventos, invitaciones, invitados, confirmaciones y plantillas leen y escriben directamente en Supabase.
+- El dashboard obtiene métricas reales de la nube.
+- Confirmaciones y notificaciones se actualizan mediante Supabase Realtime.
+- Las invitaciones públicas se cargan mediante funciones SQL seguras.
+- RSVP público y pases personalizados guardan las respuestas directamente en Supabase.
+- Se elimina el uso operativo de localStorage en los módulos principales.
