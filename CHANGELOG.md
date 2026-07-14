@@ -1,3 +1,11 @@
+## 1.3.1 - Vista previa de pases y contador
+
+- Permite al administrador previsualizar invitaciones con pases sin exponerlas públicamente.
+- El enlace de Vista previa agrega un modo administrativo seguro para la modalidad `pases`.
+- Mantiene bloqueado el enlace público sin código para los invitados.
+- Agrega una franja que identifica la vista previa administrativa.
+- Corrige el contador cuando la fecha u hora no tienen un formato válido.
+
 ## 1.3.0 - Constructor comercial de invitaciones
 
 - Sustituye el selector de modalidad por tres tarjetas visuales.
