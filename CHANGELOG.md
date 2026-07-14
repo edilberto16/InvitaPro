@@ -1,3 +1,12 @@
+## 1.3.0 - Constructor comercial de invitaciones
+
+- Sustituye el selector de modalidad por tres tarjetas visuales.
+- Explica claramente Solo enlace, RSVP público y Pases personalizados.
+- Agrega formulario organizado por secciones.
+- Muestra campos y avisos según la modalidad elegida.
+- Incluye una vista previa móvil en tiempo real.
+- Conserva el CRUD directo con Supabase.
+
 ## 1.2.0 - Limpieza definitiva de Supabase
 
 - Elimina la pantalla `/admin/migracion`.

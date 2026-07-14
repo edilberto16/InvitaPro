@@ -76,3 +76,12 @@
 - [x] Eliminar la navegación hacia `/admin/migracion`.
 - [x] Dejar Supabase como fuente única de datos.
 - [x] Mantener el formulario profesional de invitados.
+
+
+## Experiencia comercial v1.3.0
+
+- [x] Selector visual de modalidades.
+- [x] Vista previa móvil durante la creación.
+- [x] Formulario comercial organizado por pasos.
+- [ ] Invitación pública premium por bloques.
+- [ ] Subida de portadas, galería y música a Supabase Storage.
