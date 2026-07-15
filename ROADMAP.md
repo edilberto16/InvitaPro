@@ -110,3 +110,14 @@
 - [ ] Reordenar galería mediante arrastrar y soltar.
 - [ ] Compresión automática de fotografías.
 - [ ] Biblioteca multimedia por evento.
+
+
+## Compartir v1.6.0
+
+- [x] Copiar enlace público.
+- [x] Compartir mediante menú del teléfono.
+- [x] Enviar invitaciones por WhatsApp.
+- [x] Mensajes personalizados por familia.
+- [ ] Registrar fecha de envío.
+- [ ] Recordatorios masivos.
+- [ ] Correos de invitación.

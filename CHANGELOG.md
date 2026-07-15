@@ -1,3 +1,14 @@
+## 1.6.0 - Compartir invitaciones y pases
+
+- Agrega un modal profesional para compartir invitaciones.
+- Permite copiar el enlace completo usando el dominio actual.
+- Genera automáticamente un mensaje listo para WhatsApp.
+- Permite utilizar el menú nativo de compartir del teléfono.
+- Las invitaciones Solo enlace y RSVP usan un enlace público.
+- Los pases personalizados generan un enlace único por invitado.
+- Usa el teléfono guardado para abrir directamente la conversación de WhatsApp.
+- Impide compartir invitaciones públicas que todavía no están publicadas.
+
 ## 1.5.3 - Plantilla premium para pases personalizados
 
 - Unifica la invitación con pase con la plantilla pública premium.
