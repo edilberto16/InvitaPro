@@ -62,3 +62,20 @@ supabase/schema-v1.sql
 ```
 
 No debes ejecutar nuevamente el esquema sobre una base que ya contiene datos sin revisar previamente los cambios.
+
+
+## Contenido de demostración
+
+El proyecto incluye recursos locales para preparar demostraciones rápidas:
+
+```text
+public/demo/
+├── portada-boda.jpg
+├── galeria/
+│   ├── foto1.jpg
+│   └── ... foto8.jpg
+└── music/
+    └── romantic-demo.mp3
+```
+
+En el constructor de invitaciones, usa el botón **Usar contenido demo** para cargar estos recursos.

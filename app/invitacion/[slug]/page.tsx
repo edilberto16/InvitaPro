@@ -1,8 +1,8 @@
 'use client';
-import { FormEvent,useEffect,useMemo,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';
+import { FormEvent,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';
 type PublicData={invitacion:{id:string;titulo:string;slug:string;modalidad:'simple'|'rsvp'|'pases';design_json:Record<string,unknown>;color_principal:string|null;musica_url:string|null;whatsapp:string|null;fecha_expiracion:string|null};evento:{nombre:string;tipo:string;fecha:string;hora:string|null;zona_horaria:string;lugar:string|null;direccion:string|null;maps_url:string|null};invitado:null};
 function longDate(v:string){return new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${v}T00:00:00Z`))}
-export default function PublicInvite(){const params=useParams<{slug:string}>();const supabase=useMemo(()=>createClient(),[]);const[data,setData]=useState<PublicData|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState('');const[name,setName]=useState('');const[phone,setPhone]=useState('');const[attendance,setAttendance]=useState(true);const[adults,setAdults]=useState(1);const[children,setChildren]=useState(0);const[message,setMessage]=useState('');const[sent,setSent]=useState(false);const[countdown,setCountdown]=useState({days:'--',hours:'--',minutes:'--',ended:false,invalid:false});const[previewMode,setPreviewMode]=useState(false);
+export default function PublicInvite(){const params=useParams<{slug:string}>();const supabase=useMemo(()=>createClient(),[]);const[data,setData]=useState<PublicData|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState('');const[name,setName]=useState('');const[phone,setPhone]=useState('');const[attendance,setAttendance]=useState(true);const[adults,setAdults]=useState(1);const[children,setChildren]=useState(0);const[message,setMessage]=useState('');const[sent,setSent]=useState(false);const[countdown,setCountdown]=useState({days:'--',hours:'--',minutes:'--',ended:false,invalid:false});const[previewMode,setPreviewMode]=useState(false);const[audioPlaying,setAudioPlaying]=useState(false);const audioRef=useRef<HTMLAudioElement|null>(null);
 useEffect(()=>{let active=true;async function load(){const preview=new URLSearchParams(window.location.search).get('preview')==='1';setPreviewMode(preview);if(preview){const{data:userData}=await supabase.auth.getUser();if(!userData.user){if(active){setError('Inicia sesión para abrir la vista previa administrativa.');setLoading(false)}return}const{data:row,error}=await supabase.from('invitaciones').select('id,titulo,slug,modalidad,design_json,color_principal,musica_url,whatsapp,fecha_expiracion,eventos(nombre,tipo,fecha,hora,zona_horaria,lugar,direccion,maps_url)').eq('slug',params.slug).maybeSingle();if(!active)return;if(error||!row||!row.eventos){setError('No fue posible cargar la vista previa.');setLoading(false);return}const evento=Array.isArray(row.eventos)?row.eventos[0]:row.eventos;if(!evento){setError('El evento relacionado no está disponible.');setLoading(false);return}setData({invitacion:{id:row.id,titulo:row.titulo,slug:row.slug,modalidad:row.modalidad,design_json:row.design_json||{},color_principal:row.color_principal,musica_url:row.musica_url,whatsapp:row.whatsapp,fecha_expiracion:row.fecha_expiracion},evento,invitado:null} as PublicData);setLoading(false);return}const{data,error}=await supabase.rpc('obtener_invitacion_publica',{p_slug:params.slug,p_codigo:null});if(!active)return;if(error||!data)setError('La invitación no existe o no está publicada.');else setData(data as PublicData);setLoading(false)}void load();return()=>{active=false}},[params.slug]);useEffect(()=>{if(!data)return;const datePart=data.evento.fecha;const timePart=(data.evento.hora||'00:00').slice(0,5);const target=new Date(`${datePart}T${timePart}:00`).getTime();if(!Number.isFinite(target)){setCountdown({days:'--',hours:'--',minutes:'--',ended:false,invalid:true});return}const tick=()=>{const d=target-Date.now();if(d<=0){setCountdown({days:'00',hours:'00',minutes:'00',ended:true,invalid:false});return}setCountdown({days:String(Math.floor(d/86400000)).padStart(2,'0'),hours:String(Math.floor((d/3600000)%24)).padStart(2,'0'),minutes:String(Math.floor((d/60000)%60)).padStart(2,'0'),ended:false,invalid:false})};tick();const id=setInterval(tick,60000);return()=>clearInterval(id)},[data]);async function submit(e:FormEvent){e.preventDefault();setError('');const r=await supabase.rpc('registrar_confirmacion',{p_slug:params.slug,p_asistira:attendance,p_adultos:attendance?adults:0,p_ninos:attendance?children:0,p_nombre:name,p_telefono:phone||null,p_mensaje:message||null,p_codigo:null});if(r.error)setError(r.error.message);else setSent(true)}
 if(loading)return <main className="public-invite-loading">Preparando invitación…</main>;
 if(!data)return <main className="public-invite-error"><h1>Invitación no disponible</h1><p>{error}</p></main>;
@@ -15,18 +15,27 @@ const dress=String(design.vestimenta||'Libre');
 const showCountdown=design.mostrar_contador!==false;
 const showDetails=design.mostrar_detalles!==false;
 const showProgram=design.mostrar_programa!==false;
+const showGallery=design.mostrar_galeria!==false;
 const showMap=design.mostrar_mapa!==false;
 const showRsvp=design.mostrar_rsvp!==false;
 const program=String(design.programa||'').split('\n').map(x=>x.trim()).filter(Boolean).map((line,index)=>{
   const [time,...rest]=line.split('|');
   return {id:index,time:time?.trim()||'',title:rest.join('|').trim()||time?.trim()||''};
 });
+const coverUrl=typeof design.portada_url==='string'?design.portada_url:'';
+const galleryUrls=Array.isArray(design.galeria_urls)?design.galeria_urls.filter((url):url is string=>typeof url==='string'):[];
 const eventType=data.evento.tipo||'Evento especial';
 
 return <main className={`premium-public-invite theme-${plantilla}`} style={{'--invite-color':data.invitacion.color_principal||'#8f5c38'} as React.CSSProperties}>
   {previewMode&&<div className="admin-preview-banner"><strong>Vista previa administrativa</strong><span>{data.invitacion.modalidad==='pases'?'Los invitados abrirán un enlace personalizado con su código.':'Esta vista no está publicada para invitados.'}</span></div>}
+  {data.invitacion.musica_url&&<>
+    <audio ref={audioRef} src={data.invitacion.musica_url} loop preload="metadata" onPlay={()=>setAudioPlaying(true)} onPause={()=>setAudioPlaying(false)}/>
+    <button className={`premium-music-button ${audioPlaying?'playing':''}`} type="button" onClick={()=>{const audio=audioRef.current;if(!audio)return;if(audio.paused)void audio.play();else audio.pause()}} aria-label={audioPlaying?'Pausar música':'Reproducir música'}>
+      <span>{audioPlaying?'Ⅱ':'♫'}</span><small>{audioPlaying?'Pausar':'Música'}</small>
+    </button>
+  </>}
 
-  <section className="premium-hero">
+  <section className={`premium-hero ${coverUrl?'has-cover':''}`} style={coverUrl?{backgroundImage:`linear-gradient(180deg,rgba(12,8,6,.28),rgba(12,8,6,.68)),url("${coverUrl}")`}:undefined}>
     <div className="premium-hero-overlay"/>
     <div className="premium-hero-decoration decoration-one"/>
     <div className="premium-hero-decoration decoration-two"/>
@@ -97,6 +106,19 @@ return <main className={`premium-public-invite theme-${plantilla}`} style={{'--i
         <span/>
         <strong>{item.title}</strong>
       </article>)}
+    </div>
+  </section>}
+
+  {showGallery&&galleryUrls.length>0&&<section className="premium-gallery-section">
+    <div className="premium-section-heading">
+      <p className="premium-small-title">Recuerdos</p>
+      <h2>Nuestra galería</h2>
+      <p>Algunos momentos que queremos compartir contigo.</p>
+    </div>
+    <div className={`premium-gallery-grid gallery-count-${Math.min(galleryUrls.length,6)}`}>
+      {galleryUrls.map((url,index)=><figure key={url} className={`gallery-item gallery-item-${index+1}`}>
+        <img src={url} alt={`Fotografía ${index+1} de ${data.invitacion.titulo}`} loading="lazy"/>
+      </figure>)}
     </div>
   </section>}
 

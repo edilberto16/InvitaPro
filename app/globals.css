@@ -954,3 +954,298 @@ a { color: inherit; }
   .premium-timeline article { grid-template-columns: 65px 16px 1fr; gap: 12px; }
   .premium-timeline strong { font-size: 17px; }
 }
+
+
+/* Supabase Storage v1.5.0 */
+.media-manager-panel {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px solid #ded5cd;
+  border-radius: 15px;
+  background: #f8f4f0;
+}
+.media-manager-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 13px; }
+.media-upload-card {
+  min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 13px;
+  border: 1px solid #e1d7cf; border-radius: 13px; background: #fff;
+}
+.media-upload-card > div:nth-child(2) { display: grid; gap: 3px; }
+.media-upload-card strong { font-size: 11px; }
+.media-upload-card small { color: var(--admin-muted); font-size: 8px; line-height: 1.4; }
+.media-upload-preview.cover {
+  min-height: 128px; display: grid; place-items: center; overflow: hidden;
+  border-radius: 10px; color: #9b897b; background: linear-gradient(145deg,#eee5de,#faf7f4);
+  background-position: center; background-size: cover; font-size: 10px; font-weight: 900; text-transform: uppercase;
+}
+.media-gallery-preview {
+  min-height: 128px; display: grid; grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(2,1fr);
+  gap: 4px; overflow: hidden; border-radius: 10px; color: #9b897b; background: #eee7e1;
+  place-items: center; font-size: 10px; font-weight: 900; text-transform: uppercase;
+}
+.media-gallery-preview img { width: 100%; height: 100%; min-height: 62px; object-fit: cover; }
+.audio-upload-icon {
+  min-height: 128px; display: grid; place-items: center; border-radius: 10px;
+  color: #fff; background: linear-gradient(145deg,#201914,var(--admin-primary)); font: 500 44px/1 Georgia,serif;
+}
+.media-file-button { position: relative; overflow: hidden; text-align: center; }
+.media-file-button input { width: 1px!important; height: 1px; min-height: 1px!important; position: absolute; opacity: 0; pointer-events: none; }
+.gallery-chip-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.gallery-chip-list button {
+  padding: 5px 7px; border: 1px solid #e0d5cc; border-radius: 999px;
+  color: #6f5e52; background: #f8f3ef; font-size: 8px; cursor: pointer;
+}
+.admin-audio-preview { width: 100%; height: 35px; }
+
+.premium-hero.has-cover {
+  background-position: center;
+  background-size: cover;
+  background-attachment: scroll;
+}
+.premium-music-button {
+  position: fixed; right: 22px; bottom: 22px; z-index: 60;
+  width: 64px; height: 64px; display: grid; place-items: center; align-content: center; gap: 2px;
+  border: 1px solid rgba(255,255,255,.55); border-radius: 50%; color: #fff;
+  background: color-mix(in srgb,var(--invite-color) 88%,#211913);
+  box-shadow: 0 15px 38px rgba(35,24,18,.28); cursor: pointer;
+}
+.premium-music-button span { font-size: 21px; line-height: 1; }
+.premium-music-button small { font-size: 7px; font-weight: 900; text-transform: uppercase; }
+.premium-music-button.playing { animation: musicPulse 2s infinite; }
+
+.premium-gallery-section { max-width: 1240px; margin: 0 auto; padding: 110px 24px; }
+.premium-gallery-section .premium-section-heading > p:last-child {
+  max-width: 560px; margin: -8px auto 0; color: #76695f; font-size: 13px; line-height: 1.7;
+}
+.premium-gallery-grid {
+  display: grid; grid-template-columns: repeat(12,1fr); grid-auto-rows: 115px;
+  gap: 12px; margin-top: 42px;
+}
+.premium-gallery-grid figure { margin: 0; overflow: hidden; border-radius: 18px; background: #e9dfd7; }
+.premium-gallery-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform .55s ease; }
+.premium-gallery-grid figure:hover img { transform: scale(1.035); }
+.premium-gallery-grid .gallery-item { grid-column: span 4; grid-row: span 2; }
+.premium-gallery-grid .gallery-item-1 { grid-column: span 7; grid-row: span 4; }
+.premium-gallery-grid .gallery-item-2 { grid-column: span 5; grid-row: span 2; }
+.premium-gallery-grid .gallery-item-3 { grid-column: span 5; grid-row: span 2; }
+.premium-gallery-grid .gallery-item-4 { grid-column: span 4; grid-row: span 3; }
+.premium-gallery-grid .gallery-item-5 { grid-column: span 4; grid-row: span 3; }
+.premium-gallery-grid .gallery-item-6 { grid-column: span 4; grid-row: span 3; }
+
+@keyframes musicPulse {
+  0%,100% { box-shadow: 0 15px 38px rgba(35,24,18,.28),0 0 0 0 color-mix(in srgb,var(--invite-color) 35%,transparent); }
+  50% { box-shadow: 0 15px 38px rgba(35,24,18,.28),0 0 0 10px transparent; }
+}
+
+@media (max-width: 900px) {
+  .media-manager-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .premium-gallery-section { padding: 78px 18px; }
+  .premium-gallery-grid { grid-template-columns: repeat(2,1fr); grid-auto-rows: 170px; gap: 8px; }
+  .premium-gallery-grid .gallery-item,
+  .premium-gallery-grid .gallery-item-1,
+  .premium-gallery-grid .gallery-item-2,
+  .premium-gallery-grid .gallery-item-3,
+  .premium-gallery-grid .gallery-item-4,
+  .premium-gallery-grid .gallery-item-5,
+  .premium-gallery-grid .gallery-item-6 { grid-column: span 1; grid-row: span 1; }
+  .premium-gallery-grid .gallery-item-1 { grid-column: 1 / -1; grid-row: span 2; }
+  .premium-music-button { width: 56px; height: 56px; right: 14px; bottom: 14px; }
+}
+
+
+/* Paquete demo incluido v1.5.1 */
+.media-manager-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.media-manager-heading-row .block-config-heading {
+  margin-bottom: 0;
+}
+.button-demo {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #cfae91;
+  color: #7b4d2e;
+  background: linear-gradient(180deg,#fffaf6,#f4e7dc);
+  box-shadow: 0 7px 18px rgba(104,68,42,.08);
+}
+.button-demo:hover {
+  border-color: var(--admin-primary);
+  background: #fff7f0;
+}
+@media (max-width: 680px) {
+  .media-manager-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .button-demo {
+    width: 100%;
+  }
+}
+
+
+/* Mejora comercial del selector de música v1.5.2 */
+.audio-manager-card {
+  position: relative;
+}
+.audio-file-status {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 9px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #cfe1d2;
+  border-radius: 11px;
+  background: #f3faf4;
+}
+.audio-status-check {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #4f9761;
+  font-size: 13px;
+  font-weight: 900;
+}
+.audio-file-status > div {
+  display: grid;
+  gap: 2px;
+}
+.audio-file-status strong {
+  color: #305a3a;
+  font-size: 9px;
+}
+.audio-file-status small {
+  color: #6f806f;
+  font-size: 8px;
+}
+.audio-remove-button {
+  align-self: center;
+  margin-top: 1px;
+}
+
+
+/* Invitación premium para pases personalizados v1.5.3 */
+.personalized-premium-hero .premium-hero-content {
+  max-width: 980px;
+}
+.personalized-premium-hero h1 {
+  font-size: clamp(58px, 8.7vw, 118px);
+}
+.personalized-event-title {
+  margin: 22px 0 0;
+  color: rgba(255,255,255,.9);
+  font: 500 clamp(21px,2.5vw,34px)/1.15 Georgia,serif;
+}
+.personalized-pass-section {
+  padding: 0 24px 110px;
+  background: #fbf8f4;
+}
+.personalized-premium-pass-card {
+  max-width: 850px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid #dfd3c9;
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(67,45,30,.12);
+}
+.pass-card-brand {
+  padding: 42px;
+  color: #fff;
+  background: linear-gradient(145deg,#201914,var(--invite-color));
+  text-align: center;
+}
+.pass-card-brand span {
+  display: block;
+  margin-bottom: 12px;
+  color: rgba(255,255,255,.72);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.pass-card-brand strong {
+  font: 500 clamp(38px,5vw,62px)/1 Georgia,serif;
+}
+.personalized-pass-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 1px;
+  background: #eadfd6;
+}
+.personalized-pass-grid article {
+  min-height: 145px;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 24px;
+  background: #fff;
+  text-align: center;
+}
+.personalized-pass-grid small {
+  color: var(--invite-color);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.personalized-pass-grid strong {
+  color: #2b241f;
+  font: 500 34px/1 Georgia,serif;
+}
+.personalized-pass-code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 23px 32px;
+  border-top: 1px dashed #d8cabf;
+  background: #faf6f2;
+}
+.personalized-pass-code span {
+  color: #817267;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.personalized-pass-code strong {
+  color: var(--invite-color);
+  font: 800 21px/1 Arial,sans-serif;
+  letter-spacing: .18em;
+}
+.personalized-rsvp-card > p:not(.premium-small-title) {
+  max-width: 520px;
+  margin: 0 auto;
+}
+@media (max-width: 760px) {
+  .personalized-pass-section {
+    padding: 0 18px 78px;
+  }
+  .personalized-premium-pass-card {
+    border-radius: 22px;
+  }
+  .pass-card-brand {
+    padding: 34px 20px;
+  }
+  .personalized-pass-grid {
+    grid-template-columns: 1fr;
+  }
+  .personalized-pass-grid article {
+    min-height: 110px;
+  }
+  .personalized-pass-code {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+}

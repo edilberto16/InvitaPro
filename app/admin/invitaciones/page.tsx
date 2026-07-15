@@ -4,18 +4,102 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 
-type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;musica_url:string;whatsapp:string;fecha_expiracion:string;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean};
-const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_mapa:true,mostrar_rsvp:true};
+type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean};
+const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true};
+const DEMO_CONTENT={
+  portada_url:'/demo/portada-boda.jpg',
+  galeria_urls:[
+    '/demo/galeria/foto1.jpg',
+    '/demo/galeria/foto2.jpg',
+    '/demo/galeria/foto3.jpg',
+    '/demo/galeria/foto4.jpg',
+    '/demo/galeria/foto5.jpg',
+    '/demo/galeria/foto6.jpg',
+    '/demo/galeria/foto7.jpg',
+    '/demo/galeria/foto8.jpg'
+  ],
+  musica_url:'/demo/music/romantic-demo.mp3',
+  color_principal:'#9a6845',
+  plantilla:'elegante',
+  subtitulo:'Una historia, un destino y un día para recordar',
+  mensaje:'Con mucha alegría queremos compartir contigo el comienzo de esta nueva etapa.',
+  vestimenta:'Formal',
+  programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'
+};
 const MODALITIES=[
   {id:'simple' as const,icon:'🔗',title:'Solo enlace',tag:'Básica',description:'Una invitación pública lista para compartir por WhatsApp.',features:['Invitación digital','Música, mapa y galería','Sin confirmaciones']},
   {id:'rsvp' as const,icon:'✓',title:'RSVP público',tag:'Popular',description:'Los asistentes confirman desde un formulario abierto.',features:['Todo lo de Solo enlace','Confirmación pública','Lista de respuestas']},
   {id:'pases' as const,icon:'★',title:'Pases personalizados',tag:'Premium',description:'Control individual por persona, pareja o familia.',features:['Códigos privados','Cupos de adultos y niños','Mesa y confirmación individual']}
 ];
 
-export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);
+export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);
 async function load(){setLoading(true);const[e,i]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false})]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);setLoading(false)}useEffect(()=>{void load()},[]);
-function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false});setError('');setModal(true)}
-async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:2,componentes:[],plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
+function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false});setError('');setModal(true)}
+
+function loadDemoContent(){
+  setForm(current=>({
+    ...current,
+    portada_url:DEMO_CONTENT.portada_url,
+    galeria_urls:[...DEMO_CONTENT.galeria_urls],
+    musica_url:DEMO_CONTENT.musica_url,
+    color_principal:DEMO_CONTENT.color_principal,
+    plantilla:DEMO_CONTENT.plantilla,
+    subtitulo:DEMO_CONTENT.subtitulo,
+    mensaje:DEMO_CONTENT.mensaje,
+    vestimenta:DEMO_CONTENT.vestimenta,
+    programa:DEMO_CONTENT.programa,
+    mostrar_galeria:true,
+    mostrar_programa:true,
+    mostrar_contador:true,
+    mostrar_detalles:true,
+    mostrar_mapa:true
+  }));
+  setError('');
+}
+function safeFileName(name:string){return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9._-]+/g,'-').replace(/-+/g,'-')}
+async function uploadAsset(file:File,bucket:'event-media'|'event-audio',tipo:'imagen'|'audio'){
+  if(!form.evento_id)throw new Error('Selecciona primero un evento.');
+  const{data:userData,error:userError}=await supabase.auth.getUser();
+  if(userError||!userData.user)throw new Error('La sesión no está disponible.');
+  const ext=file.name.includes('.')?file.name.split('.').pop():'bin';
+  const base=safeFileName(file.name.replace(/\.[^.]+$/,'')||'archivo');
+  const path=`${userData.user.id}/${form.evento_id}/${Date.now()}-${base}.${ext}`;
+  const{error:uploadError}=await supabase.storage.from(bucket).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
+  if(uploadError)throw uploadError;
+  const{data:urlData}=supabase.storage.from(bucket).getPublicUrl(path);
+  const{error:mediaError}=await supabase.from('media').insert({evento_id:form.evento_id,invitacion_id:editing?.id??null,owner_id:userData.user.id,tipo,bucket,path,nombre_original:file.name,mime_type:file.type||null,size_bytes:file.size});
+  if(mediaError)console.warn('El archivo se subió, pero no se registró en media:',mediaError.message);
+  return urlData.publicUrl;
+}
+async function handleCover(file?:File){
+  if(!file)return;
+  if(!file.type.startsWith('image/'))return setError('La portada debe ser una imagen.');
+  if(file.size>5*1024*1024)return setError('La portada no debe superar 5 MB.');
+  setUploading('cover');setError('');
+  try{const url=await uploadAsset(file,'event-media','imagen');setForm(current=>({...current,portada_url:url}))}
+  catch(e){setError(messageFromError(e))}
+  finally{setUploading(null)}
+}
+async function handleGallery(files:FileList|null){
+  if(!files?.length)return;
+  const selected=Array.from(files).slice(0,8-form.galeria_urls.length);
+  if(selected.some(file=>!file.type.startsWith('image/')))return setError('La galería solo acepta imágenes.');
+  if(selected.some(file=>file.size>5*1024*1024))return setError('Cada imagen debe pesar máximo 5 MB.');
+  setUploading('gallery');setError('');
+  try{const urls=[] as string[];for(const file of selected)urls.push(await uploadAsset(file,'event-media','imagen'));setForm(current=>({...current,galeria_urls:[...current.galeria_urls,...urls].slice(0,8)}))}
+  catch(e){setError(messageFromError(e))}
+  finally{setUploading(null)}
+}
+async function handleAudio(file?:File){
+  if(!file)return;
+  if(!file.type.startsWith('audio/'))return setError('Selecciona un archivo de audio.');
+  if(file.size>10*1024*1024)return setError('El audio no debe superar 10 MB.');
+  setUploading('audio');setError('');
+  try{const url=await uploadAsset(file,'event-audio','audio');setForm(current=>({...current,musica_url:url}))}
+  catch(e){setError(messageFromError(e))}
+  finally{setUploading(null)}
+}
+async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:3,componentes:[],plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
 async function toggle(x:Invitacion){const estado=x.estado==='publicada'?'pausada':'publicada';const r=await supabase.from('invitaciones').update({estado,fecha_publicacion:estado==='publicada'?(x.fecha_publicacion??new Date().toISOString()):x.fecha_publicacion}).eq('id',x.id);if(r.error)setError(messageFromError(r.error));else await load()}
 async function remove(){if(!deleting)return;const r=await supabase.from('invitaciones').delete().eq('id',deleting.id);if(r.error)setError(messageFromError(r.error));setDeleting(null);await load()}
 const list=useMemo(()=>items.filter(x=>filter==='todas'||x.estado===filter).filter(x=>[x.titulo,x.slug,x.eventos?.nombre,x.eventos?.clientes?.nombre].join(' ').toLowerCase().includes(search.toLowerCase().trim())),[items,filter,search]);
@@ -164,14 +248,87 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                 </label>
 
                 <label className="form-field">
-                  <span>Música URL</span>
-                  <input type="url" value={form.musica_url} onChange={e=>setForm({...form,musica_url:e.target.value})} placeholder="https://..."/>
-                </label>
-
-                <label className="form-field">
                   <span>Fecha de expiración</span>
                   <input type="datetime-local" value={form.fecha_expiracion} onChange={e=>setForm({...form,fecha_expiracion:e.target.value})}/>
                 </label>
+              </div>
+
+              <div className="media-manager-panel">
+                <div className="media-manager-heading-row">
+                  <div className="block-config-heading">
+                    <strong>Fotografías y música</strong>
+                    <span>Sube tus archivos o carga el paquete demo incluido.</span>
+                  </div>
+                  <button type="button" className="button button-demo" onClick={loadDemoContent}>Usar contenido demo</button>
+                </div>
+
+                <div className="media-manager-grid">
+                  <article className="media-upload-card">
+                    <div className="media-upload-preview cover" style={form.portada_url?{backgroundImage:`url("${form.portada_url}")`}:undefined}>
+                      {!form.portada_url&&<span>Portada</span>}
+                    </div>
+                    <div>
+                      <strong>Fotografía de portada</strong>
+                      <small>JPG, PNG o WebP. Máximo 5 MB.</small>
+                    </div>
+                    <label className="button button-outline media-file-button">
+                      {uploading==='cover'?'Subiendo…':'Seleccionar portada'}
+                      <input type="file" accept="image/*" disabled={Boolean(uploading)} onChange={e=>void handleCover(e.target.files?.[0])}/>
+                    </label>
+                    {form.portada_url&&<button type="button" className="text-button danger" onClick={()=>setForm({...form,portada_url:''})}>Quitar portada</button>}
+                  </article>
+
+                  <article className="media-upload-card">
+                    <div className="media-gallery-preview">
+                      {form.galeria_urls.length===0?<span>Galería</span>:form.galeria_urls.slice(0,4).map((url,index)=><img key={url} src={url} alt={`Galería ${index+1}`}/>)}
+                    </div>
+                    <div>
+                      <strong>Galería de fotografías</strong>
+                      <small>{form.galeria_urls.length}/8 imágenes cargadas.</small>
+                    </div>
+                    <label className="button button-outline media-file-button">
+                      {uploading==='gallery'?'Subiendo…':'Agregar fotografías'}
+                      <input type="file" accept="image/*" multiple disabled={Boolean(uploading)||form.galeria_urls.length>=8} onChange={e=>void handleGallery(e.target.files)}/>
+                    </label>
+                    {form.galeria_urls.length>0&&<div className="gallery-chip-list">{form.galeria_urls.map((url,index)=><button key={url} type="button" onClick={()=>setForm({...form,galeria_urls:form.galeria_urls.filter(item=>item!==url)})}>Foto {index+1} ×</button>)}</div>}
+                  </article>
+
+                  <article className="media-upload-card audio-manager-card">
+                    <div className="audio-upload-icon">♫</div>
+                    <div>
+                      <strong>Música de fondo</strong>
+                      <small>Sube un archivo MP3, M4A u otro audio. Máximo 10 MB.</small>
+                    </div>
+
+                    <label className="button button-outline media-file-button">
+                      {uploading==='audio'?'Subiendo música…':form.musica_url?'Cambiar música':'Seleccionar música'}
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        disabled={Boolean(uploading)}
+                        onChange={e=>void handleAudio(e.target.files?.[0])}
+                      />
+                    </label>
+
+                    {form.musica_url&&<div className="audio-file-status">
+                      <span className="audio-status-check">✓</span>
+                      <div>
+                        <strong>Música cargada correctamente</strong>
+                        <small>{form.musica_url.startsWith('/demo/')?'Pista de demostración incluida':'Archivo almacenado en Supabase Storage'}</small>
+                      </div>
+                    </div>}
+
+                    {form.musica_url&&<audio className="admin-audio-preview" controls src={form.musica_url}/>}
+
+                    {form.musica_url&&<button
+                      type="button"
+                      className="text-button danger audio-remove-button"
+                      onClick={()=>setForm({...form,musica_url:''})}
+                    >
+                      Quitar música
+                    </button>}
+                  </article>
+                </div>
               </div>
 
               <div className="block-config-panel">
@@ -184,6 +341,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                     ['mostrar_contador','Cuenta regresiva'],
                     ['mostrar_detalles','Fecha, lugar y vestimenta'],
                     ['mostrar_programa','Programa del evento'],
+                    ['mostrar_galeria','Galería de fotografías'],
                     ['mostrar_mapa','Ubicación y contacto'],
                     ['mostrar_rsvp','Confirmación RSVP']
                   ].map(([key,label])=><label className="block-toggle" key={key}>
@@ -217,7 +375,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
             </div>
             <div className="preview-phone">
               <div className="preview-phone-notch"/>
-              <div className="preview-cover" style={{background:`linear-gradient(160deg, ${form.color_principal}, #211913)`}}>
+              <div className="preview-cover" style={{backgroundImage:form.portada_url?`linear-gradient(rgba(20,15,12,.36),rgba(20,15,12,.58)), url("${form.portada_url}")`:`linear-gradient(160deg, ${form.color_principal}, #211913)`,backgroundSize:'cover',backgroundPosition:'center'}}>
                 <span className="preview-template">{form.plantilla}</span>
                 <div>
                   <small>Estás invitado a</small>

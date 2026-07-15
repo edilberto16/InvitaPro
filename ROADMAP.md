@@ -99,3 +99,14 @@
 - [ ] Portada y galería mediante Supabase Storage.
 - [ ] Reproductor de música.
 - [ ] Mesa de regalos.
+
+
+## Multimedia v1.5.0
+
+- [x] Portada en Supabase Storage.
+- [x] Galería en Supabase Storage.
+- [x] Música en Supabase Storage.
+- [x] Reproductor público.
+- [ ] Reordenar galería mediante arrastrar y soltar.
+- [ ] Compresión automática de fotografías.
+- [ ] Biblioteca multimedia por evento.

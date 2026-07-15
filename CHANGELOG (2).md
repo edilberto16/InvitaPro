@@ -1,29 +1,3 @@
-## 1.5.3 - Plantilla premium para pases personalizados
-
-- Unifica la invitación con pase con la plantilla pública premium.
-- Aplica correctamente portada, galería, música, colores y textos demo.
-- Añade cuenta regresiva y datos completos del evento.
-- Rediseña el pase personalizado con cupos, mesa y código.
-- Conserva el formulario RSVP con límites por invitado.
-- Corrige la diferencia visual entre RSVP público y pases personalizados.
-
-## 1.5.2 - Selector de música simplificado
-
-- Elimina el campo técnico `Música URL` del formulario.
-- La música se administra únicamente mediante el selector de archivos.
-- Permite cambiar o quitar la pista cargada.
-- Muestra claramente si la pista proviene del paquete demo o de Supabase Storage.
-- Evita la validación incorrecta del navegador para rutas locales `/demo/...`.
-
-## 1.5.1 - Paquete multimedia de demostración
-
-- Incluye una portada de boda de ejemplo.
-- Incluye ocho fotografías de galería.
-- Incluye una pista instrumental original de demostración.
-- Agrega el botón `Usar contenido demo` al constructor.
-- El contenido demo se guarda como rutas públicas dentro de `design_json`.
-- Los archivos personalizados continúan cargándose en Supabase Storage.
-
 ## 1.5.0 - Supabase Storage para invitaciones
 
 - Permite subir la fotografía de portada desde el constructor.
