@@ -1,3 +1,13 @@
+## 1.4.0 - Invitación pública premium por bloques
+
+- Rediseña la experiencia pública con portada premium.
+- Corrige y mejora la cuenta regresiva mediante tarjetas independientes.
+- Añade bloques configurables para detalles, programa, ubicación y RSVP.
+- Permite activar o desactivar secciones desde el formulario de invitación.
+- Guarda la configuración de bloques en `design_json` de Supabase.
+- Añade título introductorio y programa editable.
+- Conserva las tres modalidades: Solo enlace, RSVP público y Pases personalizados.
+
 ## 1.3.1 - Vista previa de pases y contador
 
 - Permite al administrador previsualizar invitaciones con pases sin exponerlas públicamente.

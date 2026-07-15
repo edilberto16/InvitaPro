@@ -4,8 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 
-type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;vestimenta:string;color_principal:string;musica_url:string;whatsapp:string;fecha_expiracion:string};
-const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',vestimenta:'Formal',color_principal:'#8f5c38',musica_url:'',whatsapp:'',fecha_expiracion:''};
+type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;musica_url:string;whatsapp:string;fecha_expiracion:string;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean};
+const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_mapa:true,mostrar_rsvp:true};
 const MODALITIES=[
   {id:'simple' as const,icon:'🔗',title:'Solo enlace',tag:'Básica',description:'Una invitación pública lista para compartir por WhatsApp.',features:['Invitación digital','Música, mapa y galería','Sin confirmaciones']},
   {id:'rsvp' as const,icon:'✓',title:'RSVP público',tag:'Popular',description:'Los asistentes confirman desde un formulario abierto.',features:['Todo lo de Solo enlace','Confirmación pública','Lista de respuestas']},
@@ -14,8 +14,8 @@ const MODALITIES=[
 
 export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);
 async function load(){setLoading(true);const[e,i]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false})]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);setLoading(false)}useEffect(()=>{void load()},[]);
-function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),vestimenta:designValue(x,'vestimenta','Formal'),color_principal:x.color_principal??'#8f5c38',musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??''});setError('');setModal(true)}
-async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:1,componentes:[],plantilla:form.plantilla,mensaje:form.mensaje.trim(),vestimenta:form.vestimenta.trim()};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
+function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false});setError('');setModal(true)}
+async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:2,componentes:[],plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
 async function toggle(x:Invitacion){const estado=x.estado==='publicada'?'pausada':'publicada';const r=await supabase.from('invitaciones').update({estado,fecha_publicacion:estado==='publicada'?(x.fecha_publicacion??new Date().toISOString()):x.fecha_publicacion}).eq('id',x.id);if(r.error)setError(messageFromError(r.error));else await load()}
 async function remove(){if(!deleting)return;const r=await supabase.from('invitaciones').delete().eq('id',deleting.id);if(r.error)setError(messageFromError(r.error));setDeleting(null);await load()}
 const list=useMemo(()=>items.filter(x=>filter==='todas'||x.estado===filter).filter(x=>[x.titulo,x.slug,x.eventos?.nombre,x.eventos?.clientes?.nombre].join(' ').toLowerCase().includes(search.toLowerCase().trim())),[items,filter,search]);
@@ -142,6 +142,17 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                   <textarea rows={3} value={form.mensaje} onChange={e=>setForm({...form,mensaje:e.target.value})}/>
                 </label>
 
+                <label className="form-field full-width">
+                  <span>Título de introducción</span>
+                  <input value={form.subtitulo} onChange={e=>setForm({...form,subtitulo:e.target.value})} placeholder="Queremos compartir contigo este momento"/>
+                </label>
+
+                <label className="form-field full-width">
+                  <span>Programa del evento</span>
+                  <textarea rows={4} value={form.programa} onChange={e=>setForm({...form,programa:e.target.value})} placeholder={'18:00 | Recepción\n19:00 | Ceremonia'}/>
+                  <small>Escribe un horario por línea usando: hora | actividad.</small>
+                </label>
+
                 <label className="form-field">
                   <span>Código de vestimenta</span>
                   <input value={form.vestimenta} onChange={e=>setForm({...form,vestimenta:e.target.value})}/>
@@ -161,6 +172,30 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                   <span>Fecha de expiración</span>
                   <input type="datetime-local" value={form.fecha_expiracion} onChange={e=>setForm({...form,fecha_expiracion:e.target.value})}/>
                 </label>
+              </div>
+
+              <div className="block-config-panel">
+                <div className="block-config-heading">
+                  <strong>Secciones visibles</strong>
+                  <span>Activa únicamente lo que necesita esta invitación.</span>
+                </div>
+                <div className="block-toggle-grid">
+                  {[
+                    ['mostrar_contador','Cuenta regresiva'],
+                    ['mostrar_detalles','Fecha, lugar y vestimenta'],
+                    ['mostrar_programa','Programa del evento'],
+                    ['mostrar_mapa','Ubicación y contacto'],
+                    ['mostrar_rsvp','Confirmación RSVP']
+                  ].map(([key,label])=><label className="block-toggle" key={key}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(form[key as keyof FormState])}
+                      disabled={key==='mostrar_rsvp'&&form.modalidad==='simple'}
+                      onChange={e=>setForm({...form,[key]:e.target.checked})}
+                    />
+                    <span><strong>{label}</strong><small>{key==='mostrar_rsvp'&&form.modalidad==='simple'?'No disponible en Solo enlace':'Mostrar en la página pública'}</small></span>
+                  </label>)}
+                </div>
               </div>
 
               {form.modalidad==='rsvp'&&<div className="modality-note">
@@ -187,6 +222,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                 <div>
                   <small>Estás invitado a</small>
                   <h3>{form.titulo||'Tu evento especial'}</h3>
+                  <p><strong>{form.subtitulo||'Queremos compartir contigo este momento'}</strong></p>
                   <p>{form.mensaje||'Será un honor contar con tu presencia.'}</p>
                 </div>
               </div>

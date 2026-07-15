@@ -85,3 +85,17 @@
 - [x] Formulario comercial organizado por pasos.
 - [ ] Invitación pública premium por bloques.
 - [ ] Subida de portadas, galería y música a Supabase Storage.
+
+
+## Invitación comercial v1.4.0
+
+- [x] Portada premium.
+- [x] Cuenta regresiva profesional.
+- [x] Detalles del evento en tarjetas.
+- [x] Programa configurable.
+- [x] Ubicación y contacto.
+- [x] RSVP integrado.
+- [x] Activación de bloques desde el constructor.
+- [ ] Portada y galería mediante Supabase Storage.
+- [ ] Reproductor de música.
+- [ ] Mesa de regalos.
