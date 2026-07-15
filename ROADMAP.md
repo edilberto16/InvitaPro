@@ -121,3 +121,15 @@
 - [ ] Registrar fecha de envío.
 - [ ] Recordatorios masivos.
 - [ ] Correos de invitación.
+
+
+## Catálogo Premium v1.7.0
+
+- [x] Catálogo maestro de 24 plantillas.
+- [x] Filtros por colección.
+- [x] Seis plantillas comerciales disponibles.
+- [x] Selección desde Nueva/Editar invitación.
+- [x] Identidades visuales distintas en la página pública.
+- [ ] Activar las 18 plantillas restantes.
+- [ ] Administrar catálogo desde Supabase.
+- [ ] Planes Básico y Premium por plantilla.

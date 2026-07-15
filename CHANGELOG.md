@@ -1,3 +1,19 @@
+## 1.7.0 - Catálogo Premium de plantillas
+
+- Incorpora el catálogo maestro de 24 plantillas.
+- Organiza las plantillas en Wedding, XV, Infantil y Empresarial.
+- Incluye filtros visuales por colección.
+- Habilita seis diseños comerciales iniciales:
+  - Elegante Classic
+  - Luxury Black
+  - Romantic Garden
+  - Princess Rose
+  - Safari
+  - Corporativo
+- Muestra las próximas plantillas como `En desarrollo`.
+- Cambiar de plantilla conserva evento, modalidad, textos, fotos y música.
+- Cada plantilla disponible tiene una identidad visual pública diferente.
+
 ## 1.6.0 - Compartir invitaciones y pases
 
 - Agrega un modal profesional para compartir invitaciones.

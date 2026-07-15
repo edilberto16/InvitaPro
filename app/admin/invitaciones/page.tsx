@@ -6,7 +6,7 @@ import ShareInvitationModal from '@/components/share-invitation-modal';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 
 type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean};
-const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true};
+const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true};
 const DEMO_CONTENT={
   portada_url:'/demo/portada-boda.jpg',
   galeria_urls:[
@@ -21,19 +21,55 @@ const DEMO_CONTENT={
   ],
   musica_url:'/demo/music/romantic-demo.mp3',
   color_principal:'#9a6845',
-  plantilla:'elegante',
+  plantilla:'elegante-classic',
   subtitulo:'Una historia, un destino y un día para recordar',
   mensaje:'Con mucha alegría queremos compartir contigo el comienzo de esta nueva etapa.',
   vestimenta:'Formal',
   programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'
 };
+const TEMPLATE_COLLECTIONS=[
+  {id:'todas',label:'Todas'},
+  {id:'wedding',label:'Wedding'},
+  {id:'xv',label:'XV años'},
+  {id:'infantil',label:'Infantil'},
+  {id:'empresarial',label:'Empresarial'}
+];
+const TEMPLATE_CATALOG=[
+  {id:'elegante-classic',name:'Elegante Classic',collection:'wedding',badge:'Disponible',available:true,color:'#9a6845',description:'Clásica, cálida y elegante. Ideal para bodas formales.',layout:'classic'},
+  {id:'luxury-black',name:'Luxury Black',collection:'wedding',badge:'Disponible',available:true,color:'#c7a55b',description:'Negro profundo, detalles dorados y alto contraste.',layout:'dark'},
+  {id:'royal-gold',name:'Royal Gold',collection:'wedding',badge:'Próximamente',available:false,color:'#b6924b',description:'Verde esmeralda, oro y detalles de inspiración real.',layout:'royal'},
+  {id:'minimal-white',name:'Minimal White',collection:'wedding',badge:'Próximamente',available:false,color:'#6d625b',description:'Limpia, luminosa y centrada en la fotografía.',layout:'minimal'},
+  {id:'romantic-garden',name:'Romantic Garden',collection:'wedding',badge:'Disponible',available:true,color:'#7f9a78',description:'Jardín, tonos naturales y una estética romántica.',layout:'garden'},
+  {id:'sunset',name:'Sunset',collection:'wedding',badge:'Próximamente',available:false,color:'#d37b57',description:'Atardecer, terracota y una atmósfera cálida.',layout:'sunset'},
+  {id:'vintage',name:'Vintage',collection:'wedding',badge:'Próximamente',available:false,color:'#8b745c',description:'Texturas antiguas y composición clásica.',layout:'vintage'},
+  {id:'modern-editorial',name:'Modern Editorial',collection:'wedding',badge:'Próximamente',available:false,color:'#222222',description:'Diseño editorial contemporáneo tipo revista.',layout:'editorial'},
+
+  {id:'princess-rose',name:'Princess Rose',collection:'xv',badge:'Disponible',available:true,color:'#c78ca7',description:'Rosa sofisticado y detalles delicados para XV años.',layout:'princess'},
+  {id:'golden-night',name:'Golden Night',collection:'xv',badge:'Próximamente',available:false,color:'#c2a14b',description:'Noche, destellos y glamour dorado.',layout:'golden'},
+  {id:'butterfly',name:'Butterfly',collection:'xv',badge:'Próximamente',available:false,color:'#b584c4',description:'Mariposas, movimiento y una estética mágica.',layout:'butterfly'},
+  {id:'lavender',name:'Lavender',collection:'xv',badge:'Próximamente',available:false,color:'#9178ad',description:'Lavanda, transparencias y elegancia juvenil.',layout:'lavender'},
+  {id:'glamour',name:'Glamour',collection:'xv',badge:'Próximamente',available:false,color:'#a96884',description:'Brillo sutil y composición de gala.',layout:'glamour'},
+  {id:'floral',name:'Floral',collection:'xv',badge:'Próximamente',available:false,color:'#b76d85',description:'Flores, romanticismo y tonos suaves.',layout:'floral'},
+  {id:'luxury-pink',name:'Luxury Pink',collection:'xv',badge:'Próximamente',available:false,color:'#bf648c',description:'Rosa intenso con una presencia lujosa.',layout:'pink'},
+
+  {id:'safari',name:'Safari',collection:'infantil',badge:'Disponible',available:true,color:'#8a9b55',description:'Naturaleza, animales y aventura para fiestas infantiles.',layout:'safari'},
+  {id:'dinosaurios',name:'Dinosaurios',collection:'infantil',badge:'Próximamente',available:false,color:'#598a64',description:'Una aventura jurásica divertida.',layout:'dino'},
+  {id:'unicornio',name:'Unicornio',collection:'infantil',badge:'Próximamente',available:false,color:'#c889c9',description:'Colores pastel y fantasía.',layout:'unicorn'},
+  {id:'espacial',name:'Espacial',collection:'infantil',badge:'Próximamente',available:false,color:'#5368a8',description:'Planetas, estrellas y exploración.',layout:'space'},
+  {id:'superheroes',name:'Superhéroes',collection:'infantil',badge:'Próximamente',available:false,color:'#d35545',description:'Energía, acción y colores intensos.',layout:'hero'},
+
+  {id:'corporativo',name:'Corporativo',collection:'empresarial',badge:'Disponible',available:true,color:'#335d7a',description:'Profesional, sobria y clara para eventos de empresa.',layout:'corporate'},
+  {id:'lanzamiento',name:'Lanzamiento',collection:'empresarial',badge:'Próximamente',available:false,color:'#6756a3',description:'Presentación de producto con estilo moderno.',layout:'launch'},
+  {id:'conferencia',name:'Conferencia',collection:'empresarial',badge:'Próximamente',available:false,color:'#2b6f75',description:'Agenda, ponentes e información ejecutiva.',layout:'conference'},
+  {id:'networking',name:'Networking',collection:'empresarial',badge:'Próximamente',available:false,color:'#3d708a',description:'Conexiones, comunidad y encuentros profesionales.',layout:'network'}
+] as const;
 const MODALITIES=[
   {id:'simple' as const,icon:'🔗',title:'Solo enlace',tag:'Básica',description:'Una invitación pública lista para compartir por WhatsApp.',features:['Invitación digital','Música, mapa y galería','Sin confirmaciones']},
   {id:'rsvp' as const,icon:'✓',title:'RSVP público',tag:'Popular',description:'Los asistentes confirman desde un formulario abierto.',features:['Todo lo de Solo enlace','Confirmación pública','Lista de respuestas']},
   {id:'pases' as const,icon:'★',title:'Pases personalizados',tag:'Premium',description:'Control individual por persona, pareja o familia.',features:['Códigos privados','Cupos de adultos y niños','Mesa y confirmación individual']}
 ];
 
-export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);
+export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);const[templateFilter,setTemplateFilter]=useState('todas');
 async function load(){setLoading(true);const[e,i]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false})]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);setLoading(false)}useEffect(()=>{void load()},[]);
 function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false});setError('');setModal(true)}
 
@@ -56,6 +92,11 @@ function loadDemoContent(){
     mostrar_mapa:true
   }));
   setError('');
+}
+function selectTemplate(templateId:string){
+  const template=TEMPLATE_CATALOG.find(item=>item.id===templateId);
+  if(!template||!template.available)return;
+  setForm(current=>({...current,plantilla:template.id,color_principal:template.color}));
 }
 function safeFileName(name:string){return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9._-]+/g,'-').replace(/-+/g,'-')}
 async function uploadAsset(file:File,bucket:'event-media'|'event-audio',tipo:'imagen'|'audio'){
@@ -205,14 +246,54 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
               </div>
 
               <div className="invitation-form-grid">
-                <label className="form-field">
-                  <span>Plantilla</span>
-                  <select value={form.plantilla} onChange={e=>setForm({...form,plantilla:e.target.value})}>
-                    <option value="elegante">Elegante</option>
-                    <option value="minimalista">Minimalista</option>
-                    <option value="floral">Floral</option>
-                  </select>
-                </label>
+                <div className="template-catalog-field full-width">
+                  <div className="template-catalog-title">
+                    <div>
+                      <span>Catálogo de plantillas</span>
+                      <small>Selecciona un diseño. Tu contenido y modalidad se conservarán.</small>
+                    </div>
+                    <strong>{TEMPLATE_CATALOG.find(item=>item.id===form.plantilla)?.name||'Selecciona una plantilla'}</strong>
+                  </div>
+
+                  <div className="template-filter-row">
+                    {TEMPLATE_COLLECTIONS.map(collection=><button
+                      key={collection.id}
+                      type="button"
+                      className={templateFilter===collection.id?'active':''}
+                      onClick={()=>setTemplateFilter(collection.id)}
+                    >{collection.label}</button>)}
+                  </div>
+
+                  <div className="template-catalog-grid">
+                    {TEMPLATE_CATALOG
+                      .filter(template=>templateFilter==='todas'||template.collection===templateFilter)
+                      .map(template=>{
+                        const selected=form.plantilla===template.id;
+                        return <button
+                          key={template.id}
+                          type="button"
+                          className={`template-catalog-card theme-preview-${template.id} ${selected?'selected':''} ${!template.available?'disabled':''}`}
+                          onClick={()=>selectTemplate(template.id)}
+                          disabled={!template.available}
+                        >
+                          <div className="template-mini-preview">
+                            <span className="template-preview-kicker">{template.collection}</span>
+                            <strong>A & M</strong>
+                            <i/>
+                            <small>Una fecha para recordar</small>
+                          </div>
+                          <div className="template-card-copy">
+                            <div>
+                              <strong>{template.name}</strong>
+                              <span>{template.badge}</span>
+                            </div>
+                            <p>{template.description}</p>
+                            <em>{selected?'✓ Seleccionada':template.available?'Seleccionar':'En desarrollo'}</em>
+                          </div>
+                        </button>
+                      })}
+                  </div>
+                </div>
 
                 <label className="form-field">
                   <span>Color principal</span>
@@ -374,7 +455,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
               <span>Vista previa</span>
               <small>Celular</small>
             </div>
-            <div className="preview-phone">
+            <div className={`preview-phone admin-template-preview theme-${form.plantilla}`}>
               <div className="preview-phone-notch"/>
               <div className="preview-cover" style={{backgroundImage:form.portada_url?`linear-gradient(rgba(20,15,12,.36),rgba(20,15,12,.58)), url("${form.portada_url}")`:`linear-gradient(160deg, ${form.color_principal}, #211913)`,backgroundSize:'cover',backgroundPosition:'center'}}>
                 <span className="preview-template">{form.plantilla}</span>
