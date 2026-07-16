@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -56,7 +56,7 @@ const TEMPLATE_CATALOG=[
   {id:'dinosaurios',name:'Dinosaurios',collection:'infantil',badge:'Próximamente',available:false,color:'#598a64',description:'Una aventura jurásica divertida.',layout:'dino'},
   {id:'unicornio',name:'Unicornio',collection:'infantil',badge:'Próximamente',available:false,color:'#c889c9',description:'Colores pastel y fantasía.',layout:'unicorn'},
   {id:'espacial',name:'Espacial',collection:'infantil',badge:'Próximamente',available:false,color:'#5368a8',description:'Planetas, estrellas y exploración.',layout:'space'},
-  {id:'superheroes',name:'Power Heroes',collection:'infantil',badge:'Disponible',available:true,color:'#e22d32',description:'Heroes de colores, energia, rayos y accion para cumpleanos.',layout:'hero'},
+  {id:'superheroes',name:'Superhéroes',collection:'infantil',badge:'Próximamente',available:false,color:'#d35545',description:'Energía, acción y colores intensos.',layout:'hero'},
 
   {id:'corporativo',name:'Corporativo',collection:'empresarial',badge:'Disponible',available:true,color:'#335d7a',description:'Profesional, sobria y clara para eventos de empresa.',layout:'corporate'},
   {id:'lanzamiento',name:'Lanzamiento',collection:'empresarial',badge:'Próximamente',available:false,color:'#6756a3',description:'Presentación de producto con estilo moderno.',layout:'launch'},
@@ -562,4 +562,3 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
   personalized={false}
 />}
 {deleting&&<div className="modal-backdrop delete-backdrop"><section className="delete-modal"><div className="delete-icon">✕</div><div className="delete-heading"><h2>Eliminar invitación</h2><p>{deleting.titulo}</p></div><div className="delete-warning"><strong>Importante</strong><p>Se eliminarán también pases y respuestas asociadas.</p></div><div className="delete-actions"><button className="button button-outline" onClick={()=>setDeleting(null)}>Cancelar</button><button className="button button-danger" onClick={remove}>Sí, eliminar</button></div></section></div>}</div>}
-
