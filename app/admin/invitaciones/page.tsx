@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/client';
 import ShareInvitationModal from '@/components/share-invitation-modal';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 
-type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean};
-const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true};
+type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;portada_efecto:string;pantalla_bienvenida:boolean;texto_bienvenida:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean};
+const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',portada_efecto:'cinematic-zoom',pantalla_bienvenida:true,texto_bienvenida:'Abrir invitación',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true};
 const DEMO_CONTENT={
   portada_url:'/demo/portada-boda.jpg',
   galeria_urls:[
@@ -39,7 +39,7 @@ const TEMPLATE_CATALOG=[
   {id:'luxury-black',name:'Luxury Black',collection:'wedding',badge:'Disponible',available:true,color:'#c7a55b',description:'Negro profundo, detalles dorados y alto contraste.',layout:'dark'},
   {id:'royal-gold',name:'Royal Gold',collection:'wedding',badge:'Próximamente',available:false,color:'#b6924b',description:'Verde esmeralda, oro y detalles de inspiración real.',layout:'royal'},
   {id:'minimal-white',name:'Minimal White',collection:'wedding',badge:'Próximamente',available:false,color:'#6d625b',description:'Limpia, luminosa y centrada en la fotografía.',layout:'minimal'},
-  {id:'romantic-garden',name:'Romantic Garden',collection:'wedding',badge:'Disponible',available:true,color:'#7f9a78',description:'Jardín, tonos naturales y una estética romántica.',layout:'garden'},
+  {id:'romantic-garden',name:'Romantic Garden',collection:'wedding',badge:'Disponible',available:true,color:'#7f9a78',description:'Editorial botánica, navegación flotante y secciones orgánicas.',layout:'garden'},
   {id:'sunset',name:'Sunset',collection:'wedding',badge:'Próximamente',available:false,color:'#d37b57',description:'Atardecer, terracota y una atmósfera cálida.',layout:'sunset'},
   {id:'vintage',name:'Vintage',collection:'wedding',badge:'Próximamente',available:false,color:'#8b745c',description:'Texturas antiguas y composición clásica.',layout:'vintage'},
   {id:'modern-editorial',name:'Modern Editorial',collection:'wedding',badge:'Próximamente',available:false,color:'#222222',description:'Diseño editorial contemporáneo tipo revista.',layout:'editorial'},
@@ -71,12 +71,15 @@ const MODALITIES=[
 
 export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);const[templateFilter,setTemplateFilter]=useState('todas');
 async function load(){setLoading(true);const[e,i]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false})]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);setLoading(false)}useEffect(()=>{void load()},[]);
-function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false});setError('');setModal(true)}
+function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),portada_efecto:designValue(x,'portada_efecto','cinematic-zoom'),pantalla_bienvenida:d.pantalla_bienvenida!==false,texto_bienvenida:designValue(x,'texto_bienvenida','Abrir invitación'),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false});setError('');setModal(true)}
 
 function loadDemoContent(){
   setForm(current=>({
     ...current,
     portada_url:DEMO_CONTENT.portada_url,
+    portada_efecto:'cinematic-zoom',
+    pantalla_bienvenida:true,
+    texto_bienvenida:'Abrir invitación',
     galeria_urls:[...DEMO_CONTENT.galeria_urls],
     musica_url:DEMO_CONTENT.musica_url,
     color_principal:DEMO_CONTENT.color_principal,
@@ -141,7 +144,7 @@ async function handleAudio(file?:File){
   catch(e){setError(messageFromError(e))}
   finally{setUploading(null)}
 }
-async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:3,componentes:[],plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
+async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:3,componentes:[],plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,portada_efecto:form.portada_efecto,pantalla_bienvenida:form.pantalla_bienvenida,texto_bienvenida:form.texto_bienvenida.trim()||'Abrir invitación',galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
 async function toggle(x:Invitacion){const estado=x.estado==='publicada'?'pausada':'publicada';const r=await supabase.from('invitaciones').update({estado,fecha_publicacion:estado==='publicada'?(x.fecha_publicacion??new Date().toISOString()):x.fecha_publicacion}).eq('id',x.id);if(r.error)setError(messageFromError(r.error));else await load()}
 async function remove(){if(!deleting)return;const r=await supabase.from('invitaciones').delete().eq('id',deleting.id);if(r.error)setError(messageFromError(r.error));setDeleting(null);await load()}
 const list=useMemo(()=>items.filter(x=>filter==='todas'||x.estado===filter).filter(x=>[x.titulo,x.slug,x.eventos?.nombre,x.eventos?.clientes?.nombre].join(' ').toLowerCase().includes(search.toLowerCase().trim())),[items,filter,search]);
@@ -333,6 +336,63 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                   <span>Fecha de expiración</span>
                   <input type="datetime-local" value={form.fecha_expiracion} onChange={e=>setForm({...form,fecha_expiracion:e.target.value})}/>
                 </label>
+              </div>
+
+              <div className="opening-experience-panel">
+                <div className="block-config-heading">
+                  <strong>Experiencia de apertura</strong>
+                  <span>El primer toque permite iniciar la música correctamente en teléfonos y computadoras.</span>
+                </div>
+
+                <div className="opening-experience-grid">
+                  <label className="opening-toggle-card">
+                    <input
+                      type="checkbox"
+                      checked={form.pantalla_bienvenida}
+                      onChange={e=>setForm({...form,pantalla_bienvenida:e.target.checked})}
+                    />
+                    <span>
+                      <strong>Mostrar pantalla de bienvenida</strong>
+                      <small>Recomendada cuando la invitación tiene música.</small>
+                    </span>
+                  </label>
+
+                  <label className="form-field">
+                    <span>Texto del botón</span>
+                    <input
+                      value={form.texto_bienvenida}
+                      disabled={!form.pantalla_bienvenida}
+                      onChange={e=>setForm({...form,texto_bienvenida:e.target.value})}
+                      placeholder="Abrir invitación"
+                    />
+                  </label>
+
+                  <label className="form-field full-width">
+                    <span>Efecto de la fotografía de portada</span>
+                    <select
+                      value={form.portada_efecto}
+                      onChange={e=>setForm({...form,portada_efecto:e.target.value})}
+                    >
+                      <option value="cinematic-zoom">Zoom cinematográfico</option>
+                      <option value="blur-focus">Desenfoque a enfoque</option>
+                      <option value="slow-pan">Movimiento lateral suave</option>
+                      <option value="fade-in">Fundido elegante</option>
+                      <option value="none">Sin efecto</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className={`opening-mini-preview effect-${form.portada_efecto}`}>
+                  <div
+                    className="opening-mini-background"
+                    style={form.portada_url?{backgroundImage:`url("${form.portada_url}")`}:undefined}
+                  />
+                  <div className="opening-mini-overlay">
+                    <small>Esta invitación es para</small>
+                    <strong>{form.titulo||'Tu evento especial'}</strong>
+                    <span>{form.pantalla_bienvenida?(form.texto_bienvenida||'Abrir invitación'):'Apertura directa'}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="media-manager-panel">

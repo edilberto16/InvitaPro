@@ -1,3 +1,24 @@
+## 1.8.0 - Apertura cinematográfica y música
+
+- Agrega una pantalla de bienvenida opcional.
+- La música comienza al presionar `Abrir invitación`, compatible con las políticas de los navegadores.
+- Permite personalizar el texto del botón de apertura.
+- Añade cinco efectos configurables para la fotografía de portada.
+- Incluye Zoom cinematográfico, Desenfoque a enfoque, Movimiento lateral, Fundido y Sin efecto.
+- Aplica la apertura y los efectos a invitaciones públicas y pases personalizados.
+- Respeta la preferencia de accesibilidad `prefers-reduced-motion`.
+- Guarda toda la configuración dentro de `design_json`, sin migración SQL.
+
+## 1.7.1 - Romantic Garden Signature
+
+- Rediseña Romantic Garden como plantilla editorial botánica de alta gama.
+- Agrega navegación flotante por secciones.
+- Añade un botón para guardar el evento en Google Calendar.
+- Incorpora formas orgánicas, arcos, fondos fotográficos y ornamentos vegetales.
+- Rediseña cuenta regresiva, detalles, itinerario, galería, ubicación, RSVP y footer.
+- Aplica la misma identidad visual a los pases personalizados.
+- La propuesta toma inspiración general de invitaciones editoriales de boda, sin copiar el diseño ni los recursos de terceros.
+
 ## 1.7.0 - Catálogo Premium de plantillas
 
 - Incorpora el catálogo maestro de 24 plantillas.

@@ -133,3 +133,14 @@
 - [ ] Activar las 18 plantillas restantes.
 - [ ] Administrar catálogo desde Supabase.
 - [ ] Planes Básico y Premium por plantilla.
+
+
+## Experiencia cinematográfica v1.8.0
+
+- [x] Pantalla de apertura.
+- [x] Inicio de música mediante interacción válida.
+- [x] Efectos seleccionables para portada.
+- [x] Compatibilidad con pases personalizados.
+- [x] Preferencia de movimiento reducido.
+- [ ] Animaciones al hacer scroll.
+- [ ] Efectos por colección de plantillas.

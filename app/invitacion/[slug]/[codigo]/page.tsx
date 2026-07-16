@@ -58,6 +58,7 @@ export default function PersonalizedPassPage() {
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
+  const [opened, setOpened] = useState(false);
   const [countdown, setCountdown] = useState({
     days: '--',
     hours: '--',
@@ -140,6 +141,30 @@ export default function PersonalizedPassPage() {
     return () => window.clearInterval(timer);
   }, [data]);
 
+  useEffect(() => {
+    if (!data) return;
+    const enabled = data.invitacion.design_json?.pantalla_bienvenida !== false;
+    if (enabled && !opened) {
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+  }, [data, opened]);
+
+  async function openInvitation() {
+    setOpened(true);
+    const audio = audioRef.current;
+    if (audio) {
+      try {
+        await audio.play();
+      } catch {
+        setAudioPlaying(false);
+      }
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError('');
@@ -187,6 +212,15 @@ export default function PersonalizedPassPage() {
   const dress = String(design.vestimenta || 'Libre');
   const coverUrl =
     typeof design.portada_url === 'string' ? design.portada_url : '';
+  const coverEffect =
+    typeof design.portada_efecto === 'string'
+      ? design.portada_efecto
+      : 'cinematic-zoom';
+  const welcomeEnabled = design.pantalla_bienvenida !== false;
+  const welcomeButton =
+    typeof design.texto_bienvenida === 'string' && design.texto_bienvenida.trim()
+      ? design.texto_bienvenida
+      : 'Abrir invitación';
   const galleryUrls = Array.isArray(design.galeria_urls)
     ? design.galeria_urls.filter(
         (value): value is string => typeof value === 'string'
@@ -200,13 +234,34 @@ export default function PersonalizedPassPage() {
 
   return (
     <main
-      className={`premium-public-invite personalized-premium theme-${plantilla}`}
+      className={`premium-public-invite personalized-premium theme-${plantilla} ${opened||!welcomeEnabled?'invitation-opened':'invitation-locked'}`}
       style={
         {
           '--invite-color': data.invitacion.color_principal || '#8f5c38',
         } as React.CSSProperties
       }
     >
+      {welcomeEnabled && !opened && (
+        <section className={`invitation-opening-screen personalized-opening effect-${coverEffect}`}>
+          <div
+            className="opening-screen-background"
+            style={coverUrl ? { backgroundImage: `url("${coverUrl}")` } : undefined}
+          />
+          <div className="opening-screen-shade" />
+          <div className="opening-screen-content">
+            <span className="opening-screen-kicker">Invitación personalizada</span>
+            <p>Esta invitación es para</p>
+            <h1>{data.invitado.nombre}</h1>
+            <small>{data.invitacion.titulo}</small>
+            <button type="button" onClick={() => void openInvitation()}>
+              <span>♫</span>
+              {welcomeButton}
+            </button>
+            {data.invitacion.musica_url && <em>La música iniciará al abrir</em>}
+          </div>
+        </section>
+      )}
+
       {data.invitacion.musica_url && (
         <>
           <audio
@@ -238,18 +293,28 @@ export default function PersonalizedPassPage() {
         </>
       )}
 
+      {plantilla === 'romantic-garden' && (
+        <nav className="garden-floating-nav" aria-label="Navegación de la invitación">
+          <a href="#inicio">Inicio</a>
+          <a href="#pase">Mi pase</a>
+          {showGallery && galleryUrls.length > 0 && <a href="#galeria">Galería</a>}
+          {showMap && <a href="#ubicacion">Ubicación</a>}
+          <a href="#rsvp">RSVP</a>
+        </nav>
+      )}
+
       <section
+        id="inicio"
         className={`premium-hero personalized-premium-hero ${
           coverUrl ? 'has-cover' : ''
-        }`}
-        style={
-          coverUrl
-            ? {
-                backgroundImage: `linear-gradient(180deg,rgba(12,8,6,.32),rgba(12,8,6,.72)),url("${coverUrl}")`,
-              }
-            : undefined
-        }
+        } cover-effect-${coverEffect}`}
       >
+        {coverUrl && (
+          <div
+            className="premium-hero-background"
+            style={{ backgroundImage: `url("${coverUrl}")` }}
+          />
+        )}
         <div className="premium-hero-overlay" />
         <div className="premium-hero-decoration decoration-one" />
         <div className="premium-hero-decoration decoration-two" />
@@ -274,7 +339,7 @@ export default function PersonalizedPassPage() {
         </div>
       </section>
 
-      <section className="premium-intro-block" id="pase">
+      <section className="premium-intro-block" id="pase"><div className="garden-botanical-separator" aria-hidden="true"><span>❦</span></div>
         <span className="premium-ornament">✦</span>
         <p className="premium-small-title">{eventType}</p>
         <h2>{subtitle}</h2>
@@ -372,7 +437,7 @@ export default function PersonalizedPassPage() {
       )}
 
       {showGallery && galleryUrls.length > 0 && (
-        <section className="premium-gallery-section">
+        <section id="galeria" className="premium-gallery-section">
           <div className="premium-section-heading">
             <p className="premium-small-title">Recuerdos</p>
             <h2>Nuestra galería</h2>
@@ -404,7 +469,7 @@ export default function PersonalizedPassPage() {
       )}
 
       {showMap && (
-        <section className="premium-location-section">
+        <section id="ubicacion" className="premium-location-section">
           <div className="premium-location-card">
             <p className="premium-small-title">Ubicación</p>
             <h2>{data.evento.lugar || 'Lugar por confirmar'}</h2>
@@ -434,7 +499,7 @@ export default function PersonalizedPassPage() {
         </section>
       )}
 
-      <section className="premium-rsvp-section">
+      <section id="rsvp" className="premium-rsvp-section">
         <div className="premium-rsvp-card personalized-rsvp-card">
           <p className="premium-small-title">Confirmación</p>
           <h2>¿Nos acompañas?</h2>
