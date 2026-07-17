@@ -89,7 +89,7 @@ export default function PlantillasPage() {
                   <ul>{template.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
                   <footer>
                     <span className="template-color-dot" style={{ background: template.color }} aria-hidden="true" />
-                    {template.available ? <Link href="/admin/invitaciones" className="button button-primary">Usar plantilla</Link> : <button className="button button-ghost" disabled>En desarrollo</button>}
+                    {template.available ? <Link href={`/admin/invitaciones?plantilla=${encodeURIComponent(template.id)}`} className="button button-primary">Usar plantilla</Link> : <button className="button button-ghost" disabled>En desarrollo</button>}
                   </footer>
                 </div>
               </article>
