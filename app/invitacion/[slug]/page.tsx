@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';import { resolveTemplateEngine,templateEngineStyle } from '@/lib/template-engine';
+import { FormEvent,ReactNode,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';import { normalizeTemplateSectionOrder,resolveTemplateEngine,TemplateSectionId,templateEngineStyle } from '@/lib/template-engine';
 type PublicData={invitacion:{id:string;titulo:string;slug:string;modalidad:'simple'|'rsvp'|'pases';design_json:Record<string,unknown>;color_principal:string|null;musica_url:string|null;whatsapp:string|null;fecha_expiracion:string|null};evento:{nombre:string;tipo:string;fecha:string;hora:string|null;zona_horaria:string;lugar:string|null;direccion:string|null;maps_url:string|null};invitado:null};
 function longDate(v:string){return new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${v}T00:00:00Z`))}
 export default function PublicInvite(){const params=useParams<{slug:string}>();const supabase=useMemo(()=>createClient(),[]);const[data,setData]=useState<PublicData|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState('');const[name,setName]=useState('');const[phone,setPhone]=useState('');const[attendance,setAttendance]=useState(true);const[adults,setAdults]=useState(1);const[children,setChildren]=useState(0);const[message,setMessage]=useState('');const[sent,setSent]=useState(false);const[countdown,setCountdown]=useState({days:'--',hours:'--',minutes:'--',ended:false,invalid:false});const[previewMode,setPreviewMode]=useState(false);const[reviewMode,setReviewMode]=useState(false);const[opened,setOpened]=useState(false);const[audioPlaying,setAudioPlaying]=useState(false);const audioRef=useRef<HTMLAudioElement|null>(null);
@@ -20,6 +20,7 @@ const plantilla=String(design.plantilla||'elegante-classic');const templateEngin
 const intro=String(design.mensaje||'Será un honor contar con tu presencia.');
 const subtitle=String(design.subtitulo||'Queremos compartir contigo este momento');
 const dress=String(design.vestimenta||'Libre');
+const showIntro=design.mostrar_intro!==false;
 const showCountdown=design.mostrar_contador!==false;
 const showDetails=design.mostrar_detalles!==false;
 const showProgram=design.mostrar_programa!==false;
@@ -38,6 +39,7 @@ const galleryUrls=Array.isArray(design.galeria_urls)?design.galeria_urls.filter(
 const eventType=data.evento.tipo||'Evento especial';
 const calendarStart=`${data.evento.fecha.replaceAll('-','')}T${(data.evento.hora||'00:00').slice(0,5).replace(':','')}00`;
 const calendarEnd=`${data.evento.fecha.replaceAll('-','')}T${String(Number((data.evento.hora||'00:00').slice(0,2))+2).padStart(2,'0')}${(data.evento.hora||'00:00').slice(3,5)}00`;
+const sectionOrder=normalizeTemplateSectionOrder(design.section_order);
 const calendarUrl=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(data.invitacion.titulo)}&dates=${calendarStart}/${calendarEnd}&details=${encodeURIComponent(intro)}&location=${encodeURIComponent([data.evento.lugar,data.evento.direccion].filter(Boolean).join(', '))}`;
 
 return <main data-template={templateEngine.id} data-family={templateEngine.family} data-layout={templateEngine.layout} data-typography={templateEngine.typography} data-decoration={templateEngine.decoration} data-hero={templateEngine.hero} data-motion={templateEngine.motion} data-radius={templateEngine.radius} className={`premium-public-invite template-engine theme-${templateEngine.id} layout-${templateEngine.layout} typography-${templateEngine.typography} decoration-${templateEngine.decoration} hero-${templateEngine.hero} motion-${templateEngine.motion} radius-${templateEngine.radius} ${opened||!welcomeEnabled?'invitation-opened':'invitation-locked'}`} style={templateEngineStyle(templateEngine)}>
@@ -71,129 +73,23 @@ return <main data-template={templateEngine.id} data-family={templateEngine.famil
     {data.invitacion.modalidad==='rsvp'&&showRsvp&&<a href="#rsvp">RSVP</a>}
   </nav>}
 
-  <section id="inicio" className={`premium-hero ${coverUrl?'has-cover':''} cover-effect-${coverEffect}`}>
-    {coverUrl&&<div className="premium-hero-background" style={{backgroundImage:`url("${coverUrl}")`}}/>}
-    <div className="premium-hero-overlay"/>
-    <div className="premium-hero-decoration decoration-one"/>
-    <div className="premium-hero-decoration decoration-two"/>
-    <div className="premium-hero-content">
-      <span className="premium-kicker">{eventType}</span>
-      <p className="premium-invite-label">Tenemos el honor de invitarte a</p>
-      <h1>{data.invitacion.titulo}</h1>
-      <div className="premium-hero-date">
-        <span>{longDate(data.evento.fecha)}</span>
-        <i/>
-        <span>{(data.evento.hora||'Hora por confirmar').slice(0,5)}</span>
-      </div>
-      <a href="#detalles" className="premium-scroll-link">Descubre los detalles <span>↓</span></a>
-    </div>
-  </section>
-
-  <section className="premium-intro-block" id="detalles"><div className="garden-botanical-separator" aria-hidden="true"><span>❦</span></div>
-    <span className="premium-ornament">✦</span>
-    <p className="premium-small-title">Estás cordialmente invitado</p>
-    <h2>{subtitle}</h2>
-    <p className="premium-copy">{intro}</p>
-    {plantilla==='romantic-garden'&&<a className="garden-calendar-button" href={calendarUrl} target="_blank" rel="noreferrer">Agregar a mi calendario</a>}
-  </section>
-
-  {showCountdown&&<section className="premium-countdown-section">
-    <p className="premium-small-title">Faltan</p>
-    {countdown.invalid?<div className="premium-date-pending">Fecha por confirmar</div>:countdown.ended?<div className="premium-date-pending">¡Hoy es el gran día!</div>:<div className="premium-countdown-grid">
-      <article><strong>{countdown.days}</strong><span>Días</span></article>
-      <article><strong>{countdown.hours}</strong><span>Horas</span></article>
-      <article><strong>{countdown.minutes}</strong><span>Minutos</span></article>
-    </div>}
-  </section>}
-
-  {showDetails&&<section className="premium-details-section">
-    <div className="premium-section-heading">
-      <p className="premium-small-title">Información</p>
-      <h2>Todo lo que necesitas saber</h2>
-    </div>
-    <div className="premium-detail-grid">
-      <article>
-        <span className="premium-detail-icon">01</span>
-        <small>Fecha y hora</small>
-        <strong>{longDate(data.evento.fecha)}</strong>
-        <p>{data.evento.hora?.slice(0,5)||'Hora por confirmar'}</p>
-      </article>
-      <article>
-        <span className="premium-detail-icon">02</span>
-        <small>Lugar</small>
-        <strong>{data.evento.lugar||'Por confirmar'}</strong>
-        <p>{data.evento.direccion||'Dirección por confirmar'}</p>
-      </article>
-      <article>
-        <span className="premium-detail-icon">03</span>
-        <small>Código de vestimenta</small>
-        <strong>{dress}</strong>
-        <p>Gracias por acompañarnos</p>
-      </article>
-    </div>
-  </section>}
-
-  {showProgram&&program.length>0&&<section id="programa" className="premium-program-section">
-    <div className="premium-section-heading light">
-      <p className="premium-small-title">Itinerario</p>
-      <h2>Programa del evento</h2>
-    </div>
-    <div className="premium-timeline">
-      {program.map(item=><article key={item.id}>
-        <time>{item.time}</time>
-        <span/>
-        <strong>{item.title}</strong>
-      </article>)}
-    </div>
-  </section>}
-
-  {showGallery&&galleryUrls.length>0&&<section id="galeria" className="premium-gallery-section">
-    <div className="premium-section-heading">
-      <p className="premium-small-title">Recuerdos</p>
-      <h2>Nuestra galería</h2>
-      <p>Algunos momentos que queremos compartir contigo.</p>
-    </div>
-    <div className={`premium-gallery-grid gallery-count-${Math.min(galleryUrls.length,6)}`}>
-      {galleryUrls.map((url,index)=><figure key={url} className={`gallery-item gallery-item-${index+1}`}>
-        <img src={url} alt={`Fotografía ${index+1} de ${data.invitacion.titulo}`} loading="lazy"/>
-      </figure>)}
-    </div>
-  </section>}
-
-  {showMap&&<section id="ubicacion" className="premium-location-section">
-    <div className="premium-location-card">
-      <p className="premium-small-title">Ubicación</p>
-      <h2>{data.evento.lugar||'Lugar por confirmar'}</h2>
-      <p>{data.evento.direccion||'La dirección se publicará próximamente.'}</p>
-      <div className="premium-location-actions">
-        {data.evento.maps_url&&<a href={data.evento.maps_url} target="_blank">Cómo llegar</a>}
-        {data.invitacion.whatsapp&&<a className="secondary" href={`https://wa.me/${data.invitacion.whatsapp}`} target="_blank">Contactar anfitrión</a>}
-      </div>
-    </div>
-  </section>}
-
-  {data.invitacion.modalidad==='rsvp'&&showRsvp&&<section id="rsvp" className="premium-rsvp-section">
-    <div className="premium-rsvp-card">
-      <p className="premium-small-title">RSVP</p>
-      <h2>¿Nos acompañas?</h2>
-      <p>Agradecemos confirmar tu asistencia.</p>
-      {sent?<div className="rsvp-success">✓ Tu respuesta se guardó correctamente.</div>:<form className="rsvp-public-form" onSubmit={submit}>
-        <label className="rsvp-message-field"><span>Nombre *</span><input value={name} onChange={e=>setName(e.target.value)} required/></label>
-        <label className="rsvp-message-field"><span>Teléfono</span><input value={phone} onChange={e=>setPhone(e.target.value)}/></label>
-        <div className="rsvp-choice-grid">
-          <button type="button" className={`rsvp-choice ${attendance?'selected':''}`} onClick={()=>setAttendance(true)}>✓ <strong>Sí, asistiré</strong></button>
-          <button type="button" className={`rsvp-choice decline ${!attendance?'selected':''}`} onClick={()=>setAttendance(false)}>× <strong>No podré asistir</strong></button>
-        </div>
-        {attendance&&<div className="rsvp-attendee-grid">
-          <label><span>Adultos</span><input type="number" min="0" value={adults} onChange={e=>setAdults(Number(e.target.value))}/></label>
-          <label><span>Niños</span><input type="number" min="0" value={children} onChange={e=>setChildren(Number(e.target.value))}/></label>
-        </div>}
-        <label className="rsvp-message-field"><span>Mensaje</span><textarea rows={3} value={message} onChange={e=>setMessage(e.target.value)}/></label>
-        {error&&<p className="form-error">{error}</p>}
-        <button className="rsvp-submit">Enviar confirmación</button>
-      </form>}
-    </div>
-  </section>}
+  {sectionOrder.map(sectionId=>{
+    const sections:Record<TemplateSectionId,ReactNode>={
+      hero:<section id="inicio" className={`premium-hero ${coverUrl?'has-cover':''} cover-effect-${coverEffect}`}>
+        {coverUrl&&<div className="premium-hero-background" style={{backgroundImage:`url("${coverUrl}")`}}/>}
+        <div className="premium-hero-overlay"/><div className="premium-hero-decoration decoration-one"/><div className="premium-hero-decoration decoration-two"/>
+        <div className="premium-hero-content"><span className="premium-kicker">{eventType}</span><p className="premium-invite-label">Tenemos el honor de invitarte a</p><h1>{data.invitacion.titulo}</h1><div className="premium-hero-date"><span>{longDate(data.evento.fecha)}</span><i/><span>{(data.evento.hora||'Hora por confirmar').slice(0,5)}</span></div><a href="#detalles" className="premium-scroll-link">Descubre los detalles <span>↓</span></a></div>
+      </section>,
+      intro:showIntro?<section className="premium-intro-block" id="detalles"><div className="garden-botanical-separator" aria-hidden="true"><span>❦</span></div><span className="premium-ornament">✦</span><p className="premium-small-title">Estás cordialmente invitado</p><h2>{subtitle}</h2><p className="premium-copy">{intro}</p>{plantilla==='romantic-garden'&&<a className="garden-calendar-button" href={calendarUrl} target="_blank" rel="noreferrer">Agregar a mi calendario</a>}</section>:null,
+      countdown:showCountdown?<section className="premium-countdown-section"><p className="premium-small-title">Faltan</p>{countdown.invalid?<div className="premium-date-pending">Fecha por confirmar</div>:countdown.ended?<div className="premium-date-pending">¡Hoy es el gran día!</div>:<div className="premium-countdown-grid"><article><strong>{countdown.days}</strong><span>Días</span></article><article><strong>{countdown.hours}</strong><span>Horas</span></article><article><strong>{countdown.minutes}</strong><span>Minutos</span></article></div>}</section>:null,
+      details:showDetails?<section className="premium-details-section"><div className="premium-section-heading"><p className="premium-small-title">Información</p><h2>Todo lo que necesitas saber</h2></div><div className="premium-detail-grid"><article><span className="premium-detail-icon">01</span><small>Fecha y hora</small><strong>{longDate(data.evento.fecha)}</strong><p>{data.evento.hora?.slice(0,5)||'Hora por confirmar'}</p></article><article><span className="premium-detail-icon">02</span><small>Lugar</small><strong>{data.evento.lugar||'Por confirmar'}</strong><p>{data.evento.direccion||'Dirección por confirmar'}</p></article><article><span className="premium-detail-icon">03</span><small>Código de vestimenta</small><strong>{dress}</strong><p>Gracias por acompañarnos</p></article></div></section>:null,
+      program:showProgram&&program.length>0?<section id="programa" className="premium-program-section"><div className="premium-section-heading light"><p className="premium-small-title">Itinerario</p><h2>Programa del evento</h2></div><div className="premium-timeline">{program.map(item=><article key={item.id}><time>{item.time}</time><span/><strong>{item.title}</strong></article>)}</div></section>:null,
+      gallery:showGallery&&galleryUrls.length>0?<section id="galeria" className="premium-gallery-section"><div className="premium-section-heading"><p className="premium-small-title">Recuerdos</p><h2>Nuestra galería</h2><p>Algunos momentos que queremos compartir contigo.</p></div><div className={`premium-gallery-grid gallery-count-${Math.min(galleryUrls.length,6)}`}>{galleryUrls.map((url,index)=><figure key={url} className={`gallery-item gallery-item-${index+1}`}><img src={url} alt={`Fotografía ${index+1} de ${data.invitacion.titulo}`} loading="lazy"/></figure>)}</div></section>:null,
+      location:showMap?<section id="ubicacion" className="premium-location-section"><div className="premium-location-card"><p className="premium-small-title">Ubicación</p><h2>{data.evento.lugar||'Lugar por confirmar'}</h2><p>{data.evento.direccion||'La dirección se publicará próximamente.'}</p><div className="premium-location-actions">{data.evento.maps_url&&<a href={data.evento.maps_url} target="_blank">Cómo llegar</a>}{data.invitacion.whatsapp&&<a className="secondary" href={`https://wa.me/${data.invitacion.whatsapp}`} target="_blank">Contactar anfitrión</a>}</div></div></section>:null,
+      rsvp:data.invitacion.modalidad==='rsvp'&&showRsvp?<section id="rsvp" className="premium-rsvp-section"><div className="premium-rsvp-card"><p className="premium-small-title">RSVP</p><h2>¿Nos acompañas?</h2><p>Agradecemos confirmar tu asistencia.</p>{sent?<div className="rsvp-success">✓ Tu respuesta se guardó correctamente.</div>:<form className="rsvp-public-form" onSubmit={submit}><label className="rsvp-message-field"><span>Nombre *</span><input value={name} onChange={e=>setName(e.target.value)} required/></label><label className="rsvp-message-field"><span>Teléfono</span><input value={phone} onChange={e=>setPhone(e.target.value)}/></label><div className="rsvp-choice-grid"><button type="button" className={`rsvp-choice ${attendance?'selected':''}`} onClick={()=>setAttendance(true)}>✓ <strong>Sí, asistiré</strong></button><button type="button" className={`rsvp-choice decline ${!attendance?'selected':''}`} onClick={()=>setAttendance(false)}>× <strong>No podré asistir</strong></button></div>{attendance&&<div className="rsvp-attendee-grid"><label><span>Adultos</span><input type="number" min="0" value={adults} onChange={e=>setAdults(Number(e.target.value))}/></label><label><span>Niños</span><input type="number" min="0" value={children} onChange={e=>setChildren(Number(e.target.value))}/></label></div>}<label className="rsvp-message-field"><span>Mensaje</span><textarea rows={3} value={message} onChange={e=>setMessage(e.target.value)}/></label>{error&&<p className="form-error">{error}</p>}<button className="rsvp-submit">Enviar confirmación</button></form>}</div></section>:null
+    };
+    return <div className="invitation-section-slot" data-section={sectionId} key={sectionId}>{sections[sectionId]}</div>;
+  })}
 
   <footer className="premium-footer">
     <span>Gracias por ser parte de este momento</span>

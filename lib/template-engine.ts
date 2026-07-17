@@ -30,7 +30,7 @@ export type TemplateEngineDefinition = {
   sectionOrder: TemplateSectionId[];
 };
 
-const defaultOrder: TemplateSectionId[] = [
+export const DEFAULT_TEMPLATE_SECTION_ORDER: TemplateSectionId[] = [
   'hero',
   'intro',
   'countdown',
@@ -97,7 +97,7 @@ export function resolveTemplateEngine(id: string, customPrimary?: string | null)
     hero,
     motion,
     radius,
-    sectionOrder: base.sectionOrder || defaultOrder,
+    sectionOrder: base.sectionOrder || DEFAULT_TEMPLATE_SECTION_ORDER,
     palette: {
       ...base.palette,
       primary: customPrimary || base.palette.primary,
@@ -116,4 +116,14 @@ export function templateEngineStyle(definition: TemplateEngineDefinition): React
     '--template-muted': definition.palette.muted,
     '--template-radius': definition.radius === 'rounded' ? '32px' : definition.radius === 'square' ? '4px' : '18px',
   } as React.CSSProperties;
+}
+
+
+export function normalizeTemplateSectionOrder(value: unknown): TemplateSectionId[] {
+  if (!Array.isArray(value)) return [...DEFAULT_TEMPLATE_SECTION_ORDER];
+  const allowed = new Set<TemplateSectionId>(DEFAULT_TEMPLATE_SECTION_ORDER);
+  const unique = value.filter((item): item is TemplateSectionId =>
+    typeof item === 'string' && allowed.has(item as TemplateSectionId)
+  ).filter((item, index, list) => list.indexOf(item) === index);
+  return [...unique, ...DEFAULT_TEMPLATE_SECTION_ORDER.filter(item => !unique.includes(item))];
 }
