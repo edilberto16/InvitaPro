@@ -1,0 +1,5 @@
+'use client';
+import {useEffect,useMemo,useState} from 'react';
+import {useParams} from 'next/navigation';
+import {createClient} from '@/lib/supabase/client';
+export default function RevisionPage(){const params=useParams<{token:string}>();const supabase=useMemo(()=>createClient(),[]);const[error,setError]=useState('');useEffect(()=>{let active=true;async function open(){const{data,error}=await supabase.rpc('obtener_invitacion_revision',{p_token:params.token});if(!active)return;if(error||!data||typeof data!=='object'||!('invitacion' in data)){setError('El enlace de revisión no está disponible o fue desactivado.');return}const payload=data as {invitacion?:{slug?:string}};if(!payload.invitacion?.slug){setError('No fue posible abrir la revisión.');return}window.location.replace(`/invitacion/${payload.invitacion.slug}?review=${encodeURIComponent(params.token)}`)}void open();return()=>{active=false}},[params.token,supabase]);return <main className="public-invite-loading">{error||'Abriendo revisión privada…'}</main>}

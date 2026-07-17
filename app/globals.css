@@ -3729,3 +3729,35 @@ a { color: inherit; }
   .template-engine.theme-elegante-classic .premium-intro-block::after { display:none; }
   .template-engine.theme-elegante-classic .premium-countdown-grid article { padding-inline: 8px; }
 }
+
+
+/* InvitaPro v1.15.0: publicación y revisión */
+.button-success{background:#19764a;color:#fff;border-color:#19764a}.button-success:hover{background:#125f3b}
+.review-link-modal{width:min(620px,calc(100vw - 32px));background:#fff;border-radius:24px;padding:26px;box-shadow:0 24px 80px rgba(25,22,18,.22)}
+.review-link-heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.review-link-heading span{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#8f5c38}.review-link-heading h2{margin:5px 0 6px}.review-link-heading p{margin:0;color:#6f675f}.modal-close{border:0;background:#f4f1ed;width:38px;height:38px;border-radius:50%;font-size:24px;cursor:pointer}.review-link-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.review-security-note{display:block;margin-top:16px;color:#756d65}.client-review-banner{background:#2f295f}.invite-status-archivada{background:#ece9e6!important;color:#615b55!important}
+@media(max-width:720px){.review-link-actions .button{width:100%;justify-content:center}.invitation-builder-footer>div:last-child{flex-wrap:wrap}}
+
+/* v1.15.1 — acciones visuales de la biblioteca de invitaciones */
+.invitation-table{min-width:1180px}
+.invitation-table th:last-child{width:390px}
+.invitation-actions-cell{width:390px;min-width:390px}
+.invitation-action-panel{display:flex;flex-direction:column;gap:8px;width:100%;max-width:370px}
+.invitation-action-primary{display:grid;grid-template-columns:repeat(4,minmax(76px,1fr));gap:7px}
+.invite-action-button{appearance:none;border:1px solid #e7e2dc;background:#fff;border-radius:11px;min-height:62px;padding:8px 7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:11px;font-weight:800;line-height:1.1;text-decoration:none;cursor:pointer;transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}
+.invite-action-button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 7px 18px rgba(36,29,23,.08)}
+.invite-action-button:focus-visible,.invite-secondary-action:focus-visible{outline:3px solid rgba(143,92,56,.2);outline-offset:2px}
+.invite-action-button:disabled{opacity:.42;cursor:not-allowed;background:#f6f4f1}
+.action-preview{color:#1565d8}.action-preview:hover{border-color:#bcd4f7;background:#f4f8ff}
+.action-share{color:#16884a}.action-share:hover:not(:disabled){border-color:#bfe4cd;background:#f2fbf5}
+.action-edit{color:#7338d5}.action-edit:hover{border-color:#d4c2f5;background:#f8f5ff}
+.action-review{color:#d46516}.action-review:hover{border-color:#f2cfb4;background:#fff8f2}
+.invitation-action-secondary{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #e7e2dc;border-radius:10px;overflow:hidden;background:#fff}
+.invite-secondary-action{appearance:none;border:0;border-right:1px solid #ece7e2;background:#fff;min-height:38px;padding:7px 9px;display:flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:11px;font-weight:800;cursor:pointer;transition:background .18s ease}
+.invite-secondary-action:last-child{border-right:0}
+.invite-secondary-action svg{width:16px;height:16px}
+.action-publish{color:#16884a}.action-publish:hover{background:#f2fbf5}
+.action-pause{color:#d46516}.action-pause:hover{background:#fff8f2}
+.action-archive{color:#626b76}.action-archive:hover{background:#f5f6f7}
+.action-delete{color:#d62f3e}.action-delete:hover{background:#fff4f5}
+@media(max-width:1250px){.invitation-table{min-width:1120px}.invitation-table th:last-child,.invitation-actions-cell{width:350px;min-width:350px}.invitation-action-panel{max-width:335px}.invitation-action-primary{grid-template-columns:repeat(4,minmax(70px,1fr))}.invite-action-button{padding-inline:4px}}
+@media(max-width:760px){.invitation-actions-cell{width:330px;min-width:330px}.invitation-action-panel{max-width:315px}.invite-action-button{min-height:58px;font-size:10px}.invitation-action-primary{gap:5px}.invite-secondary-action{font-size:10px;padding-inline:5px}}
