@@ -1,5 +1,15 @@
 import type React from 'react';
 
+export type ThemeStudioOverrides = Partial<{
+  primary: string;
+  secondary: string;
+  background: string;
+  surface: string;
+  text: string;
+  headingFont: string;
+  bodyFont: string;
+}>;
+
 export type ThemeStudioDefinition = {
   id: string;
   name: string;
@@ -33,6 +43,37 @@ export const THEME_STUDIO_THEMES: ThemeStudioDefinition[] = [
 export function resolveThemeStudio(value: unknown): ThemeStudioDefinition {
   const id = typeof value === 'string' ? value : '';
   return THEME_STUDIO_THEMES.find(theme => theme.id === id) || THEME_STUDIO_THEMES[0];
+}
+
+export function normalizeThemeStudioOverrides(value: unknown): ThemeStudioOverrides {
+  if (!value || typeof value !== 'object') return {};
+  const input = value as Record<string, unknown>;
+  const output: ThemeStudioOverrides = {};
+  const colorKeys = ['primary', 'secondary', 'background', 'surface', 'text'] as const;
+  for (const key of colorKeys) {
+    const current = input[key];
+    if (typeof current === 'string' && /^#[0-9a-f]{6}$/i.test(current)) output[key] = current;
+  }
+  if (typeof input.headingFont === 'string' && input.headingFont.trim()) output.headingFont = input.headingFont;
+  if (typeof input.bodyFont === 'string' && input.bodyFont.trim()) output.bodyFont = input.bodyFont;
+  return output;
+}
+
+export function applyThemeStudioOverrides(theme: ThemeStudioDefinition, value: unknown): ThemeStudioDefinition {
+  const overrides = normalizeThemeStudioOverrides(value);
+  return {
+    ...theme,
+    palette: {
+      ...theme.palette,
+      primary: overrides.primary || theme.palette.primary,
+      secondary: overrides.secondary || theme.palette.secondary,
+      background: overrides.background || theme.palette.background,
+      surface: overrides.surface || theme.palette.surface,
+      text: overrides.text || theme.palette.text,
+    },
+    headingFont: overrides.headingFont || theme.headingFont,
+    bodyFont: overrides.bodyFont || theme.bodyFont,
+  };
 }
 
 export function themeStudioStyle(theme: ThemeStudioDefinition): React.CSSProperties {

@@ -4557,3 +4557,16 @@ a { color: inherit; }
 .admin-template-preview[data-theme-studio] .preview-details{background:var(--template-surface);color:var(--template-text)}
 @media(max-width:1100px){.theme-studio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.theme-studio-grid{grid-template-columns:1fr}.theme-studio-preview{height:94px}.theme-studio-current{align-items:flex-start;flex-direction:column}.theme-studio-current small{margin-left:0}}
+
+/* InvitaPro v1.22.2 — Theme Studio live customizer */
+.theme-studio-customizer{margin-top:18px;padding:18px;border:1px solid rgba(148,163,184,.28);border-radius:18px;background:rgba(255,255,255,.76)}
+.theme-studio-customizer-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.theme-studio-customizer-heading div{display:grid;gap:3px}.theme-studio-customizer-heading small{color:#64748b;line-height:1.45}
+.theme-studio-customizer-heading button{border:1px solid #d7dce5;background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+.theme-studio-color-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.theme-studio-color-grid label,.theme-studio-font-grid label{display:grid;gap:7px;font-size:12px;font-weight:800;color:#475569}
+.theme-studio-color-grid label>div{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+.theme-studio-color-grid input[type=color]{width:34px;height:30px;border:0;padding:0;background:transparent;cursor:pointer}.theme-studio-color-grid code{font-size:11px;color:#334155}
+.theme-studio-font-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.theme-studio-font-grid select{width:100%;border:1px solid #dbe2ea;border-radius:12px;padding:11px 12px;background:#fff;color:#172033}
+@media(max-width:900px){.theme-studio-color-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.theme-studio-font-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.theme-studio-customizer-heading{display:grid}.theme-studio-color-grid{grid-template-columns:1fr}.theme-studio-customizer-heading button{width:100%}}
