@@ -535,7 +535,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                       <span className="audio-status-check">✓</span>
                       <div>
                         <strong>Música cargada correctamente</strong>
-                        <small>{form.musica_url.startsWith('/demo/')?'Pista de demostración incluida':'Archivo almacenado en Supabase Storage'}</small>
+                        <small>{form.musica_url.startsWith('/demo/')?'Pista de demostración incluida':'Archivo de música seleccionado'}</small>
                       </div>
                     </div>}
 
@@ -580,7 +580,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                 <div className="theme-studio-current">
                   <span>Tema activo</span>
                   <strong>{resolveThemeStudio(form.theme_id).name}</strong>
-                  <small>Los cambios se muestran al instante y se guardan en design_json.</small>
+                  <small>Personaliza colores y tipografías con vista previa en tiempo real.</small>
                 </div>
                 <div className="theme-studio-customizer">
                   <div className="theme-studio-customizer-heading">
@@ -654,9 +654,9 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                     <label className="form-field"><span>Texto del botón</span><input value={form.section_settings[selectedSection].buttonLabel} onChange={e=>updateSectionSetting(selectedSection,'buttonLabel',e.target.value)}/></label>
                     <label className="form-field"><span>Alineación</span><select value={form.section_settings[selectedSection].alignment} onChange={e=>updateSectionSetting(selectedSection,'alignment',e.target.value as 'left'|'center'|'right')}><option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option></select></label>
                   </div>
-                  <small>Los cambios se guardan en design_json y se reflejan en la invitación pública.</small>
+                  <small>Personaliza el contenido y la alineación de cada sección.</small>
                 </div>
-                <div className="section-structure-tip"><span>💡</span><p>Arrastra desde el control ⋮⋮ o utiliza las flechas. El orden se guarda dentro del diseño sin cambios en Supabase.</p></div>
+                <div className="section-structure-tip"><span>💡</span><p>Arrastra desde el control ⋮⋮ o utiliza las flechas para organizar las secciones.</p></div>
               </div>
 
               {form.modalidad==='rsvp'&&<div className="modality-note">
