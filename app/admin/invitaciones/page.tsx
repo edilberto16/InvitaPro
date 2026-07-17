@@ -6,6 +6,7 @@ import ShareInvitationModal from '@/components/share-invitation-modal';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS } from '@/lib/template-catalog';
 import { DEFAULT_TEMPLATE_SECTION_ORDER, normalizeTemplateSectionOrder, TemplateSectionId } from '@/lib/template-engine';
+import { resolveThemeStudio, THEME_STUDIO_THEMES, themeStudioStyle } from '@/lib/theme-studio';
 
 type SectionSettings=Record<TemplateSectionId,{eyebrow:string;title:string;description:string;buttonLabel:string;alignment:'left'|'center'|'right'}>;
 const DEFAULT_SECTION_SETTINGS:SectionSettings={
@@ -25,8 +26,8 @@ function normalizeSectionSettings(value:unknown):SectionSettings{
     return [id,{...defaults,...current,alignment:['left','center','right'].includes(String(current.alignment))?String(current.alignment) as 'left'|'center'|'right':defaults.alignment}];
   })) as SectionSettings;
 }
-type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;portada_efecto:string;pantalla_bienvenida:boolean;texto_bienvenida:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;section_order:TemplateSectionId[];mostrar_intro:boolean;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean;section_settings:SectionSettings};
-const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',portada_efecto:'cinematic-zoom',pantalla_bienvenida:true,texto_bienvenida:'Abrir invitación',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',section_order:[...DEFAULT_TEMPLATE_SECTION_ORDER],mostrar_intro:true,mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true,section_settings:normalizeSectionSettings(null)};
+type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;portada_efecto:string;pantalla_bienvenida:boolean;texto_bienvenida:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;theme_id:string;section_order:TemplateSectionId[];mostrar_intro:boolean;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean;section_settings:SectionSettings};
+const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',portada_efecto:'cinematic-zoom',pantalla_bienvenida:true,texto_bienvenida:'Abrir invitación',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',theme_id:'elegant-classic',section_order:[...DEFAULT_TEMPLATE_SECTION_ORDER],mostrar_intro:true,mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true,section_settings:normalizeSectionSettings(null)};
 const DEMO_CONTENT={
   portada_url:'/demo/portada-boda.jpg',
   galeria_urls:[
@@ -82,7 +83,7 @@ useEffect(()=>{
   setModal(true);
   window.history.replaceState({},'',window.location.pathname);
 },[eventos]);
-function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),portada_efecto:designValue(x,'portada_efecto','cinematic-zoom'),pantalla_bienvenida:d.pantalla_bienvenida!==false,texto_bienvenida:designValue(x,'texto_bienvenida','Abrir invitación'),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',section_order:normalizeTemplateSectionOrder(d.section_order),mostrar_intro:d.mostrar_intro!==false,mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false,section_settings:normalizeSectionSettings(d.section_settings)});setError('');setModal(true)}
+function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),portada_efecto:designValue(x,'portada_efecto','cinematic-zoom'),pantalla_bienvenida:d.pantalla_bienvenida!==false,texto_bienvenida:designValue(x,'texto_bienvenida','Abrir invitación'),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',theme_id:typeof d.theme_id==='string'?d.theme_id:'elegant-classic',section_order:normalizeTemplateSectionOrder(d.section_order),mostrar_intro:d.mostrar_intro!==false,mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false,section_settings:normalizeSectionSettings(d.section_settings)});setError('');setModal(true)}
 
 function loadDemoContent(){
   setForm(current=>({
@@ -201,7 +202,7 @@ async function handleAudio(file?:File){
   catch(e){setError(messageFromError(e))}
   finally{setUploading(null)}
 }
-async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:5,componentes:[],section_order:form.section_order,section_settings:form.section_settings,mostrar_intro:form.mostrar_intro,plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,portada_efecto:form.portada_efecto,pantalla_bienvenida:form.pantalla_bienvenida,texto_bienvenida:form.texto_bienvenida.trim()||'Abrir invitación',galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
+async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:6,componentes:[],theme_id:form.theme_id,section_order:form.section_order,section_settings:form.section_settings,mostrar_intro:form.mostrar_intro,plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,portada_efecto:form.portada_efecto,pantalla_bienvenida:form.pantalla_bienvenida,texto_bienvenida:form.texto_bienvenida.trim()||'Abrir invitación',galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
 async function changeStatus(x:Invitacion,estado:Invitacion['estado']){const r=await supabase.from('invitaciones').update({estado,fecha_publicacion:estado==='publicada'?(x.fecha_publicacion??new Date().toISOString()):x.fecha_publicacion}).eq('id',x.id);if(r.error)setError(messageFromError(r.error));else{await load();setEditing(current=>current?.id===x.id?{...current,estado}:current)}}
 async function toggle(x:Invitacion){await changeStatus(x,x.estado==='publicada'?'pausada':'publicada')}
 async function ensureReviewLink(x:Invitacion){setReviewBusy(true);setError('');const token=x.review_token||crypto.randomUUID().replace(/-/g,'');const r=await supabase.from('invitaciones').update({review_token:token,review_enabled:true}).eq('id',x.id).select('*').single();setReviewBusy(false);if(r.error)return setError(messageFromError(r.error));const updated={...x,...r.data} as Invitacion;setReviewing(updated);setItems(current=>current.map(item=>item.id===updated.id?updated:item))}
@@ -547,6 +548,38 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                 </div>
               </div>
 
+              <div className="block-config-panel theme-studio-panel">
+                <div className="block-config-heading">
+                  <strong>Theme Studio</strong>
+                  <span>Aplica una identidad completa de colores, tipografía, botones y superficies con un solo clic.</span>
+                </div>
+                <div className="theme-studio-grid">
+                  {THEME_STUDIO_THEMES.map(theme=>{
+                    const active=form.theme_id===theme.id;
+                    return <button
+                      type="button"
+                      key={theme.id}
+                      className={`theme-studio-card ${active?'active':''}`}
+                      onClick={()=>setForm(current=>({...current,theme_id:theme.id,color_principal:theme.palette.primary}))}
+                      aria-pressed={active}
+                    >
+                      <span className="theme-studio-preview" style={{background:`linear-gradient(145deg, ${theme.palette.background} 0 54%, ${theme.palette.surface} 54% 100%)`}}>
+                        <i style={{background:theme.palette.primary}}/>
+                        <i style={{background:theme.palette.secondary}}/>
+                        <i style={{background:theme.palette.text}}/>
+                      </span>
+                      <span className="theme-studio-copy"><small>{theme.collection}</small><strong>{theme.name}</strong><em>{theme.description}</em></span>
+                      <span className="theme-studio-check">{active?'✓':'Aplicar'}</span>
+                    </button>
+                  })}
+                </div>
+                <div className="theme-studio-current">
+                  <span>Tema activo</span>
+                  <strong>{resolveThemeStudio(form.theme_id).name}</strong>
+                  <small>Se guardará dentro de design_json.theme_id.</small>
+                </div>
+              </div>
+
               <div className="block-config-panel section-structure-panel">
                 <div className="block-config-heading">
                   <strong>Estructura de la invitación</strong>
@@ -622,7 +655,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
               <span>Vista previa</span>
               <small>Celular</small>
             </div>
-            <div className={`preview-phone admin-template-preview theme-${form.plantilla}`}>
+            <div data-theme-studio={form.theme_id} className={`preview-phone admin-template-preview theme-${form.plantilla} theme-studio-${form.theme_id}`} style={themeStudioStyle(resolveThemeStudio(form.theme_id))}>
               <div className="preview-phone-notch"/>
               <div className="preview-cover" style={{backgroundImage:form.portada_url?`linear-gradient(rgba(20,15,12,.36),rgba(20,15,12,.58)), url("${form.portada_url}")`:`linear-gradient(160deg, ${form.color_principal}, #211913)`,backgroundSize:'cover',backgroundPosition:'center'}}>
                 <span className="preview-template">{form.plantilla}</span>
