@@ -59,6 +59,7 @@ export default function PersonalizedPassPage() {
   const [sent, setSent] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
   const [countdown, setCountdown] = useState({
     days: '--',
     hours: '--',
@@ -71,26 +72,88 @@ export default function PersonalizedPassPage() {
   useEffect(() => {
     let active = true;
 
-    supabase
-      .rpc('obtener_invitacion_publica', {
-        p_slug: params.slug,
-        p_codigo: params.codigo,
-      })
-      .then(({ data: response, error: responseError }) => {
-        if (!active) return;
+    async function loadPass() {
+      const preview = new URLSearchParams(window.location.search).get('preview') === '1';
+      setPreviewMode(preview);
 
-        if (responseError || !response) {
-          setError('Pase no encontrado o invitación no disponible.');
-        } else {
-          const loaded = response as PassData;
-          setData(loaded);
-          setAdults(Math.min(1, loaded.invitado.adultos_permitidos));
-          setChildren(0);
+      if (preview) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) {
+          if (active) {
+            setError('Inicia sesión para abrir la vista previa administrativa.');
+            setLoading(false);
+          }
+          return;
         }
 
-        setLoading(false);
-      });
+        const { data: invitation, error: invitationError } = await supabase
+          .from('invitaciones')
+          .select('id,titulo,slug,modalidad,design_json,color_principal,musica_url,whatsapp,eventos(nombre,fecha,hora,tipo,lugar,direccion,maps_url)')
+          .eq('slug', params.slug)
+          .maybeSingle();
 
+        if (!active) return;
+        if (invitationError || !invitation) {
+          setError('No fue posible cargar la invitación para vista previa.');
+          setLoading(false);
+          return;
+        }
+
+        const { data: guest, error: guestError } = await supabase
+          .from('invitados')
+          .select('id,nombre,adultos_permitidos,ninos_permitidos,mesa,codigo,estado')
+          .eq('invitacion_id', invitation.id)
+          .eq('codigo', params.codigo)
+          .maybeSingle();
+
+        if (!active) return;
+        const event = Array.isArray(invitation.eventos) ? invitation.eventos[0] : invitation.eventos;
+        if (guestError || !guest || !event) {
+          setError('No fue posible cargar este pase para vista previa.');
+          setLoading(false);
+          return;
+        }
+
+        const loaded = {
+          invitacion: {
+            id: invitation.id,
+            titulo: invitation.titulo,
+            slug: invitation.slug,
+            modalidad: invitation.modalidad,
+            design_json: invitation.design_json || {},
+            color_principal: invitation.color_principal,
+            musica_url: invitation.musica_url,
+            whatsapp: invitation.whatsapp,
+          },
+          evento: event,
+          invitado: guest,
+        } as PassData;
+
+        setData(loaded);
+        setAdults(Math.min(1, loaded.invitado.adultos_permitidos));
+        setChildren(0);
+        setLoading(false);
+        return;
+      }
+
+      const { data: response, error: responseError } = await supabase.rpc(
+        'obtener_invitacion_publica',
+        { p_slug: params.slug, p_codigo: params.codigo }
+      );
+
+      if (!active) return;
+      if (responseError || !response) {
+        setError('Pase no encontrado o invitación no disponible.');
+      } else {
+        const loaded = response as PassData;
+        setData(loaded);
+        setAdults(Math.min(1, loaded.invitado.adultos_permitidos));
+        setChildren(0);
+      }
+      setLoading(false);
+    }
+
+    void loadPass();
     return () => {
       active = false;
     };
@@ -241,6 +304,12 @@ export default function PersonalizedPassPage() {
         } as React.CSSProperties
       }
     >
+      {previewMode && (
+        <div className="admin-preview-banner">
+          <strong>Vista previa administrativa</strong>
+          <span>Este pase puede revisarse aunque la invitación esté en borrador.</span>
+        </div>
+      )}
       {welcomeEnabled && !opened && (
         <section className={`invitation-opening-screen personalized-opening effect-${coverEffect}`}>
           <div

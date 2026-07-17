@@ -16,6 +16,9 @@ export type TemplateEngineDefinition = {
   layout: 'classic' | 'editorial' | 'immersive' | 'playful' | 'business';
   typography: 'serif' | 'editorial' | 'rounded' | 'modern';
   decoration: 'ornamental' | 'botanical' | 'sparkle' | 'geometric' | 'cosmic' | 'none';
+  hero: 'framed' | 'full-bleed' | 'split' | 'poster' | 'clean';
+  motion: 'soft' | 'cinematic' | 'dynamic' | 'minimal';
+  radius: 'soft' | 'rounded' | 'square';
   palette: {
     primary: string;
     secondary: string;
@@ -67,9 +70,26 @@ const definitions: Record<string, Omit<TemplateEngineDefinition, 'id' | 'section
 
 export function resolveTemplateEngine(id: string, customPrimary?: string | null): TemplateEngineDefinition {
   const base = definitions[id] || definitions['elegante-classic'];
+  const resolvedId = definitions[id] ? id : 'elegante-classic';
+  const hero: TemplateEngineDefinition['hero'] =
+    base.layout === 'immersive' ? 'full-bleed' :
+    base.layout === 'editorial' ? 'split' :
+    base.layout === 'playful' ? 'poster' :
+    base.layout === 'business' ? 'clean' : 'framed';
+  const motion: TemplateEngineDefinition['motion'] =
+    base.layout === 'immersive' ? 'cinematic' :
+    base.layout === 'playful' ? 'dynamic' :
+    base.layout === 'business' || base.layout === 'editorial' ? 'minimal' : 'soft';
+  const radius: TemplateEngineDefinition['radius'] =
+    base.layout === 'playful' ? 'rounded' :
+    base.layout === 'editorial' || base.layout === 'business' ? 'square' : 'soft';
+
   return {
     ...base,
-    id: definitions[id] ? id : 'elegante-classic',
+    id: resolvedId,
+    hero,
+    motion,
+    radius,
     sectionOrder: base.sectionOrder || defaultOrder,
     palette: {
       ...base.palette,
@@ -87,5 +107,6 @@ export function templateEngineStyle(definition: TemplateEngineDefinition): React
     '--template-surface': definition.palette.surface,
     '--template-text': definition.palette.text,
     '--template-muted': definition.palette.muted,
+    '--template-radius': definition.radius === 'rounded' ? '32px' : definition.radius === 'square' ? '4px' : '18px',
   } as React.CSSProperties;
 }
