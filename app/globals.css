@@ -4012,3 +4012,228 @@ a { color: inherit; }
     min-width: 0;
   }
 }
+
+/* InvitaPro v1.16.0 — duplicar invitaciones */
+.invitation-action-secondary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.action-duplicate{color:#5f3dc4}
+.action-duplicate:hover:not(:disabled){background:#f7f4ff}
+.invite-secondary-action:disabled{opacity:.55;cursor:wait}
+.invitation-notice{position:fixed;right:24px;bottom:24px;z-index:80;max-width:min(420px,calc(100vw - 48px));margin:0;padding:13px 16px;border:1px solid #bfe4cd;border-radius:14px;background:#f2fbf5;color:#12663b;box-shadow:0 14px 38px rgba(31,93,57,.16);font-weight:800}
+@media(max-width:760px){.invitation-action-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}.invite-secondary-action:nth-child(2){border-right:0}.invite-secondary-action:nth-child(-n+2){border-bottom:1px solid #ece7e2}.invitation-notice{right:16px;bottom:16px;max-width:calc(100vw - 32px)}}
+/* v1.16.1 — Acciones consistentes en tablas administrativas */
+.centered-data-table th.table-center,
+.centered-data-table td.table-center {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.centered-data-table td.table-center > span,
+.centered-data-table td.table-center > strong {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.table-action-group {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(86px, 1fr));
+  gap: 8px;
+  justify-content: center;
+  align-items: stretch;
+  margin-inline: auto;
+}
+
+.table-action-group-wide {
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+}
+
+.table-action-group-single {
+  grid-template-columns: minmax(92px, 1fr);
+}
+
+.table-action-button {
+  min-height: 58px;
+  padding: 9px 12px;
+  border: 1px solid #e8dfd7;
+  border-radius: 13px;
+  background: #fff;
+  color: #6f5d50;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 700;
+  line-height: 1.08;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.table-action-button svg {
+  flex: 0 0 auto;
+}
+
+.table-action-button:hover {
+  transform: translateY(-1px);
+  border-color: #cfb9a7;
+  background: #fffaf6;
+}
+
+.table-action-button:focus-visible {
+  outline: 3px solid rgba(166, 103, 58, .2);
+  outline-offset: 2px;
+}
+
+.table-action-button.action-preview { color: #1269df; }
+.table-action-button.action-share { color: #129552; }
+.table-action-button.action-edit { color: #6e32e5; }
+.table-action-button.action-delete { color: #dc2638; }
+
+.clients-table th:last-child,
+.clients-table td:last-child {
+  width: 220px;
+}
+
+@media (max-width: 1050px) {
+  .table-action-group,
+  .table-action-group-wide {
+    grid-template-columns: repeat(2, minmax(82px, 1fr));
+  }
+}
+
+/* v1.16.3 — Normaliza los iconos de las acciones secundarias */
+.invitation-library-card .invite-secondary-action {
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.invitation-library-card .invite-secondary-action svg {
+  display: block;
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px;
+  min-height: 17px;
+  max-width: 17px;
+  max-height: 17px;
+  flex: 0 0 17px;
+  overflow: visible;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.invitation-library-card .invite-secondary-action span {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.invitation-library-card .action-publish { color: #15945a; }
+.invitation-library-card .action-pause { color: #e76f18; }
+.invitation-library-card .action-duplicate { color: #6842c2; }
+.invitation-library-card .action-archive { color: #687381; }
+.invitation-library-card .action-delete { color: #e52d43; }
+
+@media (max-width: 760px) {
+  .invitation-library-card .invite-secondary-action svg {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+    flex-basis: 16px;
+  }
+}
+
+/* v1.16.4 — Barra secundaria proporcionada y perfectamente centrada */
+.invitation-library-card .invitation-action-secondary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  width: 100%;
+  min-width: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Cuando existe la acción Duplicar, distribuye las cuatro opciones por igual. */
+.invitation-library-card .invitation-action-secondary:has(> :nth-child(4)) {
+  grid-template-columns: repeat(4, minmax(78px, 1fr));
+}
+
+.invitation-library-card .invite-secondary-action {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 54px;
+  padding: 7px 5px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: visible;
+  text-align: center;
+  line-height: 1;
+}
+
+.invitation-library-card .invite-secondary-action svg {
+  display: block;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px;
+  min-height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  flex: 0 0 18px;
+  margin: 0 auto;
+}
+
+.invitation-library-card .invite-secondary-action span {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10.5px;
+  line-height: 1.1;
+}
+
+/* Evita que una regla antigua agregue bordes incorrectos en la cuadrícula. */
+.invitation-library-card .invite-secondary-action {
+  border-right: 1px solid #ece7e2;
+  border-bottom: 0;
+}
+
+.invitation-library-card .invite-secondary-action:last-child {
+  border-right: 0;
+}
+
+@media (max-width: 760px) {
+  .invitation-library-card .invitation-action-secondary,
+  .invitation-library-card .invitation-action-secondary:has(> :nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(104px, 1fr));
+  }
+
+  .invitation-library-card .invite-secondary-action {
+    min-height: 52px;
+    border-bottom: 1px solid #ece7e2;
+  }
+
+  .invitation-library-card .invite-secondary-action:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .invitation-library-card .invite-secondary-action:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
