@@ -233,3 +233,9 @@
 - Las invitaciones públicas se cargan mediante funciones SQL seguras.
 - RSVP público y pases personalizados guardan las respuestas directamente en Supabase.
 - Se elimina el uso operativo de localStorage en los módulos principales.
+
+## 1.10.0 - Configuración comercial
+- Nuevo módulo de configuración con secciones General, Marca y WhatsApp.
+- Preferencias persistentes por usuario mediante la tabla `configuracion`.
+- Mensajes de interfaz orientados al usuario, sin referencias visibles a la infraestructura.
+- Limpieza de archivos temporales y respaldos locales.

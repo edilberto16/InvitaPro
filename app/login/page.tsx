@@ -38,7 +38,7 @@ export default function LoginPage() {
     <main className="login-page">
       <section className="login-card">
         <div className="login-brand"><span>IP</span><div><strong>InvitaPro</strong><small>Administración de eventos</small></div></div>
-        <div className="login-heading"><p className="eyebrow">Acceso seguro</p><h1>Iniciar sesión</h1><p>Ingresa con el usuario administrador creado en Supabase.</p></div>
+        <div className="login-heading"><p className="eyebrow">Acceso seguro</p><h1>Iniciar sesión</h1><p>Ingresa con tus credenciales de administrador.</p></div>
         <form className="login-form" onSubmit={iniciarSesion}>
           <label>Correo electrónico<input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} required autoComplete="email" placeholder="admin@invitapro.mx" /></label>
           <label>Contraseña<input type="password" value={contrasena} onChange={(e) => setContrasena(e.target.value)} required autoComplete="current-password" placeholder="••••••••" /></label>
