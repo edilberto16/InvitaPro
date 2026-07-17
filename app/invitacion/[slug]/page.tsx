@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';
+import { FormEvent,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';import { resolveTemplateEngine,templateEngineStyle } from '@/lib/template-engine';
 type PublicData={invitacion:{id:string;titulo:string;slug:string;modalidad:'simple'|'rsvp'|'pases';design_json:Record<string,unknown>;color_principal:string|null;musica_url:string|null;whatsapp:string|null;fecha_expiracion:string|null};evento:{nombre:string;tipo:string;fecha:string;hora:string|null;zona_horaria:string;lugar:string|null;direccion:string|null;maps_url:string|null};invitado:null};
 function longDate(v:string){return new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${v}T00:00:00Z`))}
 export default function PublicInvite(){const params=useParams<{slug:string}>();const supabase=useMemo(()=>createClient(),[]);const[data,setData]=useState<PublicData|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState('');const[name,setName]=useState('');const[phone,setPhone]=useState('');const[attendance,setAttendance]=useState(true);const[adults,setAdults]=useState(1);const[children,setChildren]=useState(0);const[message,setMessage]=useState('');const[sent,setSent]=useState(false);const[countdown,setCountdown]=useState({days:'--',hours:'--',minutes:'--',ended:false,invalid:false});const[previewMode,setPreviewMode]=useState(false);const[opened,setOpened]=useState(false);const[audioPlaying,setAudioPlaying]=useState(false);const audioRef=useRef<HTMLAudioElement|null>(null);
@@ -16,7 +16,7 @@ if(loading)return <main className="public-invite-loading">Preparando invitación
 if(!data)return <main className="public-invite-error"><h1>Invitación no disponible</h1><p>{error}</p></main>;
 
 const design=data.invitacion.design_json||{};
-const plantilla=String(design.plantilla||'elegante');
+const plantilla=String(design.plantilla||'elegante-classic');const templateEngine=resolveTemplateEngine(plantilla,data.invitacion.color_principal);
 const intro=String(design.mensaje||'Será un honor contar con tu presencia.');
 const subtitle=String(design.subtitulo||'Queremos compartir contigo este momento');
 const dress=String(design.vestimenta||'Libre');
@@ -40,7 +40,7 @@ const calendarStart=`${data.evento.fecha.replaceAll('-','')}T${(data.evento.hora
 const calendarEnd=`${data.evento.fecha.replaceAll('-','')}T${String(Number((data.evento.hora||'00:00').slice(0,2))+2).padStart(2,'0')}${(data.evento.hora||'00:00').slice(3,5)}00`;
 const calendarUrl=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(data.invitacion.titulo)}&dates=${calendarStart}/${calendarEnd}&details=${encodeURIComponent(intro)}&location=${encodeURIComponent([data.evento.lugar,data.evento.direccion].filter(Boolean).join(', '))}`;
 
-return <main className={`premium-public-invite theme-${plantilla} ${opened||!welcomeEnabled?'invitation-opened':'invitation-locked'}`} style={{'--invite-color':data.invitacion.color_principal||'#8f5c38'} as React.CSSProperties}>
+return <main data-template={templateEngine.id} data-family={templateEngine.family} data-layout={templateEngine.layout} data-typography={templateEngine.typography} data-decoration={templateEngine.decoration} className={`premium-public-invite template-engine theme-${templateEngine.id} layout-${templateEngine.layout} typography-${templateEngine.typography} decoration-${templateEngine.decoration} ${opened||!welcomeEnabled?'invitation-opened':'invitation-locked'}`} style={templateEngineStyle(templateEngine)}>
   {previewMode&&<div className="admin-preview-banner"><strong>Vista previa administrativa</strong><span>{data.invitacion.modalidad==='pases'?'Los invitados abrirán un enlace personalizado con su código.':'Esta vista no está publicada para invitados.'}</span></div>}
   {welcomeEnabled&&!opened&&<section className={`invitation-opening-screen effect-${coverEffect}`}>
     <div className="opening-screen-background" style={coverUrl?{backgroundImage:`url("${coverUrl}")`}:undefined}/>

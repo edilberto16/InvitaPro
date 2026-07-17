@@ -2925,3 +2925,549 @@ a { color: inherit; }
 .theme-networking .premium-detail-grid article{border-radius:18px;border:1px solid #c8d8e2;box-shadow:0 12px 30px rgba(35,73,94,.08)}
 
 @keyframes invite-float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-18px) rotate(8deg)}}
+
+/* ================================================================
+   InvitaPro v1.13.0 · Premium Template Engine
+   Variables compartidas para que cada plantilla tenga identidad propia.
+   ================================================================ */
+.template-engine {
+  --template-primary: var(--invite-color, #9a6845);
+  --template-secondary: #d8c3aa;
+  --template-background: #fbf7f1;
+  --template-surface: #fff;
+  --template-text: #33271f;
+  --template-muted: #77685c;
+  background: var(--template-background);
+  color: var(--template-text);
+}
+.template-engine .premium-intro-block,
+.template-engine .premium-countdown-section,
+.template-engine .premium-details-section,
+.template-engine .premium-program-section,
+.template-engine .premium-gallery-section,
+.template-engine .premium-location-section,
+.template-engine .premium-rsvp-section {
+  background-color: var(--template-background);
+  color: var(--template-text);
+}
+.template-engine .premium-details-card,
+.template-engine .premium-program-card,
+.template-engine .premium-location-card,
+.template-engine .premium-rsvp-card,
+.template-engine .premium-gallery-item {
+  background-color: var(--template-surface);
+  color: var(--template-text);
+}
+.template-engine .premium-kicker,
+.template-engine .premium-section-kicker,
+.template-engine .premium-countdown-number,
+.template-engine .premium-details-icon,
+.template-engine .premium-program-time {
+  color: var(--template-primary);
+}
+.template-engine .premium-section-copy,
+.template-engine .premium-intro-block p,
+.template-engine .premium-details-card p,
+.template-engine .premium-program-card p {
+  color: var(--template-muted);
+}
+.template-engine .premium-hero-date i,
+.template-engine .premium-section-divider,
+.template-engine .premium-rsvp-button,
+.template-engine .premium-location-button {
+  background-color: var(--template-primary);
+}
+.template-engine.typography-serif h1,
+.template-engine.typography-serif h2,
+.template-engine.typography-serif h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: .01em;
+}
+.template-engine.typography-editorial h1,
+.template-engine.typography-editorial h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+}
+.template-engine.typography-rounded h1,
+.template-engine.typography-rounded h2,
+.template-engine.typography-rounded h3 {
+  font-family: ui-rounded, 'Trebuchet MS', system-ui, sans-serif;
+  letter-spacing: .01em;
+}
+.template-engine.typography-modern h1,
+.template-engine.typography-modern h2,
+.template-engine.typography-modern h3 {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -.02em;
+}
+.template-engine.layout-editorial .premium-intro-block > div,
+.template-engine.layout-editorial .premium-details-section > div,
+.template-engine.layout-editorial .premium-gallery-section > div {
+  max-width: 1180px;
+}
+.template-engine.layout-editorial .premium-hero-content {
+  text-align: left;
+  align-items: flex-start;
+}
+.template-engine.layout-business .premium-hero-content h1,
+.template-engine.layout-business .premium-section-heading h2 {
+  font-weight: 700;
+}
+.template-engine.layout-playful .premium-details-card,
+.template-engine.layout-playful .premium-program-card,
+.template-engine.layout-playful .premium-location-card {
+  border-radius: 28px;
+}
+.template-engine.layout-playful .premium-rsvp-button,
+.template-engine.layout-playful .premium-location-button {
+  border-radius: 999px;
+}
+.template-engine.layout-immersive .premium-hero {
+  min-height: 100svh;
+}
+.template-engine.decoration-geometric .premium-hero-decoration {
+  border-radius: 18px;
+  transform: rotate(20deg);
+}
+.template-engine.decoration-sparkle .premium-hero::after,
+.template-engine.decoration-cosmic .premium-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255,255,255,.8) 0 1px, transparent 1.8px);
+  background-size: 42px 42px;
+  opacity: .22;
+}
+.template-engine.decoration-botanical .premium-intro-block::before {
+  content: '❧';
+  display: block;
+  text-align: center;
+  color: var(--template-primary);
+  font-size: 2rem;
+  padding-top: 1rem;
+}
+.template-engine[data-family='empresarial'] .premium-invite-label {
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: .78rem;
+}
+
+/* =========================================================
+   v1.13.1 — Restauración de Configuración CMS
+   Mantiene los estilos del administrador aislados del motor
+   visual de invitaciones.
+   ========================================================= */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.settings-tabs {
+  display: grid;
+  gap: .55rem;
+  position: sticky;
+  top: 1.25rem;
+}
+
+.settings-tabs button {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  width: 100%;
+  padding: .85rem;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  text-align: left;
+  color: #686176;
+  cursor: pointer;
+  transition: .2s ease;
+  font: inherit;
+}
+
+.settings-tabs button > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #f1eef8;
+  font-size: 1rem;
+}
+
+.settings-tabs button div {
+  display: grid;
+  gap: .12rem;
+}
+
+.settings-tabs button strong {
+  font-size: .9rem;
+  color: #302a3c;
+}
+
+.settings-tabs button small {
+  font-size: .72rem;
+}
+
+.settings-tabs button:hover,
+.settings-tabs button.active {
+  background: #fff;
+  border-color: #e5dff2;
+  box-shadow: 0 10px 30px rgba(45, 33, 82, .08);
+}
+
+.settings-tabs button.active > span {
+  background: #9b6039;
+  color: #fff;
+}
+
+.settings-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.settings-card > header {
+  padding: 1.7rem 1.8rem 1.25rem;
+  border-bottom: 1px solid #eeeaf4;
+}
+
+.settings-card > header h2 {
+  margin: .2rem 0 .35rem;
+  font-size: 1.35rem;
+}
+
+.settings-card > header p:last-child {
+  margin: 0;
+  color: #766f80;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+  padding: 1.6rem 1.8rem;
+}
+
+.settings-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.settings-grid label {
+  display: grid;
+  gap: .45rem;
+  color: #433d4e;
+  font-size: .83rem;
+  font-weight: 650;
+}
+
+.settings-grid input,
+.settings-grid select,
+.settings-grid textarea {
+  width: 100%;
+  border: 1px solid #ded9e8;
+  border-radius: 11px;
+  background: #fff;
+  padding: .78rem .85rem;
+  color: #26212f;
+  font: inherit;
+  font-weight: 450;
+  outline: none;
+  transition: .2s;
+}
+
+.settings-grid input:focus,
+.settings-grid select:focus,
+.settings-grid textarea:focus {
+  border-color: #9b6039;
+  box-shadow: 0 0 0 3px rgba(155, 96, 57, .12);
+}
+
+.settings-grid label > small {
+  font-weight: 400;
+  color: #898293;
+}
+
+.color-input {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: .55rem;
+}
+
+.color-input input[type='color'] {
+  padding: .25rem;
+  height: 44px;
+}
+
+.brand-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 285px;
+  align-items: stretch;
+}
+
+.brand-settings .settings-grid {
+  grid-template-columns: 1fr;
+}
+
+.brand-preview {
+  margin: 1.6rem 1.8rem 1.6rem 0;
+  min-height: 360px;
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 22px 45px rgba(39, 27, 72, .2);
+}
+
+.brand-preview > span {
+  position: absolute;
+  transform: translateY(-145px);
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  opacity: .7;
+}
+
+.brand-preview img {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .92);
+  padding: .55rem;
+}
+
+.brand-preview-mark {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .3);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.brand-preview strong {
+  margin-top: 1rem;
+  font-size: 1.35rem;
+}
+
+.brand-preview small {
+  margin-top: .2rem;
+  opacity: .72;
+}
+
+.brand-preview button {
+  margin-top: 1.4rem;
+  border: 0;
+  border-radius: 10px;
+  padding: .7rem 1rem;
+  background: #fff;
+  color: #2c2442;
+  font-weight: 700;
+}
+
+.variable-chips {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  padding: .85rem;
+  border-radius: 12px;
+  background: #f7f5fb;
+}
+
+.variable-chips span {
+  font-size: .78rem;
+  color: #777083;
+}
+
+.variable-chips code {
+  padding: .35rem .5rem;
+  border-radius: 7px;
+  background: #fff;
+  border: 1px solid #e5dfef;
+  color: #8a542f;
+}
+
+.settings-feedback {
+  margin: 0 1.8rem 1rem;
+}
+
+.form-success {
+  padding: .8rem 1rem;
+  border-radius: 10px;
+  background: #edf9f2;
+  color: #18754a;
+  font-size: .85rem;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  padding: 1.15rem 1.8rem;
+  border-top: 1px solid #eeeaf4;
+  background: #fbfafc;
+}
+
+@media (max-width: 900px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-tabs {
+    position: static;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .settings-tabs button {
+    justify-content: center;
+  }
+
+  .settings-tabs button div small {
+    display: none;
+  }
+
+  .brand-settings {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-preview {
+    margin: 0 1.8rem 1.6rem;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 620px) {
+  .settings-heading {
+    align-items: flex-start;
+  }
+
+  .settings-status {
+    display: none;
+  }
+
+  .settings-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-tabs button {
+    justify-content: flex-start;
+  }
+
+  .settings-tabs button div small {
+    display: block;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+  }
+
+  .settings-card > header {
+    padding: 1.35rem 1.25rem 1rem;
+  }
+
+  .settings-actions {
+    padding: 1rem 1.25rem;
+    flex-direction: column-reverse;
+  }
+
+  .settings-actions .button {
+    width: 100%;
+  }
+
+  .brand-preview {
+    margin: 0 1.25rem 1.25rem;
+  }
+
+  .settings-feedback {
+    margin: 0 1.25rem 1rem;
+  }
+}
+
+/* =========================================================
+   v1.13.2 — Restauración definitiva de Configuración
+   Estas reglas corresponden exactamente al markup actual.
+   ========================================================= */
+.settings-page { gap: 28px; }
+.settings-page-heading { padding-top: 2px; }
+.settings-page-heading .eyebrow { margin: 0 0 7px; color: #8d542f; text-transform: uppercase; letter-spacing: .11em; font-size: 12px; font-weight: 850; }
+.settings-page-heading h1 { color: #202033; font-size: clamp(36px, 4vw, 48px); line-height: 1; }
+.settings-page-heading p:not(.eyebrow) { max-width: 720px; font-size: 17px; line-height: 1.55; }
+
+.settings-page .settings-layout { grid-template-columns: 330px minmax(0, 1fr); gap: 20px; }
+.settings-page .settings-tabs { padding: 15px; border: 1px solid var(--admin-border, #e6ded7); border-radius: 18px; background: #fff; box-shadow: 0 8px 28px rgba(56, 40, 28, .045); }
+.settings-page .settings-tabs button { min-height: 78px; padding: 12px 14px; border-radius: 13px; gap: 14px; color: #292638; }
+.settings-page .settings-tabs button:hover { background: #faf7f4; border-color: transparent; box-shadow: none; }
+.settings-page .settings-tabs button.active { background: linear-gradient(100deg, #f7f0e9, #fbf9f7); border-color: transparent; box-shadow: none; }
+.settings-page .settings-tabs button > span.settings-tab-icon { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; border-radius: 11px; color: #fff; font-size: 25px; font-weight: 900; box-shadow: 0 8px 17px rgba(38, 29, 22, .16); }
+.settings-page .settings-tab-icon-brown { background: linear-gradient(145deg, #ad6b3d, #824318) !important; }
+.settings-page .settings-tab-icon-purple { background: linear-gradient(145deg, #7264d9, #4936a8) !important; }
+.settings-page .settings-tab-icon-green { background: linear-gradient(145deg, #18ad61, #078b47) !important; }
+.settings-page .settings-tab-copy { display: grid !important; place-items: initial !important; width: auto !important; height: auto !important; flex: 1 !important; gap: 4px; border-radius: 0 !important; background: transparent !important; }
+.settings-page .settings-tab-copy strong { color: #222033; font-size: 16px; line-height: 1.15; }
+.settings-page .settings-tab-copy small { color: #6f6871; font-size: 13px; line-height: 1.25; }
+
+.settings-page .settings-card { display: block; min-width: 0; border-radius: 18px; }
+.settings-page .settings-card-header { padding: 26px 32px 10px; border: 0; }
+.settings-page .settings-card-header h2 { margin: 0 0 6px; color: #202033; font-size: 23px; }
+.settings-page .settings-card-header p { margin: 0; color: #726a67; font-size: 14px; }
+.settings-page .settings-grid { padding: 20px 32px 26px; gap: 18px 20px; }
+.settings-page .settings-grid label { color: #222033; font-size: 14px; font-weight: 800; }
+.settings-page .settings-grid input,
+.settings-page .settings-grid select,
+.settings-page .settings-grid textarea { min-height: 56px; border-color: #dcd3cb; border-radius: 11px; padding: 14px 16px; color: #17151d; font-size: 15px; background: #fff; }
+.settings-page .settings-grid textarea { min-height: 128px; resize: vertical; }
+.settings-page .settings-field-full { grid-column: 1 / -1; }
+.settings-page .settings-feedback { padding-top: 2px; }
+
+.settings-page .settings-actions { align-items: center; justify-content: space-between; gap: 22px; min-height: 96px; padding: 18px 32px; background: #fcfaf8; }
+.settings-page .settings-note { display: flex; align-items: center; gap: 13px; min-width: 0; color: #3d3734; }
+.settings-page .settings-note > span { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; border-radius: 50%; background: #f0dfcc; color: #92572f; font-family: Georgia, serif; font-weight: 800; }
+.settings-page .settings-note p { margin: 0; max-width: 520px; font-size: 14px; line-height: 1.5; }
+.settings-page .settings-save { display: inline-flex; align-items: center; justify-content: center; gap: 9px; flex: 0 0 auto; min-width: 184px; min-height: 52px; border-radius: 11px; background: linear-gradient(135deg, #a76233, #854719); box-shadow: 0 10px 22px rgba(137, 73, 29, .18); }
+.settings-page .settings-save:hover { transform: translateY(-1px); }
+.settings-page .settings-save:disabled { opacity: .65; cursor: wait; transform: none; }
+
+.settings-page .brand-settings { grid-template-columns: minmax(0, 1fr) 300px; }
+.settings-page .brand-preview { position: relative; margin: 20px 32px 26px 0; min-height: 410px; }
+.settings-page .brand-preview > span { top: 20px; transform: none; }
+.settings-page .brand-preview strong { display: block; }
+.settings-page .form-error { margin: 0; padding: 12px 14px; border-radius: 10px; color: #a2322c; background: #fff1ef; }
+
+@media (max-width: 1080px) {
+  .settings-page .settings-layout { grid-template-columns: 265px minmax(0, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .settings-page .settings-layout { grid-template-columns: 1fr; }
+  .settings-page .settings-tabs { position: static; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .settings-page .settings-tabs button { min-height: 72px; padding: 10px; }
+  .settings-page .settings-tab-copy small { display: none; }
+  .settings-page .brand-settings { grid-template-columns: 1fr; }
+  .settings-page .brand-preview { margin: 0 24px 24px; min-height: 280px; }
+}
+
+@media (max-width: 640px) {
+  .settings-page { gap: 20px; }
+  .settings-page .settings-tabs { grid-template-columns: 1fr; padding: 10px; }
+  .settings-page .settings-tab-copy small { display: block; }
+  .settings-page .settings-card-header { padding: 22px 20px 8px; }
+  .settings-page .settings-grid { grid-template-columns: 1fr; padding: 18px 20px 22px; }
+  .settings-page .settings-field-full { grid-column: auto; }
+  .settings-page .settings-actions { align-items: stretch; flex-direction: column; padding: 18px 20px; }
+  .settings-page .settings-save { width: 100%; }
+  .settings-page .brand-preview { margin: 0 20px 22px; }
+}
