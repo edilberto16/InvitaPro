@@ -3761,3 +3761,24 @@ a { color: inherit; }
 .action-delete{color:#d62f3e}.action-delete:hover{background:#fff4f5}
 @media(max-width:1250px){.invitation-table{min-width:1120px}.invitation-table th:last-child,.invitation-actions-cell{width:350px;min-width:350px}.invitation-action-panel{max-width:335px}.invitation-action-primary{grid-template-columns:repeat(4,minmax(70px,1fr))}.invite-action-button{padding-inline:4px}}
 @media(max-width:760px){.invitation-actions-cell{width:330px;min-width:330px}.invitation-action-panel{max-width:315px}.invite-action-button{min-height:58px;font-size:10px}.invitation-action-primary{gap:5px}.invite-secondary-action{font-size:10px;padding-inline:5px}}
+
+/* InvitaPro v1.15.2 — centra iconos y etiquetas de acciones */
+.invite-action-button {
+  text-align: center;
+}
+
+.invite-action-button > svg {
+  display: block;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-inline: auto;
+}
+
+.invite-action-button > span {
+  display: block;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  line-height: 1.15;
+}
