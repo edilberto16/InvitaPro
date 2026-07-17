@@ -31,6 +31,26 @@ function SparklesIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.2 3.4L16.5 8l-3.3 1.5L12 13l-1.2-3.5L7.5 8l3.3-1.6L12 3ZM5 14l.8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14Zm14-2 1 2.8 2.5 1.2-2.5 1.2L19 20l-1-2.8-2.5-1.2 2.5-1.2L19 12Z"/></svg>;
 }
 
+
+function PreviewArtwork({ template, large = false }: { template: TemplateDefinition; large?: boolean }) {
+  const label = collectionName(template);
+  return (
+    <div className={`template-artwork template-artwork-${template.layout} ${large ? 'is-large' : ''}`} aria-hidden="true">
+      <span className="art-shape art-shape-one" />
+      <span className="art-shape art-shape-two" />
+      <span className="art-shape art-shape-three" />
+      <span className="art-spark art-spark-one">✦</span>
+      <span className="art-spark art-spark-two">✧</span>
+      <span className="art-icon">
+        {template.layout === 'space' ? '🪐' : template.layout === 'dino' ? '🦖' : template.layout === 'unicorn' ? '🦄' : template.layout === 'safari' ? '🦁' : template.layout === 'hero' ? '⚡' : template.layout === 'butterfly' ? '🦋' : template.collection === 'empresarial' ? '◆' : template.collection === 'xv' ? '♕' : '❦'}
+      </span>
+      <span className="art-kicker">{label}</span>
+      <strong>{template.name}</strong>
+      <i />
+      <em>{template.collection === 'empresarial' ? 'Ideas que conectan' : template.collection === 'infantil' ? 'Una aventura inolvidable' : template.collection === 'xv' ? 'Mis quince años' : 'Nuestra historia'}</em>
+    </div>
+  );
+}
 function collectionName(template: TemplateDefinition) {
   return TEMPLATE_COLLECTIONS.find((item) => item.id === template.collection)?.label ?? template.collection;
 }
@@ -151,12 +171,7 @@ export default function PlantillasPage() {
                         <HeartIcon filled={isFavorite} />
                       </button>
                     </div>
-                    <div className="template-preview-stage">
-                      <small>Invitación digital</small>
-                      <strong>{template.name}</strong>
-                      <span className="template-preview-divider" />
-                      <em>Tu historia comienza aquí</em>
-                    </div>
+                    <PreviewArtwork template={template} />
                     <div className="template-card-badges">
                       {template.premium && <span className="premium"><SparklesIcon /> Premium</span>}
                       {NEW_IDS.has(template.id) && <span className="new">Nueva</span>}
@@ -189,11 +204,7 @@ export default function PlantillasPage() {
           <div className="template-preview-dialog">
             <button type="button" className="template-preview-close" aria-label="Cerrar vista previa" onClick={() => setSelectedTemplate(null)}>×</button>
             <div className={`template-preview-large theme-preview-${selectedTemplate.id}`}>
-              <span>{collectionName(selectedTemplate)}</span>
-              <small>Invitación digital</small>
-              <strong>{selectedTemplate.name}</strong>
-              <i />
-              <em>Una celebración inolvidable</em>
+              <PreviewArtwork template={selectedTemplate} large />
             </div>
             <div className="template-preview-details">
               <p className="eyebrow">Vista previa</p>
