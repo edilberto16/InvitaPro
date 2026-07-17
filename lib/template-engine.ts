@@ -41,7 +41,14 @@ const defaultOrder: TemplateSectionId[] = [
   'rsvp',
 ];
 
-const definitions: Record<string, Omit<TemplateEngineDefinition, 'id' | 'sectionOrder'> & { sectionOrder?: TemplateSectionId[] }> = {
+type TemplateEnginePreset = Omit<
+  TemplateEngineDefinition,
+  'id' | 'sectionOrder' | 'hero' | 'motion' | 'radius'
+> & {
+  sectionOrder?: TemplateSectionId[];
+};
+
+const definitions: Record<string, TemplateEnginePreset> = {
   'elegante-classic': { family:'wedding', layout:'classic', typography:'serif', decoration:'ornamental', palette:{primary:'#9a6845',secondary:'#d8c3aa',background:'#fbf7f1',surface:'#ffffff',text:'#33271f',muted:'#77685c'} },
   'luxury-black': { family:'wedding', layout:'immersive', typography:'serif', decoration:'sparkle', palette:{primary:'#c7a55b',secondary:'#6f5a2e',background:'#0d0d0d',surface:'#171717',text:'#f8f1df',muted:'#b9ad94'} },
   'royal-gold': { family:'wedding', layout:'classic', typography:'serif', decoration:'ornamental', palette:{primary:'#b6924b',secondary:'#234b42',background:'#f7f2e6',surface:'#fffdf7',text:'#26362f',muted:'#6f786f'} },
