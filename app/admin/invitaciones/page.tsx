@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { DragEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ShareInvitationModal from '@/components/share-invitation-modal';
+import MediaLibraryPicker from '@/components/media/media-library-picker';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS } from '@/lib/template-catalog';
 import { DEFAULT_TEMPLATE_SECTION_ORDER, normalizeTemplateSectionOrder, TemplateSectionId } from '@/lib/template-engine';
@@ -66,7 +67,7 @@ function ArchiveIcon(){return <Icon><path d="M3 6h18"/><path d="M5 6v14h14V6"/><
 function TrashIcon(){return <Icon><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></Icon>}
 function CopyIcon(){return <Icon><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></Icon>}
 
-export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);const[reviewing,setReviewing]=useState<Invitacion|null>(null);const[reviewBusy,setReviewBusy]=useState(false);const[templateFilter,setTemplateFilter]=useState('todas');const[copiedSlug,setCopiedSlug]=useState('');const[draggedSection,setDraggedSection]=useState<TemplateSectionId|null>(null);const[selectedSection,setSelectedSection]=useState<TemplateSectionId>('hero');
+export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);const[mediaPicker,setMediaPicker]=useState<'cover'|'gallery'|'audio'|null>(null);const[reviewing,setReviewing]=useState<Invitacion|null>(null);const[reviewBusy,setReviewBusy]=useState(false);const[templateFilter,setTemplateFilter]=useState('todas');const[copiedSlug,setCopiedSlug]=useState('');const[draggedSection,setDraggedSection]=useState<TemplateSectionId|null>(null);const[selectedSection,setSelectedSection]=useState<TemplateSectionId>('hero');
 async function load(){setLoading(true);const[e,i]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false})]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);setLoading(false)}useEffect(()=>{void load()},[]);
 useEffect(()=>{
   if(typeof window==='undefined'||eventos.length===0)return;
@@ -492,6 +493,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                       {uploading==='cover'?'Subiendo…':'Seleccionar portada'}
                       <input type="file" accept="image/*" disabled={Boolean(uploading)} onChange={e=>void handleCover(e.target.files?.[0])}/>
                     </label>
+                    <button type="button" className="button button-soft media-library-button" disabled={!form.evento_id} onClick={()=>setMediaPicker('cover')}>Elegir de Biblioteca</button>
                     {form.portada_url&&<button type="button" className="text-button danger" onClick={()=>setForm({...form,portada_url:''})}>Quitar portada</button>}
                   </article>
 
@@ -507,6 +509,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                       {uploading==='gallery'?'Subiendo…':'Agregar fotografías'}
                       <input type="file" accept="image/*" multiple disabled={Boolean(uploading)||form.galeria_urls.length>=8} onChange={e=>void handleGallery(e.target.files)}/>
                     </label>
+                    <button type="button" className="button button-soft media-library-button" disabled={!form.evento_id||form.galeria_urls.length>=8} onClick={()=>setMediaPicker('gallery')}>Elegir de Biblioteca</button>
                     {form.galeria_urls.length>0&&<div className="gallery-chip-list">{form.galeria_urls.map((url,index)=><button key={url} type="button" onClick={()=>setForm({...form,galeria_urls:form.galeria_urls.filter(item=>item!==url)})}>Foto {index+1} ×</button>)}</div>}
                   </article>
 
@@ -526,6 +529,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                         onChange={e=>void handleAudio(e.target.files?.[0])}
                       />
                     </label>
+                    <button type="button" className="button button-soft media-library-button" disabled={!form.evento_id} onClick={()=>setMediaPicker('audio')}>Elegir de Biblioteca</button>
 
                     {form.musica_url&&<div className="audio-file-status">
                       <span className="audio-status-check">✓</span>
@@ -716,6 +720,20 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
   </section>
 </div>}
 
+{mediaPicker&&<MediaLibraryPicker
+  open
+  eventId={form.evento_id}
+  kind={mediaPicker==='audio'?'audio':'imagen'}
+  multiple={mediaPicker==='gallery'}
+  maxSelected={mediaPicker==='gallery'?Math.max(1,8-form.galeria_urls.length):1}
+  selectedUrls={mediaPicker==='gallery'?form.galeria_urls:[]}
+  onClose={()=>setMediaPicker(null)}
+  onSelect={urls=>{
+    if(mediaPicker==='cover')setForm(current=>({...current,portada_url:urls[0]||current.portada_url}));
+    if(mediaPicker==='audio')setForm(current=>({...current,musica_url:urls[0]||current.musica_url}));
+    if(mediaPicker==='gallery')setForm(current=>({...current,galeria_urls:Array.from(new Set([...current.galeria_urls,...urls])).slice(0,8)}));
+  }}
+/>}
 {sharing&&<ShareInvitationModal
   open={Boolean(sharing)}
   onClose={()=>setSharing(null)}

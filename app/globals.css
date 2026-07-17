@@ -4576,3 +4576,29 @@ a { color: inherit; }
 @media(max-width:1100px){.media-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.media-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-toolbar{align-items:stretch;flex-direction:column}.media-filters input{flex:1;min-width:0}}
 @media(max-width:760px){.media-library-header{align-items:stretch;flex-direction:column}.media-upload-actions{justify-content:stretch}.media-upload-actions label{flex:1}.media-upload-actions select,.media-upload-actions .button{width:100%}.media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-filters{flex-direction:column}.media-filters input,.media-filters select{width:100%}}
 @media(max-width:520px){.media-summary-grid,.media-grid{grid-template-columns:1fr}.media-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-tabs button{text-align:left}.media-card-preview{aspect-ratio:16/10}}
+
+/* v1.23.2 · Selector reutilizable de Biblioteca Multimedia */
+.media-library-button{width:100%;justify-content:center}
+.media-picker-backdrop{z-index:1200}
+.media-picker-modal{width:min(980px,calc(100vw - 32px));max-height:min(820px,calc(100vh - 32px));display:flex;flex-direction:column;padding:0;overflow:hidden}
+.media-picker-header{display:flex;justify-content:space-between;gap:24px;padding:24px 26px 18px;border-bottom:1px solid var(--border,#e7e2dc)}
+.media-picker-header h2{margin:4px 0 6px}.media-picker-header p{margin:0;color:var(--muted,#6f6a64)}
+.media-picker-toolbar{display:flex;align-items:center;gap:16px;padding:16px 26px;border-bottom:1px solid var(--border,#e7e2dc)}
+.media-picker-toolbar input{flex:1;min-width:0;border:1px solid var(--border,#ddd7d0);border-radius:12px;padding:11px 14px;background:#fff;color:inherit}
+.media-picker-toolbar span{font-size:.84rem;font-weight:700;color:var(--muted,#6f6a64);white-space:nowrap}
+.media-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:22px 26px;overflow:auto;min-height:240px}
+.media-picker-grid.is-audio{grid-template-columns:repeat(2,minmax(0,1fr))}
+.media-picker-item{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0;padding:8px;border:1px solid var(--border,#e4ded7);border-radius:16px;background:#fff;text-align:left;cursor:pointer;transition:.18s ease}
+.media-picker-item:hover{transform:translateY(-2px);border-color:#bca58e;box-shadow:0 10px 28px rgba(30,24,18,.09)}
+.media-picker-item.is-selected{border-color:var(--brand,#8f5c38);box-shadow:0 0 0 2px rgba(143,92,56,.18)}
+.media-picker-item>img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:11px;background:#f3f0ec}
+.media-picker-item>div:last-child{display:flex;flex-direction:column;gap:3px;padding:0 4px 5px;min-width:0}
+.media-picker-item strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.88rem}.media-picker-item small{color:var(--muted,#77716b)}
+.media-picker-check{position:absolute;right:14px;top:14px;width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.94);border:1px solid #ddd5cd;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.media-picker-item.is-selected .media-picker-check{background:var(--brand,#8f5c38);border-color:var(--brand,#8f5c38);color:#fff}
+.media-picker-audio{min-height:118px;border-radius:11px;background:linear-gradient(145deg,#f4eee7,#e9dfd4);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:18px}
+.media-picker-audio>span{font-size:2rem}.media-picker-audio audio{width:100%;height:36px}
+.media-picker-footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 26px;border-top:1px solid var(--border,#e7e2dc);background:#fff}
+.media-picker-loading,.media-picker-empty{display:grid;place-items:center;align-content:center;gap:8px;min-height:300px;padding:30px;text-align:center;color:var(--muted,#6f6a64)}
+.media-picker-empty strong{font-size:1.05rem;color:var(--text,#27231f)}.media-picker-empty p{margin:0}
+@media(max-width:760px){.media-picker-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:16px}.media-picker-grid.is-audio{grid-template-columns:1fr}.media-picker-header,.media-picker-toolbar,.media-picker-footer{padding-left:18px;padding-right:18px}.media-picker-toolbar{align-items:stretch;flex-direction:column}.media-picker-footer .button{flex:1}}
