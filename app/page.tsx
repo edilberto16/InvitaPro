@@ -11,9 +11,9 @@ const features = [
 ];
 
 const templates = [
-  { category: 'Boda', title: 'Romantic Garden', image: '/inspiracion/boda-romantic-garden.svg', tone: 'garden' },
-  { category: 'XV años', title: 'Princess Rose', image: '/inspiracion/xv-princess-rose.svg', tone: 'rose' },
-  { category: 'Cumpleaños', title: 'Dino Adventure', image: '/inspiracion/cumple-dinosaurios.svg', tone: 'gold' },
+  { category: 'Boda', title: 'Romantic Garden', image: '/inspiracion/boda-romantic-garden.webp', tone: 'garden', slug: 'boda-romantic-garden' },
+  { category: 'XV años', title: 'Princess Rose', image: '/inspiracion/xv-princess-rose.webp', tone: 'rose', slug: 'xv-princess-rose' },
+  { category: 'Cumpleaños', title: 'Dino Adventure', image: '/inspiracion/cumple-dinosaurios.webp', tone: 'gold', slug: 'cumple-dinosaurios' },
 ];
 
 const steps = [
@@ -40,11 +40,11 @@ export default function Home() {
             <a href="#caracteristicas">Características</a>
             <a href="#plantillas">Plantillas</a>
             <a href="#como-funciona">Cómo funciona</a>
-            <a href="#preguntas">Preguntas</a>
+            <a href="#preguntas">Preguntas</a><Link href="/solicitar">Solicitar invitación</Link>
           </nav>
           <div className="marketing-nav-actions">
             <Link className="marketing-login" href="/login">Iniciar sesión</Link>
-            <Link className="marketing-button marketing-button-small" href="/login">Crear invitación</Link>
+            <Link className="marketing-button marketing-button-small" href="/solicitar">Solicitar invitación</Link>
           </div>
         </div>
       </header>
@@ -58,7 +58,7 @@ export default function Home() {
             <h1>Convierte tu evento en una experiencia que comienza desde la invitación.</h1>
             <p>Crea, personaliza y comparte invitaciones digitales con RSVP, galería, música, ubicación, pases y administración de invitados.</p>
             <div className="marketing-hero-actions">
-              <Link className="marketing-button" href="/login">Crear mi invitación <span>→</span></Link>
+              <Link className="marketing-button" href="/solicitar">Quiero que la creen por mí <span>→</span></Link>
               <Link className="marketing-button marketing-button-ghost" href="/inspiracion">Explorar inspiración <span>▶</span></Link>
             </div>
             <div className="marketing-trust-row">
@@ -140,7 +140,10 @@ export default function Home() {
               <article className={`marketing-template-card marketing-template-${template.tone}`} key={template.title}>
                 <div className="marketing-template-image" style={{ backgroundImage: `url(${template.image})` }}>
                   <span>{template.category}</span>
-                  <Link href="/inspiracion" aria-label={`Ver demo de ${template.title}`}>Ver demo <b>↗</b></Link>
+                  <div className="marketing-template-actions">
+                    <Link href={`/inspiracion/${template.slug}`} aria-label={`Ver experiencia ${template.title}`}>Ver experiencia <b>↗</b></Link>
+                    <Link className="marketing-template-request" href={`/solicitar?plantilla=${encodeURIComponent(template.title)}&categoria=${encodeURIComponent(template.category)}`}>Quiero una como esta</Link>
+                  </div>
                 </div>
                 <div className="marketing-template-info"><h3>{template.title}</h3><p>Diseño adaptable y personalizable</p></div>
               </article>
@@ -169,14 +172,24 @@ export default function Home() {
       <section className="marketing-section marketing-demo-section">
         <div className="marketing-container marketing-demo-card">
           <div className="marketing-demo-copy">
-            <span className="marketing-eyebrow marketing-eyebrow-light">Una experiencia real</span>
+            <span className="marketing-eyebrow marketing-eyebrow-light">Explora una experiencia real</span>
             <h2>No te lo imagines.<br />Vívelo como uno de tus invitados.</h2>
             <p>Abre una invitación completa y descubre cómo se ven la portada, cuenta regresiva, galería, música, ubicación y confirmación de asistencia.</p>
             <Link className="marketing-button marketing-button-light" href="/inspiracion">Explorar experiencias <span>↗</span></Link>
           </div>
           <div className="marketing-demo-phone">
             <div className="marketing-demo-photo" />
-            <div><span>Invitación de muestra</span><strong>Valeria &amp; Daniel</strong><small>Una experiencia completa y navegable</small></div>
+            <div><span>Inspiración destacada</span><strong>Romantic Garden</strong><small>Una experiencia completa y navegable</small></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="managed-choice" id="solicitar">
+        <div className="marketing-container">
+          <div className="managed-choice-heading"><span className="marketing-eyebrow">Tú eliges cómo empezar</span><h2>¿Cómo quieres crear tu invitación?</h2><p>Podemos encargarnos de todo por ti. El modo de autoservicio llegará en la siguiente etapa.</p></div>
+          <div className="managed-choice-grid">
+            <article className="managed-choice-card managed-choice-card--featured"><span className="managed-choice-badge">Disponible ahora</span><h3>Quiero que InvitaPro la cree por mí</h3><p>Cuéntanos sobre tu evento y nuestro equipo prepara tu invitación, configura los detalles y la deja lista para compartir.</p><ul><li>Asesoría personalizada</li><li>Diseño y configuración</li><li>Fotografías, música, ubicación y RSVP</li><li>Acceso a Mi InvitaPro</li></ul><Link className="marketing-button" href="/solicitar">Solicitar mi invitación <span>→</span></Link></article>
+            <article className="managed-choice-card"><span className="managed-choice-badge managed-choice-badge--soft">Próximamente</span><h3>Prefiero crearla yo</h3><p>Muy pronto podrás elegir una plantilla, personalizarla y publicar tu evento directamente desde Mi InvitaPro.</p><Link className="marketing-button marketing-button-ghost" href="/inspiracion">Explorar diseños</Link></article>
           </div>
         </div>
       </section>
@@ -206,7 +219,7 @@ export default function Home() {
           <h2>Crea una invitación que tus invitados querrán volver a abrir.</h2>
           <p>Empieza a diseñar, comparte tu historia y administra cada confirmación desde InvitaPro.</p>
           <div className="marketing-hero-actions">
-            <Link className="marketing-button marketing-button-light" href="/login">Crear mi invitación <span>→</span></Link>
+            <Link className="marketing-button marketing-button-light" href="/solicitar">Solicitar mi invitación <span>→</span></Link>
             <Link className="marketing-button marketing-button-outline-light" href="/inspiracion">Explorar inspiración</Link>
           </div>
         </div>
@@ -217,7 +230,7 @@ export default function Home() {
           <div className="marketing-footer-main">
             <div><InvitaProLogo /><p>Invitaciones digitales y gestión de eventos, todo en un solo lugar.</p></div>
             <div><strong>Producto</strong><a href="#caracteristicas">Características</a><a href="#plantillas">Plantillas</a><Link href="/inspiracion">Inspiración</Link></div>
-            <div><strong>Cuenta</strong><Link href="/login">Iniciar sesión</Link><Link href="/login">Crear invitación</Link><Link href="/admin">Panel administrativo</Link></div>
+            <div><strong>Cuenta</strong><Link href="/login">Iniciar sesión</Link><Link href="/solicitar">Solicitar invitación</Link><Link href="/login">Iniciar sesión</Link></div>
             <div><strong>Legal</strong><span>Aviso de privacidad</span><span>Términos y condiciones</span><span>Contacto</span></div>
           </div>
           <div className="marketing-footer-bottom"><span>© 2026 InvitaPro. Todos los derechos reservados.</span><span>Hecho para celebrar momentos inolvidables ✦</span></div>

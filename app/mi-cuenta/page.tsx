@@ -1,0 +1,27 @@
+"use client";
+import {useEffect,useMemo,useState} from "react";
+import {createClient} from "../../lib/supabase/client";
+type Event={id:string;nombre:string;tipo:string;fecha:string;estado:string;lugar:string|null};
+type Invite={id:string;evento_id:string;titulo:string;slug:string;estado:string;modalidad:string};
+type Guest={id:string;invitacion_id:string;estado:string;adultos_permitidos:number;ninos_permitidos:number};
+export default function MiCuenta(){
+ const supabase=useMemo(()=>createClient(),[]); const [name,setName]=useState(""); const [events,setEvents]=useState<Event[]>([]);const [invites,setInvites]=useState<Invite[]>([]);const [guests,setGuests]=useState<Guest[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
+ useEffect(()=>{(async()=>{const {data:{user}}=await supabase.auth.getUser();if(!user)return;const {data:p}=await supabase.from("profiles").select("nombre").eq("id",user.id).maybeSingle();setName(p?.nombre||user.email?.split("@")[0]||"");
+ const {data:c}=await supabase.from("clientes").select("id").eq("user_id",user.id).maybeSingle();
+ if(!c){setLoading(false);return;}
+ const {data:e,error:ee}=await supabase.from("eventos").select("id,nombre,tipo,fecha,estado,lugar").eq("cliente_id",c.id).order("fecha",{ascending:true});if(ee){setError(ee.message);setLoading(false);return;}const ev=(e||[]) as Event[];setEvents(ev);
+ if(ev.length){const {data:i}=await supabase.from("invitaciones").select("id,evento_id,titulo,slug,estado,modalidad").in("evento_id",ev.map(x=>x.id));const iv=(i||[]) as Invite[];setInvites(iv);if(iv.length){const {data:g}=await supabase.from("invitados").select("id,invitacion_id,estado,adultos_permitidos,ninos_permitidos").in("invitacion_id",iv.map(x=>x.id));setGuests((g||[]) as Guest[]);}}
+ setLoading(false);})()},[supabase]);
+ async function salir(){await supabase.auth.signOut();location.href="/login"}
+ const next=events[0], invite=invites.find(i=>i.evento_id===next?.id);const related=guests.filter(g=>g.invitacion_id===invite?.id);const confirmed=related.filter(g=>g.estado==="confirmado").length;const pending=related.filter(g=>g.estado==="pendiente").length;
+ if(loading)return <main className="client-portal"><div className="client-loading">Preparando Mi InvitaPro…</div></main>;
+ return <main className="client-portal"><header className="client-topbar"><a href="/" className="client-logo"><span>IP</span><strong>InvitaPro</strong></a><nav><a href="#evento">Mi evento</a><a href="#invitados">Invitados</a><a href="#compartir">Compartir</a><button onClick={salir}>Salir</button></nav></header>
+ <section className="client-hero"><p className="eyebrow">Mi InvitaPro</p><h1>Hola{name?`, ${name}`:""} 👋</h1><p>Todo lo importante de tu evento, en un solo lugar.</p></section>
+ {error&&<p className="client-error">{error}</p>}
+ {!next?<section className="client-empty"><span>✦</span><h2>Bienvenido a Mi InvitaPro</h2><p>Tu cuenta está creada correctamente. Si ya contrataste una invitación, el equipo de InvitaPro vinculará tu evento y aparecerá aquí automáticamente. Mientras tanto puedes explorar diseños e inspiración.</p><a className="client-primary" href="/inspiracion">Explorar inspiración</a></section>:
+ <><section id="evento" className="client-event-card"><div><span className="client-pill">{next.tipo}</span><h2>{next.nombre}</h2><p>{next.fecha} · {next.lugar||"Ubicación por definir"}</p><div className="client-actions">{invite?.estado==="publicada"&&<a className="client-primary" href={`/invitacion/${invite.slug}`} target="_blank">Ver invitación</a>}<a className="client-secondary" href="#compartir">Compartir</a></div></div><div className="client-event-side"><small>Estado</small><strong>{invite?.estado||next.estado}</strong><span>{invite?.modalidad?`Modalidad ${invite.modalidad}`:""}</span></div></section>
+ <section id="invitados" className="client-stats"><article><span>Invitados</span><strong>{related.length}</strong><small>Registros</small></article><article><span>Confirmados</span><strong>{confirmed}</strong><small>RSVP recibidos</small></article><article><span>Pendientes</span><strong>{pending}</strong><small>Por responder</small></article></section>
+ <section className="client-grid"><article><p className="eyebrow">Control</p><h3>Invitados y confirmaciones</h3><p>Consulta el avance de las respuestas de tus invitados sin entrar al panel administrativo.</p><div className="client-progress"><span style={{width:`${related.length?Math.round(confirmed/related.length*100):0}%`}}/></div><small>{related.length?Math.round(confirmed/related.length*100):0}% de registros confirmados</small></article>
+ <article id="compartir"><p className="eyebrow">Compartir</p><h3>Tu invitación</h3>{invite?.estado==="publicada"?<><p>Comparte este enlace con tus invitados.</p><div className="client-link">/invitacion/{invite.slug}</div><button className="client-primary" onClick={()=>navigator.clipboard.writeText(`${location.origin}/invitacion/${invite.slug}`)}>Copiar enlace</button></>:<p>Tu invitación todavía no está publicada. Cuando esté lista, aquí aparecerá el enlace para compartir.</p>}</article></section></>}
+ </main>
+}

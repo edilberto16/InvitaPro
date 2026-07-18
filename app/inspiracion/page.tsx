@@ -13,7 +13,7 @@ export default function InspirationPage() {
       <header className="inspiration-header">
         <div className="marketing-container inspiration-nav">
           <InvitaProLogo />
-          <nav><Link href="/">Inicio</Link><Link href="/inspiracion" className="is-current">Inspiración</Link><Link href="/login">Entrar</Link></nav>
+          <nav><Link href="/">Inicio</Link><Link href="/inspiracion" className="is-current">Inspiración</Link><Link href="/solicitar">Solicitar invitación</Link><Link href="/login">Entrar</Link></nav>
         </div>
       </header>
       <section className="inspiration-hero">

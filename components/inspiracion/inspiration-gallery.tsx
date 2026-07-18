@@ -38,7 +38,7 @@ export function InspirationGallery() {
                 <span className="inspiration-eyebrow">{item.eyebrow}</span>
                 <h2>{item.title}</h2>
                 <p>{item.description}</p>
-                <Link href={`/inspiracion/${item.slug}`}>Ver experiencia <span>↗</span></Link>
+                <div className="inspiration-card-actions"><Link href={`/inspiracion/${item.slug}`}>Ver experiencia <span>↗</span></Link><Link className="inspiration-request-link" href={`/solicitar?plantilla=${encodeURIComponent(item.title)}&categoria=${encodeURIComponent(item.category)}`}>Quiero una como esta</Link></div>
               </div>
             </div>
             <div className="inspiration-tags">
