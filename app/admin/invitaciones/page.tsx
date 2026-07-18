@@ -4,6 +4,7 @@ import { DragEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 'r
 import { createClient } from '@/lib/supabase/client';
 import ShareInvitationModal from '@/components/share-invitation-modal';
 import MediaLibraryPicker from '@/components/media/media-library-picker';
+import SectionNavigator, { SECTION_META } from '@/components/editor/section-navigator';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS } from '@/lib/template-catalog';
 import { DEFAULT_TEMPLATE_SECTION_ORDER, normalizeTemplateSectionOrder, TemplateSectionId } from '@/lib/template-engine';
@@ -270,7 +271,8 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
           </div>
         </section>
 
-        <div className="invitation-builder-layout">
+        <div className="invitation-builder-layout visual-builder-layout">
+          <SectionNavigator order={form.section_order} selected={selectedSection} modalidad={form.modalidad} isEnabled={sectionEnabled} onSelect={setSelectedSection}/>
           <div className="invitation-builder-fields">
             <section className="invitation-builder-section">
               <div className="invitation-section-heading">
@@ -608,17 +610,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                 </div>
                 <div className="section-structure-list">
                   {form.section_order.map((sectionId,index)=>{
-                    const labels:Record<TemplateSectionId,{title:string;description:string;icon:string}>={
-                      hero:{title:'Portada',description:'Presentación principal de la invitación',icon:'✦'},
-                      intro:{title:'Introducción',description:'Mensaje especial para los invitados',icon:'“'},
-                      countdown:{title:'Cuenta regresiva',description:'Días, horas y minutos para el evento',icon:'◷'},
-                      details:{title:'Detalles del evento',description:'Fecha, lugar y código de vestimenta',icon:'i'},
-                      program:{title:'Programa',description:'Itinerario y horarios del evento',icon:'≡'},
-                      gallery:{title:'Galería',description:'Fotografías y recuerdos',icon:'▧'},
-                      location:{title:'Ubicación',description:'Dirección, mapa y contacto',icon:'⌖'},
-                      rsvp:{title:'Confirmación RSVP',description:'Formulario de confirmación de asistencia',icon:'✓'}
-                    };
-                    const meta=labels[sectionId];
+                    const meta=SECTION_META[sectionId];
                     const locked=sectionId==='hero';
                     const unavailable=sectionId==='rsvp'&&form.modalidad==='simple';
                     const enabled=sectionEnabled(sectionId)&&!unavailable;
