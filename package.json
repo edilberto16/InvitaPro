@@ -1,6 +1,6 @@
 {
   "name": "invitapro",
-  "version": "1.24.2",
+  "version": "2.0.0",
   "private": true,
   "engines": {
     "node": "22.x"
