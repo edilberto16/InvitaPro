@@ -4,7 +4,7 @@ import { DragEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 'r
 import { createClient } from '@/lib/supabase/client';
 import ShareInvitationModal from '@/components/share-invitation-modal';
 import MediaLibraryPicker from '@/components/media/media-library-picker';
-import SectionNavigator, { SECTION_META } from '@/components/editor/section-navigator';
+import { SECTION_META } from '@/components/editor/section-navigator';
 import { designValue, Evento, formatDate, initials, Invitacion, messageFromError, slugify } from '@/lib/invitapro';
 import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS } from '@/lib/template-catalog';
 import { DEFAULT_TEMPLATE_SECTION_ORDER, normalizeTemplateSectionOrder, TemplateSectionId } from '@/lib/template-engine';
@@ -271,8 +271,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
           </div>
         </section>
 
-        <div className="invitation-builder-layout visual-builder-layout">
-          <SectionNavigator order={form.section_order} selected={selectedSection} modalidad={form.modalidad} isEnabled={sectionEnabled} onSelect={setSelectedSection}/>
+        <div className="invitation-builder-layout invitation-builder-layout-clean">
           <div className="invitation-builder-fields">
             <section className="invitation-builder-section">
               <div className="invitation-section-heading">
