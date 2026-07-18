@@ -45,7 +45,6 @@ export default function LoginPage() {
           {error && <p className="form-error">{error}</p>}
           <button className="button button-primary login-button" disabled={cargando}>{cargando ? "Ingresando…" : "Entrar a InvitaPro"}</button>
         </form>
-        <p className="login-help">La autenticación se activa cuando configuras <code>.env.local</code>.</p>
       </section>
     </main>
   );

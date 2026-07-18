@@ -11,9 +11,9 @@ const features = [
 ];
 
 const templates = [
-  { category: 'Boda', title: 'Romantic Garden', image: '/demo/portada-boda.jpg', tone: 'garden' },
-  { category: 'XV años', title: 'Princess Rose', image: '/demo/galeria/foto3.jpg', tone: 'rose' },
-  { category: 'Celebración', title: 'Golden Night', image: '/demo/galeria/foto6.jpg', tone: 'gold' },
+  { category: 'Boda', title: 'Romantic Garden', image: '/inspiracion/boda-romantic-garden.svg', tone: 'garden' },
+  { category: 'XV años', title: 'Princess Rose', image: '/inspiracion/xv-princess-rose.svg', tone: 'rose' },
+  { category: 'Cumpleaños', title: 'Dino Adventure', image: '/inspiracion/cumple-dinosaurios.svg', tone: 'gold' },
 ];
 
 const steps = [
@@ -59,7 +59,7 @@ export default function Home() {
             <p>Crea, personaliza y comparte invitaciones digitales con RSVP, galería, música, ubicación, pases y administración de invitados.</p>
             <div className="marketing-hero-actions">
               <Link className="marketing-button" href="/login">Crear mi invitación <span>→</span></Link>
-              <Link className="marketing-button marketing-button-ghost" href="/invitacion/demo-valeria">Ver demostración <span>▶</span></Link>
+              <Link className="marketing-button marketing-button-ghost" href="/inspiracion">Explorar inspiración <span>▶</span></Link>
             </div>
             <div className="marketing-trust-row">
               <div className="marketing-avatars" aria-hidden="true"><span>AM</span><span>JP</span><span>FV</span><span>+</span></div>
@@ -133,14 +133,14 @@ export default function Home() {
               <span className="marketing-eyebrow">Diseños que inspiran</span>
               <h2>Encuentra el estilo perfecto para tu historia.</h2>
             </div>
-            <Link className="marketing-text-link" href="/invitacion/demo-valeria">Explorar demostración <span>→</span></Link>
+            <Link className="marketing-text-link" href="/inspiracion">Explorar inspiración <span>→</span></Link>
           </div>
           <div className="marketing-template-grid">
             {templates.map((template) => (
               <article className={`marketing-template-card marketing-template-${template.tone}`} key={template.title}>
                 <div className="marketing-template-image" style={{ backgroundImage: `url(${template.image})` }}>
                   <span>{template.category}</span>
-                  <Link href="/invitacion/demo-valeria" aria-label={`Ver demo de ${template.title}`}>Ver demo <b>↗</b></Link>
+                  <Link href="/inspiracion" aria-label={`Ver demo de ${template.title}`}>Ver demo <b>↗</b></Link>
                 </div>
                 <div className="marketing-template-info"><h3>{template.title}</h3><p>Diseño adaptable y personalizable</p></div>
               </article>
@@ -172,7 +172,7 @@ export default function Home() {
             <span className="marketing-eyebrow marketing-eyebrow-light">Una experiencia real</span>
             <h2>No te lo imagines.<br />Vívelo como uno de tus invitados.</h2>
             <p>Abre una invitación completa y descubre cómo se ven la portada, cuenta regresiva, galería, música, ubicación y confirmación de asistencia.</p>
-            <Link className="marketing-button marketing-button-light" href="/invitacion/demo-valeria">Abrir invitación de muestra <span>↗</span></Link>
+            <Link className="marketing-button marketing-button-light" href="/inspiracion">Explorar experiencias <span>↗</span></Link>
           </div>
           <div className="marketing-demo-phone">
             <div className="marketing-demo-photo" />
@@ -207,7 +207,7 @@ export default function Home() {
           <p>Empieza a diseñar, comparte tu historia y administra cada confirmación desde InvitaPro.</p>
           <div className="marketing-hero-actions">
             <Link className="marketing-button marketing-button-light" href="/login">Crear mi invitación <span>→</span></Link>
-            <Link className="marketing-button marketing-button-outline-light" href="/invitacion/demo-valeria">Ver demostración</Link>
+            <Link className="marketing-button marketing-button-outline-light" href="/inspiracion">Explorar inspiración</Link>
           </div>
         </div>
       </section>
@@ -216,7 +216,7 @@ export default function Home() {
         <div className="marketing-container">
           <div className="marketing-footer-main">
             <div><InvitaProLogo /><p>Invitaciones digitales y gestión de eventos, todo en un solo lugar.</p></div>
-            <div><strong>Producto</strong><a href="#caracteristicas">Características</a><a href="#plantillas">Plantillas</a><Link href="/invitacion/demo-valeria">Demostración</Link></div>
+            <div><strong>Producto</strong><a href="#caracteristicas">Características</a><a href="#plantillas">Plantillas</a><Link href="/inspiracion">Inspiración</Link></div>
             <div><strong>Cuenta</strong><Link href="/login">Iniciar sesión</Link><Link href="/login">Crear invitación</Link><Link href="/admin">Panel administrativo</Link></div>
             <div><strong>Legal</strong><span>Aviso de privacidad</span><span>Términos y condiciones</span><span>Contacto</span></div>
           </div>

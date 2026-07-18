@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#21120f"/><stop offset="1" stop-color="#8b5f29"/></linearGradient><radialGradient id="r"><stop stop-color="#f5cf82" stop-opacity=".75"/><stop offset="1" stop-color="#f5cf82" stop-opacity="0"/></radialGradient></defs>
+<rect width="1600" height="900" fill="url(#g)"/><circle cx="1250" cy="180" r="430" fill="url(#r)"/><circle cx="250" cy="760" r="360" fill="url(#r)" opacity=".45"/>
+<g fill="none" stroke="#f5cf82" stroke-width="8" opacity=".9"><path d="M630 510c80-180 260-180 340 0"/><circle cx="800" cy="350" r="95"/><path d="M690 330l110-130 110 130"/></g><g fill="#fff" opacity=".92"><path d="M640 580c70-120 250-120 320 0-90 70-230 70-320 0z"/></g>
+<rect x="70" y="70" width="1460" height="760" rx="42" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="2"/>
+<text x="800" y="695" text-anchor="middle" fill="#fff" font-family="Georgia,serif" font-size="82" font-weight="700">Mariana &amp; Alejandro</text>
+<text x="800" y="760" text-anchor="middle" fill="#fff" fill-opacity=".86" font-family="Arial,sans-serif" font-size="28" letter-spacing="8">LUXURY GOLD</text>
+</svg>
