@@ -43,6 +43,13 @@ export default function StudioPage(){
  const [error,setError]=useState("");
  const [active,setActive]=useState("portada");
  const [showTemplates,setShowTemplates]=useState(false);
+ const [templateFilter,setTemplateFilter]=useState<"recommended"|"todas"|"wedding"|"xv"|"infantil"|"empresarial">("recommended");
+ const [pendingTemplate,setPendingTemplate]=useState<string|null>(null);
+ const [applyingTemplate,setApplyingTemplate]=useState(false);
+ const [templateNotice,setTemplateNotice]=useState("");
+ const [showPublish,setShowPublish]=useState(false);
+ const [selectedPlan,setSelectedPlan]=useState<"clasico"|"premium"|"signature">("clasico");
+ const [requestingActivation,setRequestingActivation]=useState(false);
  const [title,setTitle]=useState("");
  const [message,setMessage]=useState("");
  const [subtitle,setSubtitle]=useState("");
@@ -105,33 +112,66 @@ export default function StudioPage(){
   window.setTimeout(()=>setSaved(""),2200);
  }
 
- async function changeTemplate(id:string){
+ async function applyTemplate(id:string){
   if(!invite)return;
   const t=getTemplateById(id); if(!t)return;
-  const current=invite.design_json||{};const {error}=await supabase.from("invitaciones").update({template_key:id,color_principal:t.color,design_json:{...current,plantilla:id,template_engine:id}}).eq("id",invite.id);
+  setApplyingTemplate(true);setError("");
+  const current=invite.design_json||{};
+  const {error}=await supabase.from("invitaciones").update({
+    template_key:id,
+    color_principal:t.color,
+    design_json:{...current,plantilla:id,template_engine:id,template_collection:t.collection}
+  }).eq("id",invite.id);
+  setApplyingTemplate(false);
   if(error){setError(error.message);return;}
-  setInvite({...invite,template_key:id,color_principal:t.color});setColor(t.color);setShowTemplates(false);setSaved("Plantilla actualizada ✓");
+  setInvite({...invite,template_key:id,color_principal:t.color,design_json:{...current,plantilla:id,template_engine:id,template_collection:t.collection}});
+  setColor(t.color);setPendingTemplate(null);setShowTemplates(false);setTemplateNotice(`✓ ${t.name} aplicada`);
+  setSaved("Plantilla actualizada ✓");
+  window.setTimeout(()=>setTemplateNotice(""),2800);
  }
 
+ function requestTemplateChange(id:string){
+  if(!invite)return;
+  const t=getTemplateById(id); if(!t)return;
+  setPendingTemplate(id);
+ }
+ async function requestActivation(){
+  if(!invite)return;
+  setRequestingActivation(true);setError("");
+  const current=invite.design_json||{};
+  const {error}=await supabase.from("invitaciones").update({
+    estado:"pendiente_activacion",
+    design_json:{...current,activation_plan:selectedPlan,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}
+  }).eq("id",invite.id);
+  setRequestingActivation(false);
+  if(error){setError(error.message);return;}
+  setInvite({...invite,estado:"pendiente_activacion",design_json:{...current,activation_plan:selectedPlan,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}});
+  setShowPublish(false);setSaved("Solicitud enviada ✓");
+ }
  if(loading)return <main className="studio-page"><div className="client-loading">Abriendo InvitaPro Studio…</div></main>;
  if(!invite)return <main className="studio-page"><div className="client-empty"><h2>No pudimos abrir la invitación</h2><p>{error}</p><Link className="client-primary" href="/mi-cuenta">Volver</Link></div></main>;
 
  const template=getTemplateById(invite.template_key||"");
  const collection=collectionForTipo(invite.eventos?.tipo||"");
- const templates=TEMPLATE_CATALOG.filter(t=>t.collection===collection&&t.available);
+ const allAvailableTemplates=TEMPLATE_CATALOG.filter(t=>t.available);
+ const templates=templateFilter==="recommended"
+   ? allAvailableTemplates.filter(t=>t.collection===collection)
+   : templateFilter==="todas"
+     ? allAvailableTemplates
+     : allAvailableTemplates.filter(t=>t.collection===templateFilter);
  const enabled=Object.values(visibility).filter(Boolean).length;
  const progress=Math.round((enabled/SECTIONS.length)*70 + (title?10:0)+(invite.eventos?.fecha?10:0)+(message?10:0));
 
- return <main className="studio-page">
+ return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
    <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small>{saved||"Borrador · Guardado manual"}</small></div></div>
-   <div className="studio-topbar-actions"><button className="client-secondary" onClick={()=>setShowTemplates(true)}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving}>{saving?"Guardando…":"Guardar cambios"}</button></div>
+   <div className="studio-topbar-actions"><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving}>{saving?"Guardando…":"Guardar cambios"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>setShowPublish(true)}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link>}</div>
   </header>
 
   <div className="studio-workspace">
    <aside className="studio-sidebar">
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
-    <div className="studio-template-summary" onClick={()=>setShowTemplates(true)} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?.premium?"Premium":"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
+    <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?.premium?"Premium":"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
     <nav className="studio-section-list">{SECTIONS.map(s=><button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={visibility[s.id]?"on":"off"}>{visibility[s.id]?"Visible":"Oculto"}</em></button>)}</nav>
    </aside>
 
@@ -170,9 +210,74 @@ export default function StudioPage(){
    </aside>
   </div>
 
+  {showPublish&&<div className="modal-backdrop activation-backdrop" onMouseDown={()=>!requestingActivation&&setShowPublish(false)}><section className="activation-modal" onMouseDown={e=>e.stopPropagation()}>
+   <header><div><p className="eyebrow">Lista para el siguiente paso</p><h2>Publicar tu invitación</h2><p>Revisa lo esencial y elige cómo quieres activar tu invitación.</p></div><button onClick={()=>setShowPublish(false)}>×</button></header>
+   <div className="activation-readiness"><h3>Validación antes de publicar</h3><div className="activation-checks"><span className={title.trim()?"ok":"missing"}>{title.trim()?"✓":"!"} Nombre del evento</span><span className={date?"ok":"missing"}>{date?"✓":"!"} Fecha</span><span className={invite.template_key?"ok":"missing"}>{invite.template_key?"✓":"!"} Plantilla</span><span className={venue.trim()?"ok":"optional"}>{venue.trim()?"✓":"○"} Ubicación</span><span className={message.trim()?"ok":"optional"}>{message.trim()?"✓":"○"} Mensaje</span><span className={cover?"ok":"optional"}>{cover?"✓":"○"} Portada personalizada</span></div><small>Los elementos marcados con ! son obligatorios. Los demás pueden completarse antes de la activación.</small></div>
+   <div className="activation-plans"><button className={selectedPlan==="clasico"?"selected":""} onClick={()=>setSelectedPlan("clasico")}><span>CLÁSICO</span><strong>Invitación esencial</strong><small>Publicación, enlace y funciones básicas.</small></button><button className={selectedPlan==="premium"?"selected featured":"featured"} onClick={()=>setSelectedPlan("premium")}><span>PREMIUM</span><strong>Experiencia completa</strong><small>Más personalización, multimedia y experiencia avanzada.</small><em>Recomendado</em></button><button className={selectedPlan==="signature"?"selected":""} onClick={()=>setSelectedPlan("signature")}><span>SIGNATURE</span><strong>Diseño exclusivo</strong><small>Experiencias visuales y plantillas especiales.</small></button></div>
+   <div className="activation-summary"><div><small>EVENTO</small><strong>{title||invite.titulo}</strong><span>{date||"Fecha por definir"} · {venue||"Ubicación por definir"}</span></div><div><small>PLAN SELECCIONADO</small><strong>{selectedPlan.toUpperCase()}</strong><span>Activación manual inicial</span></div></div>
+   <footer><button className="client-secondary" disabled={requestingActivation} onClick={()=>setShowPublish(false)}>Seguir editando</button><button className="client-primary activation-submit" disabled={requestingActivation||!title.trim()||!date||!invite.template_key} onClick={()=>void requestActivation()}>{requestingActivation?"Enviando…":"Solicitar activación →"}</button></footer>
+   <p className="activation-note">No se realizará ningún cobro automático todavía. InvitaPro confirmará la activación antes de publicar el enlace definitivo.</p>
+  </section></div>}
   <MediaLibraryPicker open={mediaPicker==="cover"} eventId={invite.evento_id} kind="imagen" selectedUrls={cover?[cover]:[]} onClose={()=>setMediaPicker(null)} onSelect={urls=>setCover(urls[0]||"")}/>
   <MediaLibraryPicker open={mediaPicker==="gallery"} eventId={invite.evento_id} kind="imagen" multiple maxSelected={8} selectedUrls={gallery} onClose={()=>setMediaPicker(null)} onSelect={urls=>setGallery(urls)}/>
   <MediaLibraryPicker open={mediaPicker==="music"} eventId={invite.evento_id} kind="audio" selectedUrls={music?[music]:[]} onClose={()=>setMediaPicker(null)} onSelect={urls=>setMusic(urls[0]||"")}/>
-  {showTemplates&&<div className="modal-backdrop" onMouseDown={()=>setShowTemplates(false)}><section className="studio-template-modal" onMouseDown={e=>e.stopPropagation()}><header><div><p className="eyebrow">Catálogo completo</p><h2>Cambiar plantilla</h2><p>{TEMPLATE_COLLECTIONS.find(c=>c.id===collection)?.label} · {templates.length} diseños disponibles</p></div><button onClick={()=>setShowTemplates(false)}>×</button></header><div className="studio-template-grid">{templates.map(t=><button key={t.id} className={invite.template_key===t.id?"selected":""} onClick={()=>void changeTemplate(t.id)}><div style={{background:`linear-gradient(145deg,${t.color},#21171d)`}}><small>{t.premium?"Premium":"Disponible"}</small><strong>{t.name}</strong></div><h3>{t.name}</h3><p>{t.description}</p><span>{invite.template_key===t.id?"✓ Seleccionada":"Usar esta plantilla"}</span></button>)}</div></section></div>}
- </main>
+  {showTemplates&&<div className="modal-backdrop" onMouseDown={()=>setShowTemplates(false)}>
+   <section className="studio-template-modal studio-template-modal-global" onMouseDown={e=>e.stopPropagation()}>
+    <header>
+      <div><p className="eyebrow">Catálogo completo</p><h2>Cambiar plantilla</h2><p>Explora cualquier categoría. Tu contenido se conservará al cambiar de diseño.</p></div>
+      <button onClick={()=>setShowTemplates(false)}>×</button>
+    </header>
+
+    <div className="template-category-tabs">
+      <button className={templateFilter==="recommended"?"active":""} onClick={()=>setTemplateFilter("recommended")}>Recomendadas</button>
+      <button className={templateFilter==="todas"?"active":""} onClick={()=>setTemplateFilter("todas")}>Todas</button>
+      <button className={templateFilter==="wedding"?"active":""} onClick={()=>setTemplateFilter("wedding")}>Bodas</button>
+      <button className={templateFilter==="xv"?"active":""} onClick={()=>setTemplateFilter("xv")}>XV años</button>
+      <button className={templateFilter==="infantil"?"active":""} onClick={()=>setTemplateFilter("infantil")}>Cumpleaños</button>
+      <button className={templateFilter==="empresarial"?"active":""} onClick={()=>setTemplateFilter("empresarial")}>Empresarial</button>
+    </div>
+
+    <div className="template-filter-summary">
+      <span>{templateFilter==="recommended"?"Recomendadas para tu evento":templateFilter==="todas"?"Todas las plantillas":TEMPLATE_COLLECTIONS.find(c=>c.id===templateFilter)?.label}</span>
+      <strong>{templates.length} diseño{templates.length===1?"":"s"}</strong>
+    </div>
+
+    <div className="studio-template-grid">
+      {templates.map(t=><article key={t.id} className={`studio-global-template-card ${invite.template_key===t.id?"selected":""}`}>
+        <div className="studio-global-template-art" style={{background:`linear-gradient(145deg,${t.color},#21171d)`}}>
+          <div className="studio-template-badges"><small>{TEMPLATE_COLLECTIONS.find(c=>c.id===t.collection)?.label}</small>{t.premium&&<small>Premium</small>}</div>
+          <strong>{t.name}</strong>
+        </div>
+        <div className="studio-global-template-info">
+          <div><h3>{t.name}</h3><p>{t.description}</p></div>
+          <div className="studio-global-template-actions">
+            <Link className="client-secondary" target="_blank" href={`/mi-cuenta/crear/preview?tipo=${t.collection}&plantilla=${t.id}`}>Vista previa</Link>
+            {invite.template_key===t.id
+              ? <span className="template-current-label">✓ Plantilla actual</span>
+              : <button className="client-primary" onClick={()=>requestTemplateChange(t.id)}>Aplicar plantilla</button>}
+          </div>
+        </div>
+      </article>)}
+    </div>
+   </section>
+  </div>}{pendingTemplate&&(()=>{const selected=getTemplateById(pendingTemplate);const currentCollection=collectionForTipo(invite.eventos?.tipo||"");const sourceLabel=selected?TEMPLATE_COLLECTIONS.find(c=>c.id===selected.collection)?.label:"";const different=selected?.collection!==currentCollection;return selected?<div className="modal-backdrop template-confirm-backdrop" onMouseDown={()=>!applyingTemplate&&setPendingTemplate(null)}>
+    <section className="template-confirm-modal" onMouseDown={e=>e.stopPropagation()}>
+      <div className="template-confirm-preview" style={{background:`linear-gradient(145deg,${selected.color},#21171d)`}}>
+        <span>{sourceLabel}</span><strong>{selected.name}</strong>{selected.premium&&<small>Premium</small>}
+      </div>
+      <div className="template-confirm-copy">
+        <p className="eyebrow">Cambiar diseño</p>
+        <h2>¿Aplicar {selected.name}?</h2>
+        {different&&<p className="template-category-warning">Esta plantilla fue diseñada originalmente para <strong>{sourceLabel}</strong>, pero puedes usarla en tu evento.</p>}
+        <p>Tu contenido actual se conservará. Solo cambiaremos la identidad visual y la composición compatible con la nueva plantilla.</p>
+        <div className="template-preserve-grid">
+          <span>✓ Nombre y textos</span><span>✓ Fecha y hora</span><span>✓ Portada y galería</span><span>✓ Música</span><span>✓ Ubicación</span><span>✓ Itinerario</span><span>✓ Dress code</span><span>✓ RSVP</span>
+        </div>
+      </div>
+      <footer className="template-confirm-actions">
+        <button className="client-secondary" disabled={applyingTemplate} onClick={()=>setPendingTemplate(null)}>Cancelar</button>
+        <button className="client-primary" disabled={applyingTemplate} onClick={()=>void applyTemplate(selected.id)}>{applyingTemplate?"Aplicando…":`Aplicar ${selected.name}`}</button>
+      </footer>
+    </section>
+  </div>:null})()} </main>
 }

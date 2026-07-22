@@ -11,7 +11,7 @@ export type Evento = {
 };
 export type Invitacion = {
   id: string; evento_id: string; plantilla_id: string | null; titulo: string; slug: string;
-  modalidad: 'simple' | 'rsvp' | 'pases'; estado: 'borrador' | 'publicada' | 'pausada' | 'vencida' | 'archivada';
+  modalidad: 'simple' | 'rsvp' | 'pases'; estado: 'borrador' | 'pendiente_activacion' | 'publicada' | 'pausada' | 'vencida' | 'archivada';
   design_json: Record<string, unknown>; color_principal: string | null; musica_url: string | null;
   whatsapp: string | null; fecha_publicacion: string | null; fecha_expiracion: string | null;
   review_token?: string | null; review_enabled?: boolean;

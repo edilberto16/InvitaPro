@@ -1,0 +1,44 @@
+/* InvitaPro v2.7.1 — activación administrativa */
+.invite-status-pendiente_activacion{background:#fff3d9!important;color:#8b5a00!important;border-color:#efd49a!important}
+.activation-link-locked{display:inline-flex;padding:8px 10px;border-radius:10px;background:#f5f1f3;color:#806d77;font-size:12px;font-weight:700}
+.activation-review-button{background:#197a46!important;color:#fff!important;border-color:#197a46!important}
+.activation-admin-backdrop{z-index:150}
+.activation-admin-modal{width:min(820px,calc(100vw - 32px));background:#fff;border-radius:28px;padding:26px;box-shadow:0 30px 100px rgba(30,20,25,.28)}
+.activation-admin-modal>header{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #eee4e9;padding-bottom:18px}
+.activation-admin-modal>header h2{font-size:31px;margin:4px 0}.activation-admin-modal>header p:last-child{margin:0;color:#806d77}
+.activation-admin-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;padding:22px 0}
+.activation-admin-summary,.activation-admin-checklist{border:1px solid #e8dde3;border-radius:20px;padding:18px}
+.activation-plan-card{background:linear-gradient(135deg,#72264f,#3b1d2d);color:#fff;border-radius:16px;padding:18px;display:grid;gap:4px}.activation-plan-card small{letter-spacing:.12em;font-weight:900}.activation-plan-card strong{font-size:26px}.activation-plan-card span{opacity:.8}
+.activation-admin-summary dl{margin:16px 0 0}.activation-admin-summary dl>div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #eee5e9}.activation-admin-summary dt{color:#806d77}.activation-admin-summary dd{margin:0;font-weight:800;text-align:right}
+.activation-admin-checklist h3{margin:0 0 14px}
+.activation-admin-checklist label{
+  display:grid;
+  grid-template-columns:20px minmax(0,1fr);
+  align-items:center;
+  justify-content:start;
+  gap:10px;
+  width:100%;
+  padding:10px 0;
+  margin:0;
+  font-weight:700;
+  text-align:left;
+}
+.activation-admin-checklist label input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  margin:0;
+  justify-self:start;
+  accent-color:#197a46;
+}
+.activation-admin-checklist label span{
+  display:block;
+  min-width:0;
+  line-height:1.35;
+  text-align:left;
+}
+.activation-admin-note{margin-top:14px;background:#f8f2f5;border-radius:14px;padding:14px}.activation-admin-note p{margin:5px 0 0;color:#705c67;line-height:1.5}
+.activation-admin-modal>footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee4e9;padding-top:18px}.activation-admin-modal>footer>div{display:flex;gap:10px}.activation-confirm-button{min-width:190px}
+.dashboard-activation-stat{border-color:#efd49a!important;background:linear-gradient(135deg,#fffaf0,#fff)!important}
+.badge-warning{background:#fff3d9!important;color:#8b5a00!important}
+.dashboard-activation-link{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border-radius:10px;background:#72264f;color:#fff;text-decoration:none;font-weight:800}.dashboard-activation-link svg{width:14px;height:14px}
+@media(max-width:760px){.activation-admin-grid{grid-template-columns:1fr}.activation-admin-modal>footer{align-items:stretch;gap:10px;flex-direction:column}.activation-admin-modal>footer>div{display:grid}.activation-admin-modal>footer>a{text-align:center}}
