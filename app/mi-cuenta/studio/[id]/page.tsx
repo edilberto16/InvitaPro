@@ -4,6 +4,7 @@ import {useEffect,useMemo,useState} from "react";
 import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,getTemplateById} from "@/lib/template-catalog";
+import MediaLibraryPicker from "@/components/media/media-library-picker";
 
 type Invite={
  id:string;evento_id:string;titulo:string;slug:string;estado:string;modalidad:string;
@@ -52,6 +53,14 @@ export default function StudioPage(){
  const [dress,setDress]=useState("Formal");
  const [gift,setGift]=useState("");
  const [rsvpText,setRsvpText]=useState("Confirma tu asistencia");
+ const [cover,setCover]=useState("");
+ const [gallery,setGallery]=useState<string[]>([]);
+ const [date,setDate]=useState("");
+ const [time,setTime]=useState("");
+ const [venue,setVenue]=useState("");
+ const [address,setAddress]=useState("");
+ const [mapsUrl,setMapsUrl]=useState("");
+ const [mediaPicker,setMediaPicker]=useState<null|"cover"|"gallery"|"music">(null);
  const [visibility,setVisibility]=useState<Record<string,boolean>>({
   portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,regalos:true,rsvp:true
  });
@@ -66,6 +75,8 @@ export default function StudioPage(){
   setInvite(i);setTitle(i.titulo);setMessage(typeof d.mensaje==="string"?d.mensaje:"");setSubtitle(typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento");
   setColor(i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f");setMusic(i.musica_url||"");setWhatsapp(i.whatsapp||"");
   setProgram(typeof d.programa==="string"?d.programa:"");setDress(typeof d.vestimenta==="string"?d.vestimenta:"Formal");setGift(typeof d.regalos==="string"?d.regalos:"");setRsvpText(typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia");
+  setCover(typeof d.portada_url==="string"?d.portada_url:"");setGallery(Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[]);
+  setDate(i.eventos?.fecha||"");setTime(i.eventos?.hora?.slice(0,5)||"");setVenue(i.eventos?.lugar||"");setAddress(i.eventos?.direccion||"");setMapsUrl(i.eventos?.maps_url||"");
   setVisibility(v=>({...v,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})}));
   setLoading(false);
  }
@@ -80,19 +91,24 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,regalos:gift,rsvp_text:rsvpText,section_visibility:visibility,studio_version:"2.6.0"}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,regalos:gift,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,mostrar_galeria:visibility.galeria,mostrar_programa:visibility.programa,mostrar_mapa:visibility.ubicacion,mostrar_rsvp:visibility.rsvp,mostrar_contador:visibility.fecha,studio_version:"2.6.2",plantilla:invite.template_key||current.plantilla}
   };
-  const {error}=await supabase.from("invitaciones").update(payload).eq("id",invite.id);
+  const [{error:inviteError},{error:eventError}]=await Promise.all([
+    supabase.from("invitaciones").update(payload).eq("id",invite.id),
+    supabase.from("eventos").update({fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}).eq("id",invite.evento_id)
+  ]);
   setSaving(false);
+  const error=inviteError||eventError;
   if(error){setError(error.message);return;}
-  setSaved("Guardado ✓");setInvite({...invite,...payload});
+  const updatedEvent=invite.eventos?{...invite.eventos,fecha:date,hora:time||null,lugar:venue||null,direccion:address||null,maps_url:mapsUrl||null}:invite.eventos;
+  setSaved("Guardado ✓");setInvite({...invite,...payload,eventos:updatedEvent});
   window.setTimeout(()=>setSaved(""),2200);
  }
 
  async function changeTemplate(id:string){
   if(!invite)return;
   const t=getTemplateById(id); if(!t)return;
-  const {error}=await supabase.from("invitaciones").update({template_key:id,color_principal:t.color}).eq("id",invite.id);
+  const current=invite.design_json||{};const {error}=await supabase.from("invitaciones").update({template_key:id,color_principal:t.color,design_json:{...current,plantilla:id,template_engine:id}}).eq("id",invite.id);
   if(error){setError(error.message);return;}
   setInvite({...invite,template_key:id,color_principal:t.color});setColor(t.color);setShowTemplates(false);setSaved("Plantilla actualizada ✓");
  }
@@ -126,12 +142,12 @@ export default function StudioPage(){
       <label>Título principal<input value={title} onChange={e=>setTitle(e.target.value)}/></label>
       <label>Introducción<input value={subtitle} onChange={e=>setSubtitle(e.target.value)}/></label>
       <label className="full">Mensaje de bienvenida<textarea rows={5} value={message} onChange={e=>setMessage(e.target.value)}/></label>
-      <label>Color principal<div className="studio-color"><input type="color" value={color} onChange={e=>setColor(e.target.value)}/><input value={color} onChange={e=>setColor(e.target.value)}/></div></label>
+      <label>Color principal<div className="studio-color"><input type="color" value={color} onChange={e=>setColor(e.target.value)}/><input value={color} onChange={e=>setColor(e.target.value)}/></div></label><div className="studio-cover-field full"><div><strong>Imagen de portada</strong><small>Usa una fotografía vertical o panorámica de buena calidad.</small></div>{cover?<div className="studio-cover-preview"><img src={cover} alt="Portada"/><button type="button" onClick={()=>setCover("")}>Quitar</button></div>:null}<button type="button" className="client-secondary" onClick={()=>setMediaPicker("cover")}>{cover?"Cambiar portada":"Elegir de Biblioteca"}</button></div>
     </div>}
-    {active==="fecha"&&<div className="studio-info-card"><span>◷</span><h3>{invite.eventos?.fecha||"Fecha por definir"} · {invite.eventos?.hora||"Hora por definir"}</h3><p>Los datos principales del evento se conservaron desde el asistente. La edición completa de fecha y hora se habilitará en esta misma sección.</p></div>}
-    {active==="ubicacion"&&<div className="studio-info-card"><span>⌖</span><h3>{invite.eventos?.lugar||"Ubicación por definir"}</h3><p>{invite.eventos?.direccion||"Agrega posteriormente dirección y enlace de Google Maps."}</p></div>}
-    {active==="galeria"&&<div className="studio-upload-placeholder"><span>▧</span><h3>Galería de fotografías</h3><p>En la siguiente iteración conectaremos esta sección con tu Biblioteca Multimedia para subir y ordenar fotografías.</p><button className="client-secondary" disabled>Seleccionar fotografías</button></div>}
-    {active==="musica"&&<div className="studio-fields"><label className="full">URL o archivo de música<input value={music} onChange={e=>setMusic(e.target.value)} placeholder="Selecciona desde Biblioteca o pega una URL"/></label><div className="studio-note full">♫ La reproducción comenzará después de que el invitado abra la invitación.</div></div>}
+    {active==="fecha"&&<div className="studio-fields"><label>Fecha<input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label><label>Hora<input type="time" value={time} onChange={e=>setTime(e.target.value)}/></label><div className="studio-note full">◷ La cuenta regresiva usa esta fecha y hora automáticamente.</div></div>}
+    {active==="ubicacion"&&<div className="studio-fields"><label>Lugar<input value={venue} onChange={e=>setVenue(e.target.value)} placeholder="Salón, jardín, iglesia…"/></label><label>Dirección<input value={address} onChange={e=>setAddress(e.target.value)} placeholder="Dirección completa"/></label><label className="full">Google Maps<input value={mapsUrl} onChange={e=>setMapsUrl(e.target.value)} placeholder="https://maps.google.com/..."/></label></div>}
+    {active==="galeria"&&<div className="studio-media-section"><div className="studio-media-toolbar"><div><h3>Galería de fotografías</h3><p>Selecciona hasta 8 fotografías de la Biblioteca Multimedia.</p></div><button className="client-primary" onClick={()=>setMediaPicker("gallery")}>Seleccionar fotografías</button></div>{gallery.length?<div className="studio-gallery-grid">{gallery.map((url,index)=><figure key={url}><img src={url} alt={`Foto ${index+1}`}/><button onClick={()=>setGallery(gallery.filter(x=>x!==url))}>×</button></figure>)}</div>:<div className="studio-upload-placeholder"><span>▧</span><h3>Aún no hay fotografías</h3><p>Agrega imágenes para que tu invitación cobre vida.</p></div>}</div>}
+    {active==="musica"&&<div className="studio-fields"><label className="full">Música<input value={music} onChange={e=>setMusic(e.target.value)} placeholder="Selecciona desde Biblioteca o pega una URL"/></label><div className="studio-inline-actions full"><button className="client-secondary" type="button" onClick={()=>setMediaPicker("music")}>Elegir de Biblioteca</button>{music&&<audio controls src={music}/>}</div><div className="studio-note full">♫ La música iniciará después de que el invitado abra la invitación.</div></div>}
     {active==="programa"&&<div className="studio-fields"><label className="full">Itinerario<textarea rows={8} value={program} onChange={e=>setProgram(e.target.value)} placeholder={"18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena"}/><small>Una actividad por línea: hora | actividad</small></label></div>}
     {active==="vestimenta"&&<div className="studio-fields"><label className="full">Código de vestimenta<input value={dress} onChange={e=>setDress(e.target.value)} placeholder="Formal, cóctel, casual…"/></label></div>}
     {active==="regalos"&&<div className="studio-fields"><label className="full">Información de regalos<textarea rows={6} value={gift} onChange={e=>setGift(e.target.value)} placeholder="Mesa de regalos, transferencia, lluvia de sobres…"/></label></div>}
@@ -141,11 +157,11 @@ export default function StudioPage(){
 
    <aside className="studio-preview">
     <div className="studio-preview-head"><strong>Vista previa</strong><span>Celular</span></div>
-    <div className="studio-phone"><div className="studio-phone-notch"/><div className="studio-phone-screen" style={{background:`linear-gradient(160deg,${color},#21171d 55%,#fff 55%)`}}>
+    <div className="studio-phone"><div className="studio-phone-notch"/><div className="studio-phone-screen" style={{background:cover?`linear-gradient(rgba(25,15,20,.45),rgba(25,15,20,.58)),url("${cover}") center/cover`:`linear-gradient(160deg,${color},#21171d 55%,#fff 55%)`}}>
       <div className="studio-phone-hero"><small>{template?.name||"InvitaPro"}</small><span>ESTÁS INVITADO A</span><h2>{title||"Tu evento"}</h2><p>{subtitle}</p></div>
       <div className="studio-phone-body">
-       {visibility.fecha&&<div><small>FECHA</small><strong>{invite.eventos?.fecha||"Por definir"} · {invite.eventos?.hora||""}</strong></div>}
-       {visibility.ubicacion&&<div><small>UBICACIÓN</small><strong>{invite.eventos?.lugar||"Por definir"}</strong></div>}
+       {visibility.fecha&&<div><small>FECHA</small><strong>{date||"Por definir"} · {time||""}</strong></div>}
+       {visibility.ubicacion&&<div><small>UBICACIÓN</small><strong>{venue||"Por definir"}</strong></div>}
        {visibility.vestimenta&&<div><small>VESTIMENTA</small><strong>{dress||"Por definir"}</strong></div>}
        {visibility.rsvp&&<button style={{background:color}}>{rsvpText||"Confirmar asistencia"}</button>}
       </div>
@@ -154,6 +170,9 @@ export default function StudioPage(){
    </aside>
   </div>
 
+  <MediaLibraryPicker open={mediaPicker==="cover"} eventId={invite.evento_id} kind="imagen" selectedUrls={cover?[cover]:[]} onClose={()=>setMediaPicker(null)} onSelect={urls=>setCover(urls[0]||"")}/>
+  <MediaLibraryPicker open={mediaPicker==="gallery"} eventId={invite.evento_id} kind="imagen" multiple maxSelected={8} selectedUrls={gallery} onClose={()=>setMediaPicker(null)} onSelect={urls=>setGallery(urls)}/>
+  <MediaLibraryPicker open={mediaPicker==="music"} eventId={invite.evento_id} kind="audio" selectedUrls={music?[music]:[]} onClose={()=>setMediaPicker(null)} onSelect={urls=>setMusic(urls[0]||"")}/>
   {showTemplates&&<div className="modal-backdrop" onMouseDown={()=>setShowTemplates(false)}><section className="studio-template-modal" onMouseDown={e=>e.stopPropagation()}><header><div><p className="eyebrow">Catálogo completo</p><h2>Cambiar plantilla</h2><p>{TEMPLATE_COLLECTIONS.find(c=>c.id===collection)?.label} · {templates.length} diseños disponibles</p></div><button onClick={()=>setShowTemplates(false)}>×</button></header><div className="studio-template-grid">{templates.map(t=><button key={t.id} className={invite.template_key===t.id?"selected":""} onClick={()=>void changeTemplate(t.id)}><div style={{background:`linear-gradient(145deg,${t.color},#21171d)`}}><small>{t.premium?"Premium":"Disponible"}</small><strong>{t.name}</strong></div><h3>{t.name}</h3><p>{t.description}</p><span>{invite.template_key===t.id?"✓ Seleccionada":"Usar esta plantilla"}</span></button>)}</div></section></div>}
  </main>
 }
