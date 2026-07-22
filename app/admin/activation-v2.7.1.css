@@ -10,35 +10,145 @@
 .activation-admin-summary,.activation-admin-checklist{border:1px solid #e8dde3;border-radius:20px;padding:18px}
 .activation-plan-card{background:linear-gradient(135deg,#72264f,#3b1d2d);color:#fff;border-radius:16px;padding:18px;display:grid;gap:4px}.activation-plan-card small{letter-spacing:.12em;font-weight:900}.activation-plan-card strong{font-size:26px}.activation-plan-card span{opacity:.8}
 .activation-admin-summary dl{margin:16px 0 0}.activation-admin-summary dl>div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #eee5e9}.activation-admin-summary dt{color:#806d77}.activation-admin-summary dd{margin:0;font-weight:800;text-align:right}
-.activation-admin-checklist h3{margin:0 0 14px}
-.activation-admin-checklist label{
-  display:grid;
-  grid-template-columns:20px minmax(0,1fr);
-  align-items:center;
-  justify-content:start;
-  gap:10px;
-  width:100%;
-  padding:10px 0;
-  margin:0;
-  font-weight:700;
-  text-align:left;
-}
-.activation-admin-checklist label input[type="checkbox"]{
-  width:16px;
-  height:16px;
-  margin:0;
-  justify-self:start;
-  accent-color:#197a46;
-}
-.activation-admin-checklist label span{
-  display:block;
-  min-width:0;
-  line-height:1.35;
-  text-align:left;
-}
-.activation-admin-note{margin-top:14px;background:#f8f2f5;border-radius:14px;padding:14px}.activation-admin-note p{margin:5px 0 0;color:#705c67;line-height:1.5}
+.activation-admin-checklist h3{margin:0 0 12px}.activation-admin-checklist label{display:flex;align-items:center;gap:9px;padding:10px 0;font-weight:700}.activation-admin-note{margin-top:14px;background:#f8f2f5;border-radius:14px;padding:14px}.activation-admin-note p{margin:5px 0 0;color:#705c67;line-height:1.5}
 .activation-admin-modal>footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee4e9;padding-top:18px}.activation-admin-modal>footer>div{display:flex;gap:10px}.activation-confirm-button{min-width:190px}
 .dashboard-activation-stat{border-color:#efd49a!important;background:linear-gradient(135deg,#fffaf0,#fff)!important}
 .badge-warning{background:#fff3d9!important;color:#8b5a00!important}
 .dashboard-activation-link{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border-radius:10px;background:#72264f;color:#fff;text-decoration:none;font-weight:800}.dashboard-activation-link svg{width:14px;height:14px}
 @media(max-width:760px){.activation-admin-grid{grid-template-columns:1fr}.activation-admin-modal>footer{align-items:stretch;gap:10px;flex-direction:column}.activation-admin-modal>footer>div{display:grid}.activation-admin-modal>footer>a{text-align:center}}
+
+
+/* InvitaPro v2.7.5 — checklist de activación alineado */
+.activation-admin-checklist{
+  display:flex;
+  flex-direction:column;
+}
+.activation-admin-checklist h3{
+  margin:0 0 14px;
+}
+.activation-check-row{
+  display:grid;
+  grid-template-columns:24px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:44px;
+  padding:8px 0;
+  color:#231c20;
+  font-weight:800;
+  line-height:1.28;
+  text-align:left;
+}
+.activation-check-row + .activation-check-row{
+  border-top:1px solid #f0e7eb;
+}
+.activation-check-box{
+  width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  justify-self:start;
+  border-radius:6px;
+  background:#16844a;
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  box-shadow:0 3px 8px rgba(22,132,74,.18);
+}
+.activation-check-row>span:last-child{
+  display:block;
+  min-width:0;
+  text-align:left;
+  white-space:normal;
+  overflow-wrap:break-word;
+}
+.activation-admin-note{
+  margin-top:16px;
+}
+
+
+/* InvitaPro v2.7.6 — botón Revisar y activar más claro */
+.invitation-library-card .activation-review-button{
+  width:132px!important;
+  min-width:132px!important;
+  min-height:62px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  padding:8px 10px!important;
+  overflow:visible!important;
+  border-radius:12px!important;
+}
+.invitation-library-card .activation-review-button svg{
+  display:none!important;
+}
+.invitation-library-card .activation-review-button::before{
+  content:"✓";
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  border:2px solid rgba(255,255,255,.95);
+  border-radius:50%;
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+}
+.invitation-library-card .activation-review-button span{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  line-height:1.15!important;
+  text-align:center!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+
+/* InvitaPro v2.7.7 — Revisar y activar ocupa ancho completo */
+.invitation-library-card .invitation-action-secondary{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:0!important;
+}
+.invitation-library-card .activation-review-button{
+  grid-column:1 / -1!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:58px!important;
+  flex-direction:row!important;
+  gap:8px!important;
+  padding:10px 14px!important;
+  border-radius:12px 12px 0 0!important;
+}
+.invitation-library-card .activation-review-button::before{
+  flex:0 0 auto;
+  width:22px;
+  height:22px;
+}
+.invitation-library-card .activation-review-button span{
+  width:auto!important;
+  flex:1 1 auto!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  text-align:center!important;
+}
+.invitation-library-card .invitation-action-secondary .action-archive,
+.invitation-library-card .invitation-action-secondary .action-delete{
+  min-height:54px!important;
+}
+.invitation-library-card .invitation-action-secondary .action-archive{
+  border-radius:0 0 0 12px!important;
+}
+.invitation-library-card .invitation-action-secondary .action-delete{
+  border-radius:0 0 12px 0!important;
+}

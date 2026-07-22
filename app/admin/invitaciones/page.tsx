@@ -752,9 +752,9 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
       </section>
       <section className="activation-admin-checklist">
         <h3>Antes de activar</h3>
-        <label><input type="checkbox" defaultChecked readOnly/><span>Diseño revisado</span></label>
-        <label><input type="checkbox" defaultChecked readOnly/><span>Plan confirmado con el cliente</span></label>
-        <label><input type="checkbox" defaultChecked readOnly/><span>Pago confirmado o cortesía autorizada</span></label>
+        <div className="activation-check-row"><span className="activation-check-box" aria-hidden="true">✓</span><span>Diseño revisado</span></div>
+        <div className="activation-check-row"><span className="activation-check-box" aria-hidden="true">✓</span><span>Plan confirmado con el cliente</span></div>
+        <div className="activation-check-row"><span className="activation-check-box" aria-hidden="true">✓</span><span>Pago confirmado o cortesía autorizada</span></div>
         <div className="activation-admin-note"><strong>Al activar:</strong><p>La invitación cambiará a Publicada y el cliente podrá copiar y compartir el enlace definitivo.</p></div>
       </section>
     </div>
