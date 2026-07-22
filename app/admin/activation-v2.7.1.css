@@ -152,3 +152,120 @@
 .invitation-library-card .invitation-action-secondary .action-delete{
   border-radius:0 0 12px 0!important;
 }
+
+
+/* InvitaPro v2.7.8 — estados de invitación legibles */
+.invitation-library-card .invite-status{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:auto!important;
+  max-width:none!important;
+  min-width:92px!important;
+  min-height:34px!important;
+  padding:8px 14px!important;
+  border-radius:999px!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+.invitation-library-card .invite-status-pendiente_activacion{
+  min-width:174px!important;
+  background:#fff1c9!important;
+  color:#895700!important;
+  border:1px solid #efd38c!important;
+}
+.invitation-library-card .invite-status-pendiente_activacion::before{
+  content:"⏳";
+  margin-right:7px;
+  font-size:12px;
+}
+.invitation-library-card .invite-status-publicada{
+  background:#e3f4e8!important;
+  color:#2b6d3f!important;
+  border:1px solid #c8e8d2!important;
+}
+.invitation-library-card .invite-status-borrador{
+  background:#f1eff0!important;
+  color:#6d6368!important;
+  border:1px solid #e1dcdf!important;
+}
+.invitation-library-card .invite-status-pausada{
+  background:#fff0df!important;
+  color:#9a5517!important;
+  border:1px solid #f1d1ad!important;
+}
+.invitation-library-card .invite-status-vencida,
+.invitation-library-card .invite-status-finalizada,
+.invitation-library-card .invite-status-archivada{
+  background:#ece9eb!important;
+  color:#5e565b!important;
+  border:1px solid #ddd6da!important;
+}
+
+
+/* InvitaPro v2.7.9 — separación Estado / Enlace bloqueado */
+.invitation-library-card .invitation-table{
+  table-layout:fixed;
+}
+.invitation-library-card .invitation-table th:nth-child(1),
+.invitation-library-card .invitation-table td:nth-child(1){width:22%}
+.invitation-library-card .invitation-table th:nth-child(2),
+.invitation-library-card .invitation-table td:nth-child(2){width:18%}
+.invitation-library-card .invitation-table th:nth-child(3),
+.invitation-library-card .invitation-table td:nth-child(3){width:9%}
+.invitation-library-card .invitation-table th:nth-child(4),
+.invitation-library-card .invitation-table td:nth-child(4){width:15%}
+.invitation-library-card .invitation-table th:nth-child(5),
+.invitation-library-card .invitation-table td:nth-child(5){width:16%}
+.invitation-library-card .invitation-table th:nth-child(6),
+.invitation-library-card .invitation-table td:nth-child(6){width:20%}
+
+.invitation-library-card .invite-status-pendiente_activacion{
+  min-width:0!important;
+  width:max-content!important;
+  max-width:100%!important;
+  padding:8px 12px!important;
+}
+
+.invitation-library-card .activation-link-locked{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  min-height:34px!important;
+  padding:8px 10px!important;
+  border-radius:999px!important;
+  background:#f5f1f3!important;
+  color:#725f69!important;
+  border:1px solid #e8dde3!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  box-sizing:border-box!important;
+}
+
+.invitation-library-card .invitation-table td:nth-child(4),
+.invitation-library-card .invitation-table td:nth-child(5){
+  padding-left:10px!important;
+  padding-right:10px!important;
+}
+
+@media(max-width:1180px){
+  .invitation-library-card .invite-status-pendiente_activacion{
+    font-size:11px!important;
+  }
+  .invitation-library-card .activation-link-locked{
+    font-size:10px!important;
+  }
+}
