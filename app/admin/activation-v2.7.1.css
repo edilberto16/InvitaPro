@@ -17,8 +17,14 @@
 .dashboard-activation-link{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border-radius:10px;background:#72264f;color:#fff;text-decoration:none;font-weight:800}.dashboard-activation-link svg{width:14px;height:14px}
 @media(max-width:760px){.activation-admin-grid{grid-template-columns:1fr}.activation-admin-modal>footer{align-items:stretch;gap:10px;flex-direction:column}.activation-admin-modal>footer>div{display:grid}.activation-admin-modal>footer>a{text-align:center}}
 
+/* InvitaPro v2.8.0 — datos comerciales de activación */
+.activation-sale-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.activation-sale-fields label{display:grid!important;gap:6px!important;padding:0!important;font-weight:700!important}.activation-sale-fields label.full{grid-column:1/-1}.activation-sale-fields input,.activation-sale-fields select,.activation-sale-fields textarea{width:100%;box-sizing:border-box;border:1px solid #dfd4da;border-radius:10px;background:#fff;padding:10px 11px;font:inherit}.activation-sale-fields .activation-courtesy{display:flex!important;align-items:center!important;grid-template-columns:none!important;flex-direction:row!important}.activation-sale-fields .activation-courtesy input{width:16px;height:16px}.activation-sale-fields .activation-courtesy span{font-size:13px}.admin-nav-link[href="/admin/ventas"]>span{font-weight:900}
+@media(max-width:760px){.activation-sale-fields{grid-template-columns:1fr}.activation-sale-fields label.full{grid-column:auto}}
 
-/* InvitaPro v2.7.5 — checklist de activación alineado */
+
+/* InvitaPro v2.8.1 — reconciliación visual v2.7.5–v2.7.9 */
+
+/* Checklist alineado */
 .activation-admin-checklist{
   display:flex;
   flex-direction:column;
@@ -63,30 +69,37 @@
   white-space:normal;
   overflow-wrap:break-word;
 }
-.activation-admin-note{
-  margin-top:16px;
+
+/* Revisar y activar: ancho completo y legible */
+.invitation-library-card .invitation-action-secondary{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:0!important;
 }
-
-
-/* InvitaPro v2.7.6 — botón Revisar y activar más claro */
 .invitation-library-card .activation-review-button{
-  width:132px!important;
-  min-width:132px!important;
-  min-height:62px!important;
+  grid-column:1 / -1!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:58px!important;
   display:flex!important;
-  flex-direction:column!important;
+  flex-direction:row!important;
   align-items:center!important;
   justify-content:center!important;
-  gap:5px!important;
-  padding:8px 10px!important;
+  gap:8px!important;
+  padding:10px 14px!important;
+  border-radius:12px 12px 0 0!important;
+  background:#15834a!important;
+  color:#fff!important;
+  border-color:#15834a!important;
+  box-shadow:0 8px 18px rgba(21,131,74,.22);
   overflow:visible!important;
-  border-radius:12px!important;
 }
 .invitation-library-card .activation-review-button svg{
   display:none!important;
 }
 .invitation-library-card .activation-review-button::before{
   content:"✓";
+  flex:0 0 auto;
   width:22px;
   height:22px;
   display:grid;
@@ -100,61 +113,24 @@
 }
 .invitation-library-card .activation-review-button span{
   display:block!important;
-  width:100%!important;
+  width:auto!important;
   max-width:none!important;
+  flex:1 1 auto!important;
   color:#fff!important;
-  font-size:11px!important;
+  font-size:12px!important;
   font-weight:900!important;
-  line-height:1.15!important;
+  line-height:1.2!important;
   text-align:center!important;
-  white-space:normal!important;
+  white-space:nowrap!important;
   overflow:visible!important;
   text-overflow:clip!important;
 }
-
-
-/* InvitaPro v2.7.7 — Revisar y activar ocupa ancho completo */
-.invitation-library-card .invitation-action-secondary{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:0!important;
-}
-.invitation-library-card .activation-review-button{
-  grid-column:1 / -1!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:58px!important;
-  flex-direction:row!important;
-  gap:8px!important;
-  padding:10px 14px!important;
-  border-radius:12px 12px 0 0!important;
-}
-.invitation-library-card .activation-review-button::before{
-  flex:0 0 auto;
-  width:22px;
-  height:22px;
-}
-.invitation-library-card .activation-review-button span{
-  width:auto!important;
-  flex:1 1 auto!important;
-  font-size:12px!important;
-  line-height:1.2!important;
-  white-space:nowrap!important;
-  text-align:center!important;
-}
-.invitation-library-card .invitation-action-secondary .action-archive,
-.invitation-library-card .invitation-action-secondary .action-delete{
-  min-height:54px!important;
-}
-.invitation-library-card .invitation-action-secondary .action-archive{
-  border-radius:0 0 0 12px!important;
-}
-.invitation-library-card .invitation-action-secondary .action-delete{
-  border-radius:0 0 12px 0!important;
+.invitation-library-card .activation-review-button:hover{
+  background:#106f3e!important;
+  color:#fff!important;
 }
 
-
-/* InvitaPro v2.7.8 — estados de invitación legibles */
+/* Estados legibles */
 .invitation-library-card .invite-status{
   display:inline-flex!important;
   align-items:center!important;
@@ -174,7 +150,10 @@
   text-overflow:clip!important;
 }
 .invitation-library-card .invite-status-pendiente_activacion{
-  min-width:174px!important;
+  min-width:0!important;
+  width:max-content!important;
+  max-width:100%!important;
+  padding:8px 12px!important;
   background:#fff1c9!important;
   color:#895700!important;
   border:1px solid #efd38c!important;
@@ -189,26 +168,8 @@
   color:#2b6d3f!important;
   border:1px solid #c8e8d2!important;
 }
-.invitation-library-card .invite-status-borrador{
-  background:#f1eff0!important;
-  color:#6d6368!important;
-  border:1px solid #e1dcdf!important;
-}
-.invitation-library-card .invite-status-pausada{
-  background:#fff0df!important;
-  color:#9a5517!important;
-  border:1px solid #f1d1ad!important;
-}
-.invitation-library-card .invite-status-vencida,
-.invitation-library-card .invite-status-finalizada,
-.invitation-library-card .invite-status-archivada{
-  background:#ece9eb!important;
-  color:#5e565b!important;
-  border:1px solid #ddd6da!important;
-}
 
-
-/* InvitaPro v2.7.9 — separación Estado / Enlace bloqueado */
+/* Separación Estado / Enlace */
 .invitation-library-card .invitation-table{
   table-layout:fixed;
 }
@@ -224,12 +185,213 @@
 .invitation-library-card .invitation-table td:nth-child(5){width:16%}
 .invitation-library-card .invitation-table th:nth-child(6),
 .invitation-library-card .invitation-table td:nth-child(6){width:20%}
-
-.invitation-library-card .invite-status-pendiente_activacion{
+.invitation-library-card .activation-link-locked{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  width:100%!important;
   min-width:0!important;
-  width:max-content!important;
   max-width:100%!important;
-  padding:8px 12px!important;
+  min-height:34px!important;
+  padding:8px 10px!important;
+  border-radius:999px!important;
+  background:#f5f1f3!important;
+  color:#725f69!important;
+  border:1px solid #e8dde3!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  box-sizing:border-box!important;
+}
+.invitation-library-card .invitation-table td:nth-child(4),
+.invitation-library-card .invitation-table td:nth-child(5){
+  padding-left:10px!important;
+  padding-right:10px!important;
+}
+
+@media(max-width:760px){
+  .activation-check-row{
+    grid-template-columns:22px minmax(0,1fr);
+  }
+}
+
+
+/* =========================================================
+   InvitaPro v2.8.5 — reconciliación definitiva
+   Modal viewport + estado/enlace + acciones contenidas
+   ========================================================= */
+
+/* ---------- MODAL REVISAR Y PUBLICAR ---------- */
+.activation-admin-backdrop{
+  box-sizing:border-box!important;
+  padding:16px!important;
+  overflow:hidden!important;
+  align-items:center!important;
+}
+
+.activation-admin-modal{
+  box-sizing:border-box!important;
+  width:min(960px,calc(100vw - 32px))!important;
+  max-height:calc(100dvh - 32px)!important;
+  height:auto!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto!important;
+  overflow:hidden!important;
+}
+
+/* Encabezado siempre visible */
+.activation-admin-modal>header{
+  min-height:0!important;
+  flex:none!important;
+  position:relative!important;
+  z-index:3!important;
+  background:#fff!important;
+}
+
+/* SOLO la zona central hace scroll */
+.activation-admin-modal>.activation-admin-grid{
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  scrollbar-gutter:stable!important;
+  align-content:start!important;
+  padding-right:6px!important;
+}
+
+/* Footer siempre visible */
+.activation-admin-modal>footer{
+  min-height:0!important;
+  flex:none!important;
+  position:relative!important;
+  z-index:4!important;
+  background:#fff!important;
+  box-shadow:0 -1px 0 rgba(70,45,55,.10)!important;
+}
+
+/* En pantallas con poca altura, compactamos ligeramente */
+@media(max-height:820px){
+  .activation-admin-backdrop{
+    padding:10px!important;
+    align-items:flex-start!important;
+  }
+  .activation-admin-modal{
+    max-height:calc(100dvh - 20px)!important;
+  }
+  .activation-admin-modal>header{
+    padding-top:16px!important;
+    padding-bottom:12px!important;
+  }
+  .activation-admin-modal>.activation-admin-grid{
+    padding-top:12px!important;
+    padding-bottom:12px!important;
+  }
+  .activation-admin-modal>footer{
+    padding-top:12px!important;
+    padding-bottom:12px!important;
+  }
+}
+
+@media(max-width:760px){
+  .activation-admin-backdrop{padding:8px!important}
+  .activation-admin-modal{
+    width:calc(100vw - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+  }
+}
+
+/* ---------- CHECKLIST ALINEADO ---------- */
+.activation-admin-checklist{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.activation-admin-checklist h3{margin:0 0 14px!important}
+.activation-check-row{
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:10px!important;
+  width:100%!important;
+  min-height:44px!important;
+  padding:8px 0!important;
+  color:#231c20!important;
+  font-weight:800!important;
+  line-height:1.28!important;
+  text-align:left!important;
+}
+.activation-check-row + .activation-check-row{
+  border-top:1px solid #f0e7eb!important;
+}
+.activation-check-box{
+  width:20px!important;
+  height:20px!important;
+  display:grid!important;
+  place-items:center!important;
+  justify-self:start!important;
+  border-radius:6px!important;
+  background:#16844a!important;
+  color:#fff!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  line-height:1!important;
+}
+.activation-check-row>span:last-child{
+  min-width:0!important;
+  text-align:left!important;
+}
+
+/* ---------- TABLA: ESTADO + ENLACE + ACCIONES ---------- */
+.invitation-library-card .invitation-table{
+  width:100%!important;
+  table-layout:fixed!important;
+}
+
+.invitation-library-card .invitation-table th:nth-child(1),
+.invitation-library-card .invitation-table td:nth-child(1){width:20%!important}
+.invitation-library-card .invitation-table th:nth-child(2),
+.invitation-library-card .invitation-table td:nth-child(2){width:17%!important}
+.invitation-library-card .invitation-table th:nth-child(3),
+.invitation-library-card .invitation-table td:nth-child(3){width:8%!important}
+.invitation-library-card .invitation-table th:nth-child(4),
+.invitation-library-card .invitation-table td:nth-child(4){width:15%!important}
+.invitation-library-card .invitation-table th:nth-child(5),
+.invitation-library-card .invitation-table td:nth-child(5){width:16%!important}
+.invitation-library-card .invitation-table th:nth-child(6),
+.invitation-library-card .invitation-table td:nth-child(6){width:24%!important}
+
+/* Estado pendiente: todo dentro de una sola píldora */
+.invitation-library-card .invite-status-pendiente_activacion{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  width:auto!important;
+  max-width:100%!important;
+  min-width:0!important;
+  min-height:36px!important;
+  padding:9px 12px!important;
+  border-radius:999px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  box-sizing:border-box!important;
+  line-height:1!important;
+  background:#fff1c9!important;
+  color:#895700!important;
+  border:1px solid #efd38c!important;
+}
+.invitation-library-card .invite-status-pendiente_activacion::before{
+  content:"⏳"!important;
+  display:inline-block!important;
+  flex:0 0 auto!important;
+  margin:0!important;
+  font-size:12px!important;
+  line-height:1!important;
 }
 
 .invitation-library-card .activation-link-locked{
@@ -255,17 +417,321 @@
   box-sizing:border-box!important;
 }
 
-.invitation-library-card .invitation-table td:nth-child(4),
-.invitation-library-card .invitation-table td:nth-child(5){
+/* Acciones contenidas */
+.invitation-library-card .invitation-actions-cell{
+  overflow:hidden!important;
   padding-left:10px!important;
   padding-right:10px!important;
+  box-sizing:border-box!important;
 }
 
-@media(max-width:1180px){
-  .invitation-library-card .invite-status-pendiente_activacion{
-    font-size:11px!important;
-  }
-  .invitation-library-card .activation-link-locked{
+.invitation-library-card .invitation-action-panel{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+.invitation-library-card .invitation-action-primary,
+.invitation-library-card .invitation-action-secondary{
+  display:contents!important;
+}
+
+.invitation-library-card .invite-action-button,
+.invitation-library-card .invite-secondary-action{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  min-height:68px!important;
+  border-radius:12px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  padding:8px 5px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  text-align:center!important;
+}
+
+.invitation-library-card .invite-action-button span,
+.invitation-library-card .invite-secondary-action span{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  text-align:center!important;
+  white-space:normal!important;
+  line-height:1.05!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+/* Revisar y activar ocupa fila completa */
+.invitation-library-card .activation-review-button{
+  grid-column:1/-1!important;
+  min-height:58px!important;
+  flex-direction:row!important;
+  gap:10px!important;
+  background:#15834a!important;
+  color:#fff!important;
+  border-color:#15834a!important;
+}
+
+.invitation-library-card .activation-review-button svg{display:none!important}
+.invitation-library-card .activation-review-button::before{
+  content:"✓"!important;
+  width:22px!important;
+  height:22px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:2px solid rgba(255,255,255,.95)!important;
+  border-radius:50%!important;
+  color:#fff!important;
+  flex:0 0 auto!important;
+}
+.invitation-library-card .activation-review-button span{
+  width:auto!important;
+  color:#fff!important;
+  white-space:nowrap!important;
+  font-weight:900!important;
+}
+
+/* Pendiente: Archivar y Eliminar en media fila */
+.invitation-library-card tr:has(.invite-status-pendiente_activacion) .action-archive{
+  grid-column:1/3!important;
+  min-height:54px!important;
+}
+.invitation-library-card tr:has(.invite-status-pendiente_activacion) .action-delete{
+  grid-column:3/5!important;
+  min-height:54px!important;
+}
+
+/* Publicada: Pausar + Archivar, Eliminar ancho completo */
+.invitation-library-card tr:has(.invite-status-publicada) .action-pause{
+  grid-column:1/3!important;
+  min-height:54px!important;
+}
+.invitation-library-card tr:has(.invite-status-publicada) .action-archive{
+  grid-column:3/5!important;
+  min-height:54px!important;
+}
+.invitation-library-card tr:has(.invite-status-publicada) .action-delete{
+  grid-column:1/-1!important;
+  min-height:54px!important;
+}
+
+
+/* InvitaPro v2.8.6 — textos de acciones contenidos dentro de sus botones */
+.invitation-library-card .invite-action-button,
+.invitation-library-card .invite-secondary-action{
+  position:relative!important;
+  overflow:hidden!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  padding:8px 6px!important;
+}
+
+.invitation-library-card .invite-action-button span,
+.invitation-library-card .invite-secondary-action span{
+  display:block!important;
+  position:static!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0 2px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  line-height:1.08!important;
+  text-align:center!important;
+  font-size:11px!important;
+}
+
+/* Mantiene los iconos centrados y dentro de su casilla */
+.invitation-library-card .invite-action-button svg,
+.invitation-library-card .invite-secondary-action svg{
+  flex:0 0 auto!important;
+  width:20px!important;
+  height:20px!important;
+  margin:0!important;
+}
+
+/* Acciones superiores: altura suficiente para icono + texto en 2 líneas */
+.invitation-library-card .invite-action-button{
+  min-height:76px!important;
+  justify-content:center!important;
+}
+
+/* Acciones inferiores */
+.invitation-library-card .action-archive,
+.invitation-library-card .action-delete,
+.invitation-library-card .action-pause{
+  min-height:58px!important;
+  justify-content:center!important;
+}
+
+/* Revisar y activar mantiene texto en una sola línea y dentro del botón */
+.invitation-library-card .activation-review-button{
+  min-height:60px!important;
+  padding:10px 14px!important;
+  overflow:hidden!important;
+}
+.invitation-library-card .activation-review-button span{
+  width:auto!important;
+  max-width:calc(100% - 38px)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+}
+
+/* Evita que enlaces/botones internos hereden anchos o posiciones raras */
+.invitation-library-card .invitation-action-panel a,
+.invitation-library-card .invitation-action-panel button{
+  margin:0!important;
+  transform:none!important;
+}
+
+/* En pantallas más estrechas hacemos el texto un poco más compacto */
+@media(max-width:1280px){
+  .invitation-library-card .invite-action-button span,
+  .invitation-library-card .invite-secondary-action span{
     font-size:10px!important;
+  }
+}
+
+
+/* InvitaPro v2.8.7 — acciones en cuadrícula 2x2 para evitar textos cortados */
+.invitation-library-card .invitation-action-panel{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+
+.invitation-library-card .invitation-action-primary,
+.invitation-library-card .invitation-action-secondary{
+  display:contents!important;
+}
+
+/* Acciones superiores: 2 columnas x 2 filas */
+.invitation-library-card .invite-action-button{
+  min-height:76px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  padding:10px 8px!important;
+  border-radius:12px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+.invitation-library-card .invite-action-button span{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:11.5px!important;
+  font-weight:800!important;
+  line-height:1.15!important;
+  text-align:center!important;
+  white-space:normal!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+.invitation-library-card .invite-action-button svg{
+  width:21px!important;
+  height:21px!important;
+  flex:0 0 auto!important;
+}
+
+/* Revisar y activar ocupa las 2 columnas */
+.invitation-library-card .activation-review-button{
+  grid-column:1/-1!important;
+  min-height:60px!important;
+  flex-direction:row!important;
+  gap:10px!important;
+}
+.invitation-library-card .activation-review-button span{
+  width:auto!important;
+  white-space:nowrap!important;
+  font-size:12px!important;
+}
+
+/* Secundarias: dos columnas */
+.invitation-library-card .action-archive,
+.invitation-library-card .action-delete,
+.invitation-library-card .action-pause{
+  min-height:58px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  border-radius:12px!important;
+}
+
+/* Pendiente */
+.invitation-library-card tr:has(.invite-status-pendiente_activacion) .action-archive{
+  grid-column:1!important;
+}
+.invitation-library-card tr:has(.invite-status-pendiente_activacion) .action-delete{
+  grid-column:2!important;
+}
+
+/* Publicada */
+.invitation-library-card tr:has(.invite-status-publicada) .action-pause{
+  grid-column:1!important;
+}
+.invitation-library-card tr:has(.invite-status-publicada) .action-archive{
+  grid-column:2!important;
+}
+.invitation-library-card tr:has(.invite-status-publicada) .action-delete{
+  grid-column:1/-1!important;
+}
+
+/* Un poco más de espacio real para Acciones */
+.invitation-library-card .invitation-table th:nth-child(6),
+.invitation-library-card .invitation-table td:nth-child(6){
+  width:26%!important;
+}
+.invitation-library-card .invitation-table th:nth-child(1),
+.invitation-library-card .invitation-table td:nth-child(1){width:19%!important}
+.invitation-library-card .invitation-table th:nth-child(2),
+.invitation-library-card .invitation-table td:nth-child(2){width:16%!important}
+.invitation-library-card .invitation-table th:nth-child(3),
+.invitation-library-card .invitation-table td:nth-child(3){width:8%!important}
+.invitation-library-card .invitation-table th:nth-child(4),
+.invitation-library-card .invitation-table td:nth-child(4){width:15%!important}
+.invitation-library-card .invitation-table th:nth-child(5),
+.invitation-library-card .invitation-table td:nth-child(5){width:16%!important}
+
+@media(max-width:1280px){
+  .invitation-library-card .invite-action-button span{
+    font-size:11px!important;
   }
 }

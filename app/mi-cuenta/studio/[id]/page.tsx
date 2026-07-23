@@ -5,6 +5,7 @@ import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,getTemplateById} from "@/lib/template-catalog";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
+import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey} from "@/lib/commercial-plans";
 
 type Invite={
  id:string;evento_id:string;titulo:string;slug:string;estado:string;modalidad:string;
@@ -50,6 +51,7 @@ export default function StudioPage(){
  const [showPublish,setShowPublish]=useState(false);
  const [selectedPlan,setSelectedPlan]=useState<"clasico"|"premium"|"signature">("clasico");
  const [requestingActivation,setRequestingActivation]=useState(false);
+ const [commercialPlans,setCommercialPlans]=useState<CommercialPlan[]>(DEFAULT_COMMERCIAL_PLANS);
  const [title,setTitle]=useState("");
  const [message,setMessage]=useState("");
  const [subtitle,setSubtitle]=useState("");
@@ -88,6 +90,7 @@ export default function StudioPage(){
   setLoading(false);
  }
  useEffect(()=>{void load()},[params.id]);
+ useEffect(()=>{void (async()=>{const{data}=await supabase.from("planes_comerciales").select("*").eq("activo",true).order("orden");if(data?.length)setCommercialPlans(data as CommercialPlan[])})()},[]);
 
  async function save(){
   if(!invite)return;
@@ -141,11 +144,11 @@ export default function StudioPage(){
   const current=invite.design_json||{};
   const {error}=await supabase.from("invitaciones").update({
     estado:"pendiente_activacion",
-    design_json:{...current,activation_plan:selectedPlan,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}
+    design_json:{...current,activation_plan:selectedPlan,activation_plan_name:planByKey(commercialPlans,selectedPlan).nombre,activation_price_snapshot:planByKey(commercialPlans,selectedPlan).precio_mxn,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}
   }).eq("id",invite.id);
   setRequestingActivation(false);
   if(error){setError(error.message);return;}
-  setInvite({...invite,estado:"pendiente_activacion",design_json:{...current,activation_plan:selectedPlan,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}});
+  setInvite({...invite,estado:"pendiente_activacion",design_json:{...current,activation_plan:selectedPlan,activation_plan_name:planByKey(commercialPlans,selectedPlan).nombre,activation_price_snapshot:planByKey(commercialPlans,selectedPlan).precio_mxn,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}});
   setShowPublish(false);setSaved("Solicitud enviada ✓");
  }
  if(loading)return <main className="studio-page"><div className="client-loading">Abriendo InvitaPro Studio…</div></main>;
@@ -213,8 +216,8 @@ export default function StudioPage(){
   {showPublish&&<div className="modal-backdrop activation-backdrop" onMouseDown={()=>!requestingActivation&&setShowPublish(false)}><section className="activation-modal" onMouseDown={e=>e.stopPropagation()}>
    <header><div><p className="eyebrow">Lista para el siguiente paso</p><h2>Publicar tu invitación</h2><p>Revisa lo esencial y elige cómo quieres activar tu invitación.</p></div><button onClick={()=>setShowPublish(false)}>×</button></header>
    <div className="activation-readiness"><h3>Validación antes de publicar</h3><div className="activation-checks"><span className={title.trim()?"ok":"missing"}>{title.trim()?"✓":"!"} Nombre del evento</span><span className={date?"ok":"missing"}>{date?"✓":"!"} Fecha</span><span className={invite.template_key?"ok":"missing"}>{invite.template_key?"✓":"!"} Plantilla</span><span className={venue.trim()?"ok":"optional"}>{venue.trim()?"✓":"○"} Ubicación</span><span className={message.trim()?"ok":"optional"}>{message.trim()?"✓":"○"} Mensaje</span><span className={cover?"ok":"optional"}>{cover?"✓":"○"} Portada personalizada</span></div><small>Los elementos marcados con ! son obligatorios. Los demás pueden completarse antes de la activación.</small></div>
-   <div className="activation-plans"><button className={selectedPlan==="clasico"?"selected":""} onClick={()=>setSelectedPlan("clasico")}><span>CLÁSICO</span><strong>Invitación esencial</strong><small>Publicación, enlace y funciones básicas.</small></button><button className={selectedPlan==="premium"?"selected featured":"featured"} onClick={()=>setSelectedPlan("premium")}><span>PREMIUM</span><strong>Experiencia completa</strong><small>Más personalización, multimedia y experiencia avanzada.</small><em>Recomendado</em></button><button className={selectedPlan==="signature"?"selected":""} onClick={()=>setSelectedPlan("signature")}><span>SIGNATURE</span><strong>Diseño exclusivo</strong><small>Experiencias visuales y plantillas especiales.</small></button></div>
-   <div className="activation-summary"><div><small>EVENTO</small><strong>{title||invite.titulo}</strong><span>{date||"Fecha por definir"} · {venue||"Ubicación por definir"}</span></div><div><small>PLAN SELECCIONADO</small><strong>{selectedPlan.toUpperCase()}</strong><span>Activación manual inicial</span></div></div>
+   <div className="activation-plans">{commercialPlans.filter(p=>p.activo).map(plan=><button key={plan.clave} className={`${selectedPlan===plan.clave?"selected":""} ${plan.clave==="premium"?"featured":""}`.trim()} onClick={()=>setSelectedPlan(plan.clave)}><span>{plan.nombre.toUpperCase()}</span><strong>{moneyMXN(plan.precio_mxn)}</strong><small>{plan.descripcion}</small>{plan.clave==="premium"&&<em>Recomendado</em>}</button>)}</div>
+   <div className="activation-summary"><div><small>EVENTO</small><strong>{title||invite.titulo}</strong><span>{date||"Fecha por definir"} · {venue||"Ubicación por definir"}</span></div><div><small>PLAN SELECCIONADO</small><strong>{planByKey(commercialPlans,selectedPlan).nombre}</strong><span>{moneyMXN(planByKey(commercialPlans,selectedPlan).precio_mxn)} · Activación manual</span></div></div>
    <footer><button className="client-secondary" disabled={requestingActivation} onClick={()=>setShowPublish(false)}>Seguir editando</button><button className="client-primary activation-submit" disabled={requestingActivation||!title.trim()||!date||!invite.template_key} onClick={()=>void requestActivation()}>{requestingActivation?"Enviando…":"Solicitar activación →"}</button></footer>
    <p className="activation-note">No se realizará ningún cobro automático todavía. InvitaPro confirmará la activación antes de publicar el enlace definitivo.</p>
   </section></div>}
