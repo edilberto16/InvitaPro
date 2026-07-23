@@ -31,18 +31,44 @@ export default function LoginPage() {
       }}
     finally{setCargando(false);}
   }
-  return <main className="login-page"><section className="login-card">
-    <div className="login-brand"><span>IP</span><div><strong>InvitaPro</strong><small>Tu evento, en un solo lugar</small></div></div>
-    <div className="login-heading"><p className="eyebrow">Bienvenido</p><h1>Iniciar sesión</h1><p>Accede para administrar tu invitación y tus invitados.</p></div>
-    <form className="login-form" onSubmit={iniciarSesion}>
-      <label>Correo electrónico<input type="email" value={correo} onChange={e=>setCorreo(e.target.value)} required autoComplete="email" placeholder="tu@correo.com"/></label>
-      <label>Contraseña<input type="password" value={contrasena} onChange={e=>setContrasena(e.target.value)} required autoComplete="current-password" placeholder="••••••••"/></label>
-      {error&&<p className="form-error">{error}</p>}
-      <div style={{display:"flex",justifyContent:"flex-end",marginTop:-4}}>
-        <Link href="/recuperar-contrasena" style={{fontSize:14,fontWeight:700}}>¿Olvidaste tu contraseña?</Link>
-      </div>
-      <button className="button button-primary login-button" disabled={cargando}>{cargando?"Ingresando…":"Entrar a InvitaPro"}</button>
-    </form>
-    <p style={{textAlign:"center",marginTop:18,fontSize:14}}>¿Eres nuevo? <Link href="/registro"><strong>Crear cuenta</strong></Link></p>
-  </section></main>;
+  return <main className="auth-page">
+    <section className="auth-shell">
+      <aside className="auth-showcase">
+        <Link href="/" className="auth-brand"><span>IP</span><div><strong>InvitaPro</strong><small>Momentos que conectan</small></div></Link>
+        <div className="auth-showcase-copy">
+          <p className="auth-kicker">TU EVENTO, TODO EN UN SOLO LUGAR</p>
+          <h2>Crea, publica y comparte momentos inolvidables.</h2>
+          <p>Administra tu invitación, invitados, confirmaciones y todos los detalles de tu evento desde una sola experiencia.</p>
+          <div className="auth-proof-grid">
+            <div><strong>Diseña</strong><span>Plantillas profesionales y personalización visual.</span></div>
+            <div><strong>Comparte</strong><span>Un enlace listo para enviar a tus invitados.</span></div>
+            <div><strong>Gestiona</strong><span>RSVP, pases y seguimiento en tiempo real.</span></div>
+          </div>
+        </div>
+        <div className="auth-showcase-footer"><span>✦</span><p>Invitaciones digitales que se sienten especiales desde el primer vistazo.</p></div>
+      </aside>
+
+      <section className="auth-panel">
+        <div className="auth-panel-inner">
+          <div className="auth-mobile-brand"><Link href="/"><span>IP</span><strong>InvitaPro</strong></Link></div>
+          <div className="auth-heading">
+            <p className="eyebrow">Bienvenido de nuevo</p>
+            <h1>Inicia sesión</h1>
+            <p>Continúa creando y administrando tu evento desde Mi InvitaPro.</p>
+          </div>
+
+          <form className="auth-form" onSubmit={iniciarSesion}>
+            <label><span>Correo electrónico</span><input type="email" value={correo} onChange={e=>setCorreo(e.target.value)} required autoComplete="email" placeholder="tu@correo.com"/></label>
+            <label><div className="auth-label-row"><span>Contraseña</span><Link href="/recuperar-contrasena">¿La olvidaste?</Link></div><input type="password" value={contrasena} onChange={e=>setContrasena(e.target.value)} required autoComplete="current-password" placeholder="••••••••"/></label>
+            {error&&<p className="form-error auth-error">{error}</p>}
+            <button className="auth-submit" disabled={cargando}>{cargando?"Ingresando…":"Entrar a Mi InvitaPro"}<span>→</span></button>
+          </form>
+
+          <div className="auth-divider"><span>¿Aún no tienes cuenta?</span></div>
+          <Link className="auth-secondary-action" href="/registro">Crear mi cuenta gratis</Link>
+          <p className="auth-legal">Al continuar, aceptas nuestros términos y aviso de privacidad.</p>
+        </div>
+      </section>
+    </section>
+  </main>;
 }

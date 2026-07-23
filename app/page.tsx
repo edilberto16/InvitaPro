@@ -186,10 +186,10 @@ export default function Home() {
 
       <section className="managed-choice" id="solicitar">
         <div className="marketing-container">
-          <div className="managed-choice-heading"><span className="marketing-eyebrow">Tú eliges cómo empezar</span><h2>¿Cómo quieres crear tu invitación?</h2><p>Podemos encargarnos de todo por ti. El modo de autoservicio llegará en la siguiente etapa.</p></div>
+          <div className="managed-choice-heading"><span className="marketing-eyebrow">Tú eliges cómo empezar</span><h2>¿Cómo quieres crear tu invitación?</h2><p>Elige entre nuestro servicio personalizado o crea tu invitación tú mismo desde Mi InvitaPro.</p></div>
           <div className="managed-choice-grid">
             <article className="managed-choice-card managed-choice-card--featured"><span className="managed-choice-badge">Disponible ahora</span><h3>Quiero que InvitaPro la cree por mí</h3><p>Cuéntanos sobre tu evento y nuestro equipo prepara tu invitación, configura los detalles y la deja lista para compartir.</p><ul><li>Asesoría personalizada</li><li>Diseño y configuración</li><li>Fotografías, música, ubicación y RSVP</li><li>Acceso a Mi InvitaPro</li></ul><Link className="marketing-button" href="/solicitar">Solicitar mi invitación <span>→</span></Link></article>
-            <article className="managed-choice-card"><span className="managed-choice-badge managed-choice-badge--soft">Próximamente</span><h3>Prefiero crearla yo</h3><p>Muy pronto podrás elegir una plantilla, personalizarla y publicar tu evento directamente desde Mi InvitaPro.</p><Link className="marketing-button marketing-button-ghost" href="/inspiracion">Explorar diseños</Link></article>
+            <article className="managed-choice-card"><span className="managed-choice-badge">Disponible ahora</span><h3>Prefiero crearla yo</h3><p>Elige una plantilla profesional, personaliza tu evento y solicita la activación cuando esté listo para publicarse.</p><ul><li>Plantillas profesionales</li><li>Editor visual desde Mi InvitaPro</li><li>Galería, música, ubicación y RSVP según tu plan</li><li>Planes Clásico, Premium y Signature</li></ul><Link className="marketing-button" href="/registro">Crear mi invitación <span>→</span></Link></article>
           </div>
         </div>
       </section>

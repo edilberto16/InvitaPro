@@ -51,6 +51,7 @@ export default function StudioPage(){
  const [showPublish,setShowPublish]=useState(false);
  const [selectedPlan,setSelectedPlan]=useState<"clasico"|"premium"|"signature">("clasico");
  const [requestingActivation,setRequestingActivation]=useState(false);
+ const [activationIssues,setActivationIssues]=useState<string[]>([]);
  const [commercialPlans,setCommercialPlans]=useState<CommercialPlan[]>(DEFAULT_COMMERCIAL_PLANS);
  const [title,setTitle]=useState("");
  const [message,setMessage]=useState("");
@@ -140,15 +141,81 @@ export default function StudioPage(){
  }
  async function requestActivation(){
   if(!invite)return;
-  setRequestingActivation(true);setError("");
+  setRequestingActivation(true);setError("");setActivationIssues([]);
+
+  const selected=planByKey(commercialPlans,selectedPlan);
+  const issues:string[]=[];
+  const currentTemplate=getTemplateById(invite.template_key||"");
+
+  if(!title.trim())issues.push("Agrega el nombre del evento.");
+  if(!date)issues.push("Define la fecha del evento.");
+  if(!invite.template_key)issues.push("Selecciona una plantilla.");
+
+  if(selected.limite_galeria!==null&&gallery.length>selected.limite_galeria){
+    issues.push(`El plan ${selected.nombre} permite hasta ${selected.limite_galeria} fotos en la galería. Actualmente tienes ${gallery.length}.`);
+  }
+  if(!selected.permite_musica&&music.trim()){
+    issues.push(`El plan ${selected.nombre} no incluye música. Elimina la música o elige un plan superior.`);
+  }
+  if(!selected.permite_rsvp&&(invite.modalidad==="rsvp"||invite.modalidad==="pases")){
+    issues.push(`El plan ${selected.nombre} no incluye RSVP/pases para esta modalidad.`);
+  }
+  if(currentTemplate?.premium&&!selected.permite_plantillas_premium){
+    issues.push(`La plantilla "${currentTemplate.name}" es Premium y no está incluida en el plan ${selected.nombre}.`);
+  }
+
+  if(selected.limite_invitados!==null){
+    const {data:guestRows,error:guestError}=await supabase
+      .from("invitados")
+      .select("adultos_permitidos,ninos_permitidos")
+      .eq("invitacion_id",invite.id);
+    if(guestError){
+      setRequestingActivation(false);
+      setError(guestError.message);
+      return;
+    }
+    const allowedPeople=(guestRows??[]).reduce((sum,row)=>sum+Number(row.adultos_permitidos||0)+Number(row.ninos_permitidos||0),0);
+    if(allowedPeople>selected.limite_invitados){
+      issues.push(`El plan ${selected.nombre} permite hasta ${selected.limite_invitados} invitados/pases y actualmente tienes ${allowedPeople}.`);
+    }
+  }
+
+  if(issues.length){
+    setActivationIssues(issues);
+    setRequestingActivation(false);
+    return;
+  }
+
   const current=invite.design_json||{};
+  const activationSnapshot={
+    plan:selectedPlan,
+    plan_name:selected.nombre,
+    price:selected.precio_mxn,
+    limits:{
+      invitados:selected.limite_invitados,
+      galeria:selected.limite_galeria,
+      musica:selected.permite_musica,
+      rsvp:selected.permite_rsvp,
+      premium:selected.permite_plantillas_premium,
+      signature:selected.permite_signature
+    }
+  };
+  const nextDesign={
+    ...current,
+    activation_plan:selectedPlan,
+    activation_plan_name:selected.nombre,
+    activation_price_snapshot:selected.precio_mxn,
+    activation_plan_snapshot:activationSnapshot,
+    activation_requested_at:new Date().toISOString(),
+    activation_source:"autoservicio"
+  };
   const {error}=await supabase.from("invitaciones").update({
     estado:"pendiente_activacion",
-    design_json:{...current,activation_plan:selectedPlan,activation_plan_name:planByKey(commercialPlans,selectedPlan).nombre,activation_price_snapshot:planByKey(commercialPlans,selectedPlan).precio_mxn,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}
+    design_json:nextDesign
   }).eq("id",invite.id);
   setRequestingActivation(false);
   if(error){setError(error.message);return;}
-  setInvite({...invite,estado:"pendiente_activacion",design_json:{...current,activation_plan:selectedPlan,activation_plan_name:planByKey(commercialPlans,selectedPlan).nombre,activation_price_snapshot:planByKey(commercialPlans,selectedPlan).precio_mxn,activation_requested_at:new Date().toISOString(),activation_source:"autoservicio"}});
+  setInvite({...invite,estado:"pendiente_activacion",design_json:nextDesign});
   setShowPublish(false);setSaved("Solicitud enviada ✓");
  }
  if(loading)return <main className="studio-page"><div className="client-loading">Abriendo InvitaPro Studio…</div></main>;
@@ -168,7 +235,7 @@ export default function StudioPage(){
  return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
    <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small>{saved||"Borrador · Guardado manual"}</small></div></div>
-   <div className="studio-topbar-actions"><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving}>{saving?"Guardando…":"Guardar cambios"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>setShowPublish(true)}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link>}</div>
+   <div className="studio-topbar-actions"><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving}>{saving?"Guardando…":"Guardar cambios"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link>}</div>
   </header>
 
   <div className="studio-workspace">
@@ -216,8 +283,9 @@ export default function StudioPage(){
   {showPublish&&<div className="modal-backdrop activation-backdrop" onMouseDown={()=>!requestingActivation&&setShowPublish(false)}><section className="activation-modal" onMouseDown={e=>e.stopPropagation()}>
    <header><div><p className="eyebrow">Lista para el siguiente paso</p><h2>Publicar tu invitación</h2><p>Revisa lo esencial y elige cómo quieres activar tu invitación.</p></div><button onClick={()=>setShowPublish(false)}>×</button></header>
    <div className="activation-readiness"><h3>Validación antes de publicar</h3><div className="activation-checks"><span className={title.trim()?"ok":"missing"}>{title.trim()?"✓":"!"} Nombre del evento</span><span className={date?"ok":"missing"}>{date?"✓":"!"} Fecha</span><span className={invite.template_key?"ok":"missing"}>{invite.template_key?"✓":"!"} Plantilla</span><span className={venue.trim()?"ok":"optional"}>{venue.trim()?"✓":"○"} Ubicación</span><span className={message.trim()?"ok":"optional"}>{message.trim()?"✓":"○"} Mensaje</span><span className={cover?"ok":"optional"}>{cover?"✓":"○"} Portada personalizada</span></div><small>Los elementos marcados con ! son obligatorios. Los demás pueden completarse antes de la activación.</small></div>
-   <div className="activation-plans">{commercialPlans.filter(p=>p.activo).map(plan=><button key={plan.clave} className={`${selectedPlan===plan.clave?"selected":""} ${plan.clave==="premium"?"featured":""}`.trim()} onClick={()=>setSelectedPlan(plan.clave)}><span>{plan.nombre.toUpperCase()}</span><strong>{moneyMXN(plan.precio_mxn)}</strong><small>{plan.descripcion}</small>{plan.clave==="premium"&&<em>Recomendado</em>}</button>)}</div>
+   <div className="activation-plans">{commercialPlans.filter(p=>p.activo).map(plan=><button key={plan.clave} className={`${selectedPlan===plan.clave?"selected":""} ${plan.clave==="premium"?"featured":""}`.trim()} onClick={()=>{setSelectedPlan(plan.clave);setActivationIssues([])}}><span>{plan.nombre.toUpperCase()}</span><strong>{moneyMXN(plan.precio_mxn)}</strong><small>{plan.descripcion}</small><small>{plan.limite_invitados===null?"Invitados ilimitados":`Hasta ${plan.limite_invitados} invitados`} · {plan.limite_galeria===null?"Galería ilimitada":`${plan.limite_galeria} fotos`}</small><small>{plan.permite_musica?"✓ Música":"— Sin música"} · {plan.permite_plantillas_premium?"✓ Premium":"— Plantillas estándar"}</small>{plan.clave==="premium"&&<em>Recomendado</em>}</button>)}</div>
    <div className="activation-summary"><div><small>EVENTO</small><strong>{title||invite.titulo}</strong><span>{date||"Fecha por definir"} · {venue||"Ubicación por definir"}</span></div><div><small>PLAN SELECCIONADO</small><strong>{planByKey(commercialPlans,selectedPlan).nombre}</strong><span>{moneyMXN(planByKey(commercialPlans,selectedPlan).precio_mxn)} · Activación manual</span></div></div>
+   {activationIssues.length>0&&<div className="activation-plan-issues"><strong>Revisa tu plan antes de continuar:</strong>{activationIssues.map(issue=><span key={issue}>• {issue}</span>)}</div>}
    <footer><button className="client-secondary" disabled={requestingActivation} onClick={()=>setShowPublish(false)}>Seguir editando</button><button className="client-primary activation-submit" disabled={requestingActivation||!title.trim()||!date||!invite.template_key} onClick={()=>void requestActivation()}>{requestingActivation?"Enviando…":"Solicitar activación →"}</button></footer>
    <p className="activation-note">No se realizará ningún cobro automático todavía. InvitaPro confirmará la activación antes de publicar el enlace definitivo.</p>
   </section></div>}
