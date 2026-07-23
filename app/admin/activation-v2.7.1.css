@@ -735,3 +735,136 @@
     font-size:11px!important;
   }
 }
+
+
+/* InvitaPro v2.9.1 — estilos para Planes y precios */
+.commercial-plan-admin-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.commercial-plan-admin-card{
+  border:1px solid #e5d9df;
+  border-radius:18px;
+  padding:18px;
+  background:#fff;
+  display:grid;
+  gap:14px;
+}
+.commercial-plan-admin-card.inactive{opacity:.62}
+.commercial-plan-admin-card>header{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:start;
+}
+.commercial-plan-admin-card>header>div{
+  display:grid;
+  gap:5px;
+  flex:1;
+}
+.commercial-plan-admin-card>header input{
+  border:0;
+  font-size:22px;
+  font-weight:900;
+  padding:0;
+  min-width:0;
+}
+.plan-key{
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-size:10px;
+  font-weight:900;
+  color:#a24d72;
+}
+.plan-active-toggle{
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  padding:0!important;
+}
+.plan-active-toggle input{
+  width:16px!important;
+  height:16px!important;
+}
+.commercial-plan-admin-card>label,
+.commercial-plan-limits label{
+  display:grid;
+  gap:6px;
+  font-weight:800;
+  font-size:13px;
+}
+.commercial-plan-admin-card input,
+.commercial-plan-admin-card textarea{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid #ddd2d8;
+  border-radius:10px;
+  padding:10px 11px;
+  font:inherit;
+}
+.commercial-plan-limits{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.commercial-feature-list{
+  display:grid;
+  gap:8px;
+  background:#faf7f8;
+  border-radius:12px;
+  padding:12px;
+}
+.commercial-feature-list label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:700;
+}
+.commercial-feature-list input{
+  width:16px;
+  height:16px;
+}
+.commercial-plan-admin-card>footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.plan-save-message{
+  font-size:12px;
+  color:#197a46;
+  font-weight:800;
+}
+.sales-pipeline-card{
+  border-color:#efd49a!important;
+}
+.sales-pipeline-list{
+  display:grid;
+}
+.sales-pipeline-list>div{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  padding:14px 0;
+  border-top:1px solid #eee5e9;
+}
+.sales-pipeline-list>div>div{
+  display:grid;
+  gap:3px;
+}
+.sales-pipeline-list>div>div:last-child{text-align:right}
+.sales-pipeline-list span{
+  color:#79666f;
+  font-size:13px;
+}
+@media(max-width:1100px){
+  .commercial-plan-admin-grid{grid-template-columns:1fr}
+  .commercial-plan-limits{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  .commercial-plan-limits{grid-template-columns:1fr}
+  .sales-pipeline-list>div{display:grid}
+  .sales-pipeline-list>div>div:last-child{text-align:left}
+}
