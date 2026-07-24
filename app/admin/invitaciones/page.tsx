@@ -19,6 +19,11 @@ const DEFAULT_SECTION_SETTINGS:SectionSettings={
   details:{eyebrow:'Información',title:'Todo lo que necesitas saber',description:'',buttonLabel:'',alignment:'center'},
   program:{eyebrow:'Itinerario',title:'Programa del evento',description:'',buttonLabel:'',alignment:'center'},
   gallery:{eyebrow:'Recuerdos',title:'Nuestra galería',description:'Algunos momentos que queremos compartir contigo.',buttonLabel:'',alignment:'center'},
+  history:{eyebrow:'Un capítulo especial',title:'Nuestra historia',description:'',buttonLabel:'',alignment:'center'},
+  lodging:{eyebrow:'Para tu comodidad',title:'Hospedaje recomendado',description:'Opciones para que disfrutes el evento sin preocupaciones.',buttonLabel:'',alignment:'center'},
+  gifts:{eyebrow:'Tu presencia es nuestro mejor regalo',title:'Mesa de regalos',description:'',buttonLabel:'',alignment:'center'},
+  video:{eyebrow:'Un mensaje especial',title:'Queremos compartir esto contigo',description:'',buttonLabel:'',alignment:'center'},
+  faq:{eyebrow:'Información útil',title:'Preguntas frecuentes',description:'',buttonLabel:'',alignment:'center'},
   location:{eyebrow:'Ubicación',title:'',description:'',buttonLabel:'Cómo llegar',alignment:'center'},
   rsvp:{eyebrow:'RSVP',title:'¿Nos acompañas?',description:'Agradecemos confirmar tu asistencia.',buttonLabel:'Enviar confirmación',alignment:'center'}
 };
@@ -152,13 +157,35 @@ function handleSectionDragEnd(){setDraggedSection(null)}
 function sectionEnabled(sectionId:TemplateSectionId){
   if(sectionId==='hero')return true;
   if(sectionId==='intro')return form.mostrar_intro;
-  const field={countdown:'mostrar_contador',details:'mostrar_detalles',program:'mostrar_programa',gallery:'mostrar_galeria',location:'mostrar_mapa',rsvp:'mostrar_rsvp'}[sectionId] as keyof FormState|undefined;
+  if(['history','lodging','gifts','video','faq'].includes(sectionId))return false;
+
+  const visibilityField:Partial<Record<TemplateSectionId,keyof FormState>>={
+    countdown:'mostrar_contador',
+    details:'mostrar_detalles',
+    program:'mostrar_programa',
+    gallery:'mostrar_galeria',
+    location:'mostrar_mapa',
+    rsvp:'mostrar_rsvp',
+  };
+
+  const field=visibilityField[sectionId];
   return field?Boolean(form[field]):true;
 }
 function updateSectionSetting<K extends keyof SectionSettings[TemplateSectionId]>(sectionId:TemplateSectionId,key:K,value:SectionSettings[TemplateSectionId][K]){setForm(current=>({...current,section_settings:{...current.section_settings,[sectionId]:{...current.section_settings[sectionId],[key]:value}}}))}
 function toggleSection(sectionId:TemplateSectionId){
-  if(sectionId==='hero')return;
-  const field={intro:'mostrar_intro',countdown:'mostrar_contador',details:'mostrar_detalles',program:'mostrar_programa',gallery:'mostrar_galeria',location:'mostrar_mapa',rsvp:'mostrar_rsvp'}[sectionId] as keyof FormState|undefined;
+  if(sectionId==='hero'||['history','lodging','gifts','video','faq'].includes(sectionId))return;
+
+  const visibilityField:Partial<Record<TemplateSectionId,keyof FormState>>={
+    intro:'mostrar_intro',
+    countdown:'mostrar_contador',
+    details:'mostrar_detalles',
+    program:'mostrar_programa',
+    gallery:'mostrar_galeria',
+    location:'mostrar_mapa',
+    rsvp:'mostrar_rsvp',
+  };
+
+  const field=visibilityField[sectionId];
   if(!field)return;
   setForm(current=>({...current,[field]:!Boolean(current[field])}));
 }
@@ -680,7 +707,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
                   })}
                 </div>
                 <div className="section-properties-panel">
-                  <div className="section-properties-header"><div><span>Propiedades del bloque</span><strong>{({hero:'Portada',intro:'Introducción',countdown:'Cuenta regresiva',details:'Detalles del evento',program:'Programa',gallery:'Galería',location:'Ubicación',rsvp:'Confirmación RSVP'} as Record<TemplateSectionId,string>)[selectedSection]}</strong></div><button type="button" onClick={()=>setForm(current=>({...current,section_settings:{...current.section_settings,[selectedSection]:{...DEFAULT_SECTION_SETTINGS[selectedSection]}}}))}>Restablecer</button></div>
+                  <div className="section-properties-header"><div><span>Propiedades del bloque</span><strong>{({hero:'Portada',intro:'Introducción',countdown:'Cuenta regresiva',details:'Detalles del evento',program:'Programa',gallery:'Galería',history:'Nuestra historia',lodging:'Hospedaje',gifts:'Mesa de regalos',video:'Video',faq:'Preguntas frecuentes',location:'Ubicación',rsvp:'Confirmación RSVP'} as Record<TemplateSectionId,string>)[selectedSection]}</strong></div><button type="button" onClick={()=>setForm(current=>({...current,section_settings:{...current.section_settings,[selectedSection]:{...DEFAULT_SECTION_SETTINGS[selectedSection]}}}))}>Restablecer</button></div>
                   <div className="section-properties-grid">
                     <label className="form-field"><span>Etiqueta superior</span><input value={form.section_settings[selectedSection].eyebrow} onChange={e=>updateSectionSetting(selectedSection,'eyebrow',e.target.value)}/></label>
                     <label className="form-field"><span>Título del bloque</span><input value={form.section_settings[selectedSection].title} placeholder={selectedSection==='hero'?'Usa el título principal de la invitación':''} onChange={e=>updateSectionSetting(selectedSection,'title',e.target.value)}/></label>

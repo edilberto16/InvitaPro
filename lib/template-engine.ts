@@ -7,6 +7,11 @@ export type TemplateSectionId =
   | 'details'
   | 'program'
   | 'gallery'
+  | 'history'
+  | 'lodging'
+  | 'gifts'
+  | 'video'
+  | 'faq'
   | 'location'
   | 'rsvp';
 
@@ -37,6 +42,11 @@ export const DEFAULT_TEMPLATE_SECTION_ORDER: TemplateSectionId[] = [
   'details',
   'program',
   'gallery',
+  'history',
+  'lodging',
+  'gifts',
+  'video',
+  'faq',
   'location',
   'rsvp',
 ];

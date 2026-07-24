@@ -9,6 +9,11 @@ export const SECTION_META: Record<TemplateSectionId,{title:string;description:st
   details:{title:'Detalles',description:'Fecha, lugar y vestimenta',icon:'i'},
   program:{title:'Programa',description:'Itinerario y horarios',icon:'≡'},
   gallery:{title:'Galería',description:'Fotografías y recuerdos',icon:'▧'},
+  history:{title:'Nuestra historia',description:'Relato y storytelling',icon:'♡'},
+  lodging:{title:'Hospedaje',description:'Hoteles y recomendaciones',icon:'⌂'},
+  gifts:{title:'Mesa de regalos',description:'Opciones de regalos',icon:'♢'},
+  video:{title:'Video',description:'Mensaje o recuerdo audiovisual',icon:'▶'},
+  faq:{title:'Preguntas frecuentes',description:'Dudas de los invitados',icon:'?'},
   location:{title:'Ubicación',description:'Dirección y mapa',icon:'⌖'},
   rsvp:{title:'Confirmación RSVP',description:'Asistencia de invitados',icon:'✓'}
 };

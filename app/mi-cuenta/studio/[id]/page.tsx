@@ -23,7 +23,11 @@ const SECTIONS=[
  {id:"musica",label:"Música",desc:"Canción de la celebración",icon:"♫"},
  {id:"programa",label:"Itinerario",desc:"Horarios y actividades",icon:"☷"},
  {id:"vestimenta",label:"Dress code",desc:"Código de vestimenta",icon:"◇"},
+ {id:"historia",label:"Nuestra historia",desc:"Cuenta cómo comenzó todo",icon:"♡"},
+ {id:"hospedaje",label:"Hospedaje",desc:"Hoteles y recomendaciones",icon:"⌂"},
  {id:"regalos",label:"Mesa de regalos",desc:"Opciones y recomendaciones",icon:"♢"},
+ {id:"video",label:"Video",desc:"Mensaje o recuerdo especial",icon:"▶"},
+ {id:"faq",label:"Preguntas frecuentes",desc:"Resuelve dudas de tus invitados",icon:"?"},
  {id:"rsvp",label:"Confirmación RSVP",desc:"Asistencia de invitados",icon:"✓"},
 ] as const;
 
@@ -35,12 +39,17 @@ const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;lock
  details:{label:"Detalles del evento",desc:"Fecha, lugar y código de vestimenta",icon:"◇"},
  program:{label:"Itinerario",desc:"Horarios y actividades",icon:"☷"},
  gallery:{label:"Galería",desc:"Fotografías y recuerdos",icon:"▧"},
+ history:{label:"Nuestra historia",desc:"Una sección narrativa para contar su historia",icon:"♡"},
+ lodging:{label:"Hospedaje",desc:"Hoteles, tarifas y recomendaciones para invitados",icon:"⌂"},
+ gifts:{label:"Mesa de regalos",desc:"Regalos, transferencias o lluvia de sobres",icon:"♢"},
+ video:{label:"Video",desc:"Video especial, bienvenida o recuerdo",icon:"▶"},
+ faq:{label:"Preguntas frecuentes",desc:"Respuestas rápidas para tus invitados",icon:"?"},
  location:{label:"Ubicación",desc:"Dirección, mapa y cómo llegar",icon:"⌖"},
  rsvp:{label:"Confirmación RSVP",desc:"Respuesta de asistencia de invitados",icon:"✓"},
 };
 
-const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",rsvp:"rsvp"};
-const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",rsvp:"rsvp"};
+const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",rsvp:"rsvp"};
+const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",rsvp:"rsvp"};
 
 function collectionForTipo(tipo:string){
  const t=tipo.toLowerCase();
@@ -77,7 +86,12 @@ export default function StudioPage(){
  const [whatsapp,setWhatsapp]=useState("");
  const [program,setProgram]=useState("");
  const [dress,setDress]=useState("Formal");
+ const [historyTitle,setHistoryTitle]=useState("Nuestra historia");
+ const [historyText,setHistoryText]=useState("");
+ const [lodging,setLodging]=useState("");
  const [gift,setGift]=useState("");
+ const [videoUrl,setVideoUrl]=useState("");
+ const [faqText,setFaqText]=useState("");
  const [rsvpText,setRsvpText]=useState("Confirma tu asistencia");
  const [cover,setCover]=useState("");
  const [gallery,setGallery]=useState<string[]>([]);
@@ -88,10 +102,12 @@ export default function StudioPage(){
  const [mapsUrl,setMapsUrl]=useState("");
  const [mediaPicker,setMediaPicker]=useState<null|"cover"|"gallery"|"music">(null);
  const [visibility,setVisibility]=useState<Record<string,boolean>>({
-  portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,regalos:true,rsvp:true
+  portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,historia:true,hospedaje:true,regalos:true,video:true,faq:true,rsvp:true
  });
  const [sectionOrder,setSectionOrder]=useState<TemplateSectionId[]>([...DEFAULT_TEMPLATE_SECTION_ORDER]);
- const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,location:true,rsvp:true});
+ const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,history:false,lodging:false,gifts:false,video:false,faq:false,location:true,rsvp:true});
+ const [draggedBlock,setDraggedBlock]=useState<TemplateSectionId|null>(null);
+ const [showAddSection,setShowAddSection]=useState(false);
 
  async function load(){
   setLoading(true);setError("");
@@ -102,7 +118,9 @@ export default function StudioPage(){
   const i=data as unknown as Invite; const d=i.design_json||{};
   setInvite(i);setTitle(i.titulo);setMessage(typeof d.mensaje==="string"?d.mensaje:"");setSubtitle(typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento");
   setColor(i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f");setMusic(i.musica_url||"");setWhatsapp(i.whatsapp||"");
-  setProgram(typeof d.programa==="string"?d.programa:"");setDress(typeof d.vestimenta==="string"?d.vestimenta:"Formal");setGift(typeof d.regalos==="string"?d.regalos:"");setRsvpText(typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia");
+  setProgram(typeof d.programa==="string"?d.programa:"");setDress(typeof d.vestimenta==="string"?d.vestimenta:"Formal");
+  setHistoryTitle(typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia");setHistoryText(typeof d.historia_texto==="string"?d.historia_texto:"");
+  setLodging(typeof d.hospedaje==="string"?d.hospedaje:"");setGift(typeof d.regalos==="string"?d.regalos:"");setVideoUrl(typeof d.video_url==="string"?d.video_url:"");setFaqText(typeof d.faq==="string"?d.faq:"");setRsvpText(typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia");
   setCover(typeof d.portada_url==="string"?d.portada_url:"");setGallery(Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[]);
   setDate(i.eventos?.fecha||"");setTime(i.eventos?.hora?.slice(0,5)||"");setVenue(i.eventos?.lugar||"");setAddress(i.eventos?.direccion||"");setMapsUrl(i.eventos?.maps_url||"");
   setVisibility(v=>({...v,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})}));
@@ -114,6 +132,11 @@ export default function StudioPage(){
    details:d.mostrar_detalles!==false,
    program:d.mostrar_programa!==false,
    gallery:d.mostrar_galeria!==false,
+   history:d.mostrar_historia===true,
+   lodging:d.mostrar_hospedaje===true,
+   gifts:d.mostrar_regalos===true,
+   video:d.mostrar_video===true,
+   faq:d.mostrar_faq===true,
    location:d.mostrar_mapa!==false,
    rsvp:d.mostrar_rsvp!==false,
   });
@@ -131,7 +154,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,regalos:gift,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.11.0",plantilla:invite.template_key||current.plantilla}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.11.2",plantilla:invite.template_key||current.plantilla}
   };
   const [{error:inviteError},{error:eventError}]=await Promise.all([
     supabase.from("invitaciones").update(payload).eq("id",invite.id),
@@ -170,6 +193,24 @@ export default function StudioPage(){
  }
  function moveBlock(sectionId:TemplateSectionId,direction:-1|1){
   setSectionOrder(current=>{const index=current.indexOf(sectionId);const target=index+direction;if(index<0||target<0||target>=current.length)return current;const next=[...current];[next[index],next[target]]=[next[target],next[index]];return next;});
+ }
+ function reorderBlock(sourceId:TemplateSectionId,targetId:TemplateSectionId){
+  if(sourceId===targetId)return;
+  setSectionOrder(current=>{
+   const sourceIndex=current.indexOf(sourceId);
+   const targetIndex=current.indexOf(targetId);
+   if(sourceIndex<0||targetIndex<0)return current;
+   const next=[...current];
+   const [moved]=next.splice(sourceIndex,1);
+   next.splice(targetIndex,0,moved);
+   return next;
+  });
+ }
+ function addBlock(sectionId:TemplateSectionId){
+  setBlockVisibility(current=>({...current,[sectionId]:true}));
+  const editorId=BLOCK_TO_EDITOR[sectionId];
+  if(editorId)setVisibility(current=>({...current,[editorId]:true}));
+  setShowAddSection(false);
  }
  function toggleBlock(sectionId:TemplateSectionId){
   if(BLOCKS[sectionId].locked)return;
@@ -293,9 +334,28 @@ export default function StudioPage(){
     <div className="studio-editor-heading"><div><p className="eyebrow">InvitaPro Studio</p><h1>{active==="estructura"?"Estructura de la invitación":SECTIONS.find(s=>s.id===active)?.label}</h1><p>{active==="estructura"?"Organiza el recorrido de tus invitados y decide qué bloques se mostrarán.":SECTIONS.find(s=>s.id===active)?.desc}</p></div>{active!=="estructura"&&<label className="studio-visibility"><input type="checkbox" checked={visibility[active]??true} onChange={e=>setEditorVisibility(active,e.target.checked)}/><span>Mostrar sección</span></label>}</div>
 
     {active==="estructura"&&<div className="studio-block-builder">
-      <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>El orden se refleja en la invitación pública. La portada siempre permanece activa.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
-      <div className="studio-block-list">{sectionOrder.map((sectionId,index)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article key={sectionId} className={`studio-block-row ${enabled?"enabled":"disabled"}`}><span className="studio-block-handle">⋮⋮</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0} onClick={()=>moveBlock(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===sectionOrder.length-1} onClick={()=>moveBlock(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div>
-      <div className="studio-block-tip"><span>💡</span><div><strong>Base para Studio Pro</strong><p>Esta estructura queda guardada con tu invitación. En las siguientes versiones podremos añadir drag & drop, bloques duplicables y nuevos tipos de sección sin perder tu contenido.</p></div></div>
+      <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>Arrastra los bloques para cambiar su orden. También puedes ocultarlos y volver a agregarlos cuando quieras.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
+
+      <div className="studio-block-list">{sectionOrder.filter(sectionId=>blockVisibility[sectionId]||BLOCKS[sectionId].locked).map((sectionId,index,visibleOrder)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article
+        key={sectionId}
+        className={`studio-block-row ${enabled?"enabled":"disabled"} ${draggedBlock===sectionId?"dragging":""}`}
+        draggable={!meta.locked}
+        onDragStart={e=>{if(meta.locked){e.preventDefault();return;}setDraggedBlock(sectionId);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",sectionId)}}
+        onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect="move"}}
+        onDrop={e=>{e.preventDefault();const source=(draggedBlock||e.dataTransfer.getData("text/plain")) as TemplateSectionId;if(source)reorderBlock(source,sectionId);setDraggedBlock(null)}}
+        onDragEnd={()=>setDraggedBlock(null)}
+       ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar"}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlock(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlock(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div>
+
+      <div className="studio-add-section">
+       <button type="button" className="studio-add-section-button" onClick={()=>setShowAddSection(v=>!v)}><span>＋</span><div><strong>Agregar sección</strong><small>Recupera bloques ocultos y amplía tu invitación.</small></div><em>{showAddSection?"Cerrar":"Explorar"}</em></button>
+       {showAddSection&&<div className="studio-add-section-panel">
+        {sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked).length===0
+         ? <div className="studio-add-empty"><strong>Todo está activo</strong><span>Ya tienes disponibles todos los bloques de esta plantilla.</span></div>
+         : sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked).map(sectionId=>{const meta=BLOCKS[sectionId];return <button key={sectionId} type="button" onClick={()=>addBlock(sectionId)}><span>{meta.icon}</span><div><strong>{meta.label}</strong><small>{meta.desc}</small></div><em>＋ Agregar</em></button>})}
+       </div>}
+      </div>
+
+      <div className="studio-block-tip"><span>✦</span><div><strong>Block Builder v2.11.1</strong><p>Ya puedes reordenar por drag &amp; drop y recuperar secciones ocultas desde “Agregar sección”. El contenido se conserva aunque ocultes un bloque.</p></div></div>
     </div>}
     {active==="portada"&&<div className="studio-fields">
       <label>Título principal<input value={title} onChange={e=>setTitle(e.target.value)}/></label>
@@ -309,7 +369,11 @@ export default function StudioPage(){
     {active==="musica"&&<div className="studio-fields"><label className="full">Música<input value={music} onChange={e=>setMusic(e.target.value)} placeholder="Selecciona desde Biblioteca o pega una URL"/></label><div className="studio-inline-actions full"><button className="client-secondary" type="button" onClick={()=>setMediaPicker("music")}>Elegir de Biblioteca</button>{music&&<audio controls src={music}/>}</div><div className="studio-note full">♫ La música iniciará después de que el invitado abra la invitación.</div></div>}
     {active==="programa"&&<div className="studio-fields"><label className="full">Itinerario<textarea rows={8} value={program} onChange={e=>setProgram(e.target.value)} placeholder={"18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena"}/><small>Una actividad por línea: hora | actividad</small></label></div>}
     {active==="vestimenta"&&<div className="studio-fields"><label className="full">Código de vestimenta<input value={dress} onChange={e=>setDress(e.target.value)} placeholder="Formal, cóctel, casual…"/></label></div>}
+    {active==="historia"&&<div className="studio-fields"><label className="full">Título de la historia<input value={historyTitle} onChange={e=>setHistoryTitle(e.target.value)} placeholder="Nuestra historia"/></label><label className="full">Historia<textarea rows={8} value={historyText} onChange={e=>setHistoryText(e.target.value)} placeholder="Cuéntales cómo comenzó todo, un recuerdo especial o lo que significa este día para ustedes."/></label><div className="studio-note full">♡ Este bloque aparecerá únicamente cuando lo actives desde Estructura.</div></div>}
+    {active==="hospedaje"&&<div className="studio-fields"><label className="full">Hospedaje y recomendaciones<textarea rows={8} value={lodging} onChange={e=>setLodging(e.target.value)} placeholder={"Hotel Vista Mar | Código INVITAPRO | +52 998 000 0000\nHotel Centro | A 5 min del evento"}/><small>Una recomendación por línea. Puedes usar “|” para separar nombre, detalle y contacto.</small></label></div>}
     {active==="regalos"&&<div className="studio-fields"><label className="full">Información de regalos<textarea rows={6} value={gift} onChange={e=>setGift(e.target.value)} placeholder="Mesa de regalos, transferencia, lluvia de sobres…"/></label></div>}
+    {active==="video"&&<div className="studio-fields"><label className="full">URL del video<input value={videoUrl} onChange={e=>setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=... o https://vimeo.com/..."/></label><div className="studio-note full">▶ Puedes usar YouTube, Vimeo o una URL directa de video. En la siguiente fase conectaremos también la Biblioteca Multimedia.</div></div>}
+    {active==="faq"&&<div className="studio-fields"><label className="full">Preguntas frecuentes<textarea rows={10} value={faqText} onChange={e=>setFaqText(e.target.value)} placeholder={"¿Puedo llevar niños? | Sí, el evento es familiar.\n¿Hay estacionamiento? | Sí, contamos con valet parking."}/><small>Una pregunta por línea usando: pregunta | respuesta</small></label></div>}
     {active==="rsvp"&&<div className="studio-fields"><label className="full">Texto para confirmar asistencia<input value={rsvpText} onChange={e=>setRsvpText(e.target.value)}/></label><label className="full">WhatsApp de contacto<input value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} placeholder="529981234567"/></label></div>}
     {error&&<p className="form-error">{error}</p>}
    </section>
