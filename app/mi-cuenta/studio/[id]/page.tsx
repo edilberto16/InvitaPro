@@ -6,6 +6,7 @@ import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,getTemplateById} from "@/lib/template-catalog";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey} from "@/lib/commercial-plans";
+import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
 
 type Invite={
  id:string;evento_id:string;titulo:string;slug:string;estado:string;modalidad:string;
@@ -25,6 +26,21 @@ const SECTIONS=[
  {id:"regalos",label:"Mesa de regalos",desc:"Opciones y recomendaciones",icon:"♢"},
  {id:"rsvp",label:"Confirmación RSVP",desc:"Asistencia de invitados",icon:"✓"},
 ] as const;
+
+
+const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;locked?:boolean}>={
+ hero:{label:"Portada",desc:"Primera impresión de tu invitación",icon:"✦",locked:true},
+ intro:{label:"Introducción",desc:"Mensaje de bienvenida",icon:"❦"},
+ countdown:{label:"Cuenta regresiva",desc:"Días, horas y minutos para el evento",icon:"◷"},
+ details:{label:"Detalles del evento",desc:"Fecha, lugar y código de vestimenta",icon:"◇"},
+ program:{label:"Itinerario",desc:"Horarios y actividades",icon:"☷"},
+ gallery:{label:"Galería",desc:"Fotografías y recuerdos",icon:"▧"},
+ location:{label:"Ubicación",desc:"Dirección, mapa y cómo llegar",icon:"⌖"},
+ rsvp:{label:"Confirmación RSVP",desc:"Respuesta de asistencia de invitados",icon:"✓"},
+};
+
+const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",rsvp:"rsvp"};
+const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",rsvp:"rsvp"};
 
 function collectionForTipo(tipo:string){
  const t=tipo.toLowerCase();
@@ -74,6 +90,8 @@ export default function StudioPage(){
  const [visibility,setVisibility]=useState<Record<string,boolean>>({
   portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,regalos:true,rsvp:true
  });
+ const [sectionOrder,setSectionOrder]=useState<TemplateSectionId[]>([...DEFAULT_TEMPLATE_SECTION_ORDER]);
+ const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,location:true,rsvp:true});
 
  async function load(){
   setLoading(true);setError("");
@@ -88,6 +106,17 @@ export default function StudioPage(){
   setCover(typeof d.portada_url==="string"?d.portada_url:"");setGallery(Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[]);
   setDate(i.eventos?.fecha||"");setTime(i.eventos?.hora?.slice(0,5)||"");setVenue(i.eventos?.lugar||"");setAddress(i.eventos?.direccion||"");setMapsUrl(i.eventos?.maps_url||"");
   setVisibility(v=>({...v,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})}));
+  setSectionOrder(normalizeTemplateSectionOrder(d.section_order));
+  setBlockVisibility({
+   hero:true,
+   intro:d.mostrar_intro!==false,
+   countdown:d.mostrar_contador!==false,
+   details:d.mostrar_detalles!==false,
+   program:d.mostrar_programa!==false,
+   gallery:d.mostrar_galeria!==false,
+   location:d.mostrar_mapa!==false,
+   rsvp:d.mostrar_rsvp!==false,
+  });
   setLoading(false);
  }
  useEffect(()=>{void load()},[params.id]);
@@ -102,7 +131,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,regalos:gift,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,mostrar_galeria:visibility.galeria,mostrar_programa:visibility.programa,mostrar_mapa:visibility.ubicacion,mostrar_rsvp:visibility.rsvp,mostrar_contador:visibility.fecha,studio_version:"2.6.2",plantilla:invite.template_key||current.plantilla}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,regalos:gift,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.11.0",plantilla:invite.template_key||current.plantilla}
   };
   const [{error:inviteError},{error:eventError}]=await Promise.all([
     supabase.from("invitaciones").update(payload).eq("id",invite.id),
@@ -138,6 +167,21 @@ export default function StudioPage(){
   if(!invite)return;
   const t=getTemplateById(id); if(!t)return;
   setPendingTemplate(id);
+ }
+ function moveBlock(sectionId:TemplateSectionId,direction:-1|1){
+  setSectionOrder(current=>{const index=current.indexOf(sectionId);const target=index+direction;if(index<0||target<0||target>=current.length)return current;const next=[...current];[next[index],next[target]]=[next[target],next[index]];return next;});
+ }
+ function toggleBlock(sectionId:TemplateSectionId){
+  if(BLOCKS[sectionId].locked)return;
+  const next=!blockVisibility[sectionId];
+  setBlockVisibility(current=>({...current,[sectionId]:next}));
+  const editorId=BLOCK_TO_EDITOR[sectionId];
+  if(editorId)setVisibility(current=>({...current,[editorId]:next}));
+ }
+ function setEditorVisibility(sectionId:string,next:boolean){
+  setVisibility(current=>({...current,[sectionId]:next}));
+  const blockId=EDITOR_TO_BLOCK[sectionId];
+  if(blockId)setBlockVisibility(current=>({...current,[blockId]:next}));
  }
  async function requestActivation(){
   if(!invite)return;
@@ -242,12 +286,17 @@ export default function StudioPage(){
    <aside className="studio-sidebar">
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
     <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?.premium?"Premium":"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
-    <nav className="studio-section-list">{SECTIONS.map(s=><button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={visibility[s.id]?"on":"off"}>{visibility[s.id]?"Visible":"Oculto"}</em></button>)}</nav>
+    <nav className="studio-section-list"><button className={active==="estructura"?"active studio-structure-entry":"studio-structure-entry"} onClick={()=>setActive("estructura")}><span>☰</span><div><strong>Estructura</strong><small>Ordena y muestra tus bloques</small></div><em className="on">{sectionOrder.filter(id=>blockVisibility[id]).length}/8</em></button>{SECTIONS.map(s=><button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={visibility[s.id]?"on":"off"}>{visibility[s.id]?"Visible":"Oculto"}</em></button>)}</nav>
    </aside>
 
    <section className="studio-editor">
-    <div className="studio-editor-heading"><div><p className="eyebrow">InvitaPro Studio</p><h1>{SECTIONS.find(s=>s.id===active)?.label}</h1><p>{SECTIONS.find(s=>s.id===active)?.desc}</p></div><label className="studio-visibility"><input type="checkbox" checked={visibility[active]??true} onChange={e=>setVisibility({...visibility,[active]:e.target.checked})}/><span>Mostrar sección</span></label></div>
+    <div className="studio-editor-heading"><div><p className="eyebrow">InvitaPro Studio</p><h1>{active==="estructura"?"Estructura de la invitación":SECTIONS.find(s=>s.id===active)?.label}</h1><p>{active==="estructura"?"Organiza el recorrido de tus invitados y decide qué bloques se mostrarán.":SECTIONS.find(s=>s.id===active)?.desc}</p></div>{active!=="estructura"&&<label className="studio-visibility"><input type="checkbox" checked={visibility[active]??true} onChange={e=>setEditorVisibility(active,e.target.checked)}/><span>Mostrar sección</span></label>}</div>
 
+    {active==="estructura"&&<div className="studio-block-builder">
+      <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>El orden se refleja en la invitación pública. La portada siempre permanece activa.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
+      <div className="studio-block-list">{sectionOrder.map((sectionId,index)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article key={sectionId} className={`studio-block-row ${enabled?"enabled":"disabled"}`}><span className="studio-block-handle">⋮⋮</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0} onClick={()=>moveBlock(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===sectionOrder.length-1} onClick={()=>moveBlock(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div>
+      <div className="studio-block-tip"><span>💡</span><div><strong>Base para Studio Pro</strong><p>Esta estructura queda guardada con tu invitación. En las siguientes versiones podremos añadir drag & drop, bloques duplicables y nuevos tipos de sección sin perder tu contenido.</p></div></div>
+    </div>}
     {active==="portada"&&<div className="studio-fields">
       <label>Título principal<input value={title} onChange={e=>setTitle(e.target.value)}/></label>
       <label>Introducción<input value={subtitle} onChange={e=>setSubtitle(e.target.value)}/></label>
