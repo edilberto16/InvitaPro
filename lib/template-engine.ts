@@ -12,6 +12,10 @@ export type TemplateSectionId =
   | 'gifts'
   | 'video'
   | 'faq'
+  | 'special_people'
+  | 'hashtag'
+  | 'wishes'
+  | 'album'
   | 'location'
   | 'rsvp';
 
@@ -47,6 +51,10 @@ export const DEFAULT_TEMPLATE_SECTION_ORDER: TemplateSectionId[] = [
   'gifts',
   'video',
   'faq',
+  'special_people',
+  'hashtag',
+  'wishes',
+  'album',
   'location',
   'rsvp',
 ];

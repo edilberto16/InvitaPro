@@ -28,6 +28,10 @@ const SECTIONS=[
  {id:"regalos",label:"Mesa de regalos",desc:"Opciones y recomendaciones",icon:"♢"},
  {id:"video",label:"Video",desc:"Mensaje o recuerdo especial",icon:"▶"},
  {id:"faq",label:"Preguntas frecuentes",desc:"Resuelve dudas de tus invitados",icon:"?"},
+ {id:"personas",label:"Personas especiales",desc:"Padrinos, damas, corte y familia",icon:"♙"},
+ {id:"hashtag",label:"Hashtag y redes",desc:"Conecta el evento con redes sociales",icon:"#"},
+ {id:"deseos",label:"Buzón de deseos",desc:"Mensajes especiales de tus invitados",icon:"💌"},
+ {id:"album",label:"Álbum colaborativo QR",desc:"Tus invitados suben recuerdos",icon:"▧"},
  {id:"rsvp",label:"Confirmación RSVP",desc:"Asistencia de invitados",icon:"✓"},
 ] as const;
 
@@ -44,12 +48,23 @@ const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;lock
  gifts:{label:"Mesa de regalos",desc:"Regalos, transferencias o lluvia de sobres",icon:"♢"},
  video:{label:"Video",desc:"Video especial, bienvenida o recuerdo",icon:"▶"},
  faq:{label:"Preguntas frecuentes",desc:"Respuestas rápidas para tus invitados",icon:"?"},
+ special_people:{label:"Personas especiales",desc:"Padrinos, damas, corte, familia o equipo",icon:"♙"},
+ hashtag:{label:"Hashtag y redes",desc:"Hashtag oficial e indicaciones para compartir",icon:"#"},
+ wishes:{label:"Buzón de deseos",desc:"Recibe mensajes especiales de tus invitados",icon:"💌"},
+ album:{label:"Álbum colaborativo QR",desc:"Los invitados pueden subir fotografías del evento",icon:"▧"},
  location:{label:"Ubicación",desc:"Dirección, mapa y cómo llegar",icon:"⌖"},
  rsvp:{label:"Confirmación RSVP",desc:"Respuesta de asistencia de invitados",icon:"✓"},
 };
 
-const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",rsvp:"rsvp"};
-const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",rsvp:"rsvp"};
+const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",personas:"special_people",hashtag:"hashtag",deseos:"wishes",album:"album",rsvp:"rsvp"};
+const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",special_people:"personas",hashtag:"hashtag",wishes:"deseos",album:"album",rsvp:"rsvp"};
+
+type BlockCategory="todos"|"evento"|"multimedia"|"invitados"|"premium";
+const BLOCK_CATEGORY:Record<TemplateSectionId,BlockCategory>={
+ hero:"evento",intro:"evento",countdown:"evento",details:"evento",program:"evento",gallery:"multimedia",
+ history:"evento",lodging:"evento",gifts:"evento",video:"multimedia",faq:"invitados",special_people:"evento",
+ hashtag:"multimedia",wishes:"invitados",album:"premium",location:"evento",rsvp:"invitados"
+};
 
 function collectionForTipo(tipo:string){
  const t=tipo.toLowerCase();
@@ -92,6 +107,13 @@ export default function StudioPage(){
  const [gift,setGift]=useState("");
  const [videoUrl,setVideoUrl]=useState("");
  const [faqText,setFaqText]=useState("");
+ const [specialPeople,setSpecialPeople]=useState("");
+ const [hashtag,setHashtag]=useState("");
+ const [socialText,setSocialText]=useState("Comparte tus mejores momentos con nosotros");
+ const [wishesTitle,setWishesTitle]=useState("Déjanos un mensaje");
+ const [wishesText,setWishesText]=useState("Tus palabras también serán parte de este día.");
+ const [albumTitle,setAlbumTitle]=useState("Comparte tus recuerdos");
+ const [albumText,setAlbumText]=useState("Sube las fotografías que captures durante nuestra celebración.");
  const [rsvpText,setRsvpText]=useState("Confirma tu asistencia");
  const [cover,setCover]=useState("");
  const [gallery,setGallery]=useState<string[]>([]);
@@ -102,12 +124,13 @@ export default function StudioPage(){
  const [mapsUrl,setMapsUrl]=useState("");
  const [mediaPicker,setMediaPicker]=useState<null|"cover"|"gallery"|"music">(null);
  const [visibility,setVisibility]=useState<Record<string,boolean>>({
-  portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,historia:true,hospedaje:true,regalos:true,video:true,faq:true,rsvp:true
+  portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,historia:true,hospedaje:true,regalos:true,video:true,faq:true,personas:true,hashtag:true,deseos:true,album:true,rsvp:true
  });
  const [sectionOrder,setSectionOrder]=useState<TemplateSectionId[]>([...DEFAULT_TEMPLATE_SECTION_ORDER]);
- const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,history:false,lodging:false,gifts:false,video:false,faq:false,location:true,rsvp:true});
+ const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,history:false,lodging:false,gifts:false,video:false,faq:false,special_people:false,hashtag:false,wishes:false,album:false,location:true,rsvp:true});
  const [draggedBlock,setDraggedBlock]=useState<TemplateSectionId|null>(null);
  const [showAddSection,setShowAddSection]=useState(false);
+ const [blockCategory,setBlockCategory]=useState<BlockCategory>("todos");
 
  async function load(){
   setLoading(true);setError("");
@@ -120,7 +143,11 @@ export default function StudioPage(){
   setColor(i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f");setMusic(i.musica_url||"");setWhatsapp(i.whatsapp||"");
   setProgram(typeof d.programa==="string"?d.programa:"");setDress(typeof d.vestimenta==="string"?d.vestimenta:"Formal");
   setHistoryTitle(typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia");setHistoryText(typeof d.historia_texto==="string"?d.historia_texto:"");
-  setLodging(typeof d.hospedaje==="string"?d.hospedaje:"");setGift(typeof d.regalos==="string"?d.regalos:"");setVideoUrl(typeof d.video_url==="string"?d.video_url:"");setFaqText(typeof d.faq==="string"?d.faq:"");setRsvpText(typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia");
+  setLodging(typeof d.hospedaje==="string"?d.hospedaje:"");setGift(typeof d.regalos==="string"?d.regalos:"");setVideoUrl(typeof d.video_url==="string"?d.video_url:"");setFaqText(typeof d.faq==="string"?d.faq:"");
+  setSpecialPeople(typeof d.personas_especiales==="string"?d.personas_especiales:"");setHashtag(typeof d.hashtag==="string"?d.hashtag:"");setSocialText(typeof d.hashtag_texto==="string"?d.hashtag_texto:"Comparte tus mejores momentos con nosotros");
+  setWishesTitle(typeof d.deseos_titulo==="string"?d.deseos_titulo:"Déjanos un mensaje");setWishesText(typeof d.deseos_texto==="string"?d.deseos_texto:"Tus palabras también serán parte de este día.");
+  setAlbumTitle(typeof d.album_titulo==="string"?d.album_titulo:"Comparte tus recuerdos");setAlbumText(typeof d.album_texto==="string"?d.album_texto:"Sube las fotografías que captures durante nuestra celebración.");
+  setRsvpText(typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia");
   setCover(typeof d.portada_url==="string"?d.portada_url:"");setGallery(Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[]);
   setDate(i.eventos?.fecha||"");setTime(i.eventos?.hora?.slice(0,5)||"");setVenue(i.eventos?.lugar||"");setAddress(i.eventos?.direccion||"");setMapsUrl(i.eventos?.maps_url||"");
   setVisibility(v=>({...v,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})}));
@@ -137,6 +164,10 @@ export default function StudioPage(){
    gifts:d.mostrar_regalos===true,
    video:d.mostrar_video===true,
    faq:d.mostrar_faq===true,
+   special_people:d.mostrar_personas_especiales===true,
+   hashtag:d.mostrar_hashtag===true,
+   wishes:d.mostrar_deseos===true,
+   album:d.mostrar_album===true,
    location:d.mostrar_mapa!==false,
    rsvp:d.mostrar_rsvp!==false,
   });
@@ -154,7 +185,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.11.2",plantilla:invite.template_key||current.plantilla}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.11.3",plantilla:invite.template_key||current.plantilla}
   };
   const [{error:inviteError},{error:eventError}]=await Promise.all([
     supabase.from("invitaciones").update(payload).eq("id",invite.id),
@@ -347,11 +378,17 @@ export default function StudioPage(){
        ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar"}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlock(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlock(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div>
 
       <div className="studio-add-section">
-       <button type="button" className="studio-add-section-button" onClick={()=>setShowAddSection(v=>!v)}><span>＋</span><div><strong>Agregar sección</strong><small>Recupera bloques ocultos y amplía tu invitación.</small></div><em>{showAddSection?"Cerrar":"Explorar"}</em></button>
-       {showAddSection&&<div className="studio-add-section-panel">
-        {sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked).length===0
-         ? <div className="studio-add-empty"><strong>Todo está activo</strong><span>Ya tienes disponibles todos los bloques de esta plantilla.</span></div>
-         : sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked).map(sectionId=>{const meta=BLOCKS[sectionId];return <button key={sectionId} type="button" onClick={()=>addBlock(sectionId)}><span>{meta.icon}</span><div><strong>{meta.label}</strong><small>{meta.desc}</small></div><em>＋ Agregar</em></button>})}
+       <button type="button" className="studio-add-section-button" onClick={()=>setShowAddSection(v=>!v)}><span>＋</span><div><strong>Biblioteca de bloques</strong><small>Agrega nuevas experiencias a tu invitación.</small></div><em>{showAddSection?"Cerrar":"Explorar"}</em></button>
+       {showAddSection&&<div className="studio-block-library">
+        <div className="studio-block-library-head"><div><strong>Agregar una sección</strong><small>Elige un bloque y personalízalo después desde el menú del Studio.</small></div><span>{sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked).length} disponibles</span></div>
+        <div className="studio-block-library-tabs">
+         {([["todos","Todas"],["evento","Evento"],["multimedia","Multimedia"],["invitados","Invitados"],["premium","Premium"]] as const).map(([id,label])=><button key={id} type="button" className={blockCategory===id?"active":""} onClick={()=>setBlockCategory(id)}>{label}</button>)}
+        </div>
+        <div className="studio-block-library-grid">
+        {sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked&&(blockCategory==="todos"||BLOCK_CATEGORY[id]===blockCategory)).length===0
+         ? <div className="studio-add-empty"><strong>No hay bloques disponibles aquí</strong><span>Prueba otra categoría o desactiva una sección para volver a agregarla.</span></div>
+         : sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked&&(blockCategory==="todos"||BLOCK_CATEGORY[id]===blockCategory)).map(sectionId=>{const meta=BLOCKS[sectionId];const premium=BLOCK_CATEGORY[sectionId]==="premium";return <button key={sectionId} type="button" className="studio-block-library-card" onClick={()=>addBlock(sectionId)}><span className="studio-block-library-icon">{meta.icon}</span><div><span className="studio-block-library-badge">{premium?"PREMIUM":BLOCK_CATEGORY[sectionId].toUpperCase()}</span><strong>{meta.label}</strong><small>{meta.desc}</small></div><em>＋ Agregar</em></button>})}
+        </div>
        </div>}
       </div>
 
@@ -374,6 +411,10 @@ export default function StudioPage(){
     {active==="regalos"&&<div className="studio-fields"><label className="full">Información de regalos<textarea rows={6} value={gift} onChange={e=>setGift(e.target.value)} placeholder="Mesa de regalos, transferencia, lluvia de sobres…"/></label></div>}
     {active==="video"&&<div className="studio-fields"><label className="full">URL del video<input value={videoUrl} onChange={e=>setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=... o https://vimeo.com/..."/></label><div className="studio-note full">▶ Puedes usar YouTube, Vimeo o una URL directa de video. En la siguiente fase conectaremos también la Biblioteca Multimedia.</div></div>}
     {active==="faq"&&<div className="studio-fields"><label className="full">Preguntas frecuentes<textarea rows={10} value={faqText} onChange={e=>setFaqText(e.target.value)} placeholder={"¿Puedo llevar niños? | Sí, el evento es familiar.\n¿Hay estacionamiento? | Sí, contamos con valet parking."}/><small>Una pregunta por línea usando: pregunta | respuesta</small></label></div>}
+    {active==="personas"&&<div className="studio-fields"><label className="full">Personas especiales<textarea rows={9} value={specialPeople} onChange={e=>setSpecialPeople(e.target.value)} placeholder={"Padrinos | Ana & Carlos\nDamas de honor | Sofía, Mariana y Renata\nPadres | Laura & Miguel"}/><small>Una línea por grupo usando: título | nombres.</small></label></div>}
+    {active==="hashtag"&&<div className="studio-fields"><label className="full">Hashtag oficial<input value={hashtag} onChange={e=>setHashtag(e.target.value.replace(/\s/g,""))} placeholder="#AndreaYLuis2026"/></label><label className="full">Texto para tus invitados<input value={socialText} onChange={e=>setSocialText(e.target.value)} placeholder="Comparte tus mejores momentos con nosotros"/></label></div>}
+    {active==="deseos"&&<div className="studio-fields"><label className="full">Título del buzón<input value={wishesTitle} onChange={e=>setWishesTitle(e.target.value)} placeholder="Déjanos un mensaje"/></label><label className="full">Introducción<textarea rows={4} value={wishesText} onChange={e=>setWishesText(e.target.value)} placeholder="Tus palabras también serán parte de este día."/></label><div className="studio-note full">💌 Los mensajes se guardan de forma independiente en Supabase y no se publican automáticamente en la invitación.</div></div>}
+    {active==="album"&&<div className="studio-fields"><label className="full">Título del álbum<input value={albumTitle} onChange={e=>setAlbumTitle(e.target.value)} placeholder="Comparte tus recuerdos"/></label><label className="full">Texto para tus invitados<textarea rows={4} value={albumText} onChange={e=>setAlbumText(e.target.value)} placeholder="Sube las fotografías que captures durante nuestra celebración."/></label><div className="studio-note full">▧ Las fotografías de invitados se almacenan en un bucket privado separado de la Biblioteca del cliente.</div></div>}
     {active==="rsvp"&&<div className="studio-fields"><label className="full">Texto para confirmar asistencia<input value={rsvpText} onChange={e=>setRsvpText(e.target.value)}/></label><label className="full">WhatsApp de contacto<input value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} placeholder="529981234567"/></label></div>}
     {error&&<p className="form-error">{error}</p>}
    </section>

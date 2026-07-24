@@ -5217,3 +5217,32 @@ a { color: inherit; }
 .premium-faq-list summary span{transition:transform .2s}
 .premium-faq-list details[open] summary span{transform:rotate(45deg)}
 .premium-faq-list details p{margin:-4px 44px 22px 4px;color:var(--template-muted);line-height:1.75}
+
+
+/* InvitaPro v2.11.3 — Bloques sociales e interactivos */
+.premium-special-people-section,.premium-wishes-section,.premium-album-section{padding:clamp(70px,9vw,120px) clamp(20px,5vw,70px);background:var(--template-background)}
+.premium-special-people-grid{width:min(900px,100%);margin:38px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.premium-special-people-grid article{padding:26px;text-align:center;background:var(--template-surface);border:1px solid color-mix(in srgb,var(--template-primary) 16%,transparent);border-radius:var(--template-radius)}
+.premium-special-people-grid small{display:block;text-transform:uppercase;letter-spacing:.14em;color:var(--template-primary);font-weight:800;margin-bottom:8px}
+.premium-special-people-grid strong{font-family:Georgia,serif;font-size:1.3rem;color:var(--template-text)}
+.premium-hashtag-section{padding:clamp(60px,8vw,100px) 20px;background:var(--template-primary);color:#fff}
+.premium-hashtag-card{width:min(850px,100%);margin:auto;text-align:center}
+.premium-hashtag-card>span{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.35);font-size:24px}
+.premium-hashtag-card p{margin:18px 0 8px;opacity:.8}
+.premium-hashtag-card h2{margin:0;font-size:clamp(2rem,7vw,5rem);line-height:1;overflow-wrap:anywhere}
+.premium-hashtag-card small{display:block;margin-top:14px;opacity:.72}
+.premium-wishes-card,.premium-album-card{width:min(760px,100%);margin:auto;padding:clamp(30px,5vw,54px);background:var(--template-surface);border:1px solid color-mix(in srgb,var(--template-primary) 18%,transparent);border-radius:var(--template-radius);box-shadow:0 22px 70px rgba(20,14,17,.07);text-align:center}
+.premium-wishes-card h2,.premium-album-card h2{font-family:Georgia,serif;font-size:clamp(2rem,5vw,3.5rem);margin:8px 0 12px;color:var(--template-text)}
+.premium-wishes-card>p,.premium-album-card>p{color:var(--template-muted);line-height:1.7}
+.premium-wishes-card form{display:grid;gap:13px;margin-top:28px;text-align:left}
+.premium-wishes-card label{display:grid;gap:6px}
+.premium-wishes-card label span{font-size:12px;font-weight:800;color:var(--template-text)}
+.premium-wishes-card input,.premium-wishes-card textarea{width:100%;border:1px solid color-mix(in srgb,var(--template-primary) 20%,#ddd);border-radius:12px;padding:13px 14px;background:var(--template-background);color:var(--template-text);font:inherit}
+.premium-wishes-card button{border:0;border-radius:999px;padding:14px 20px;background:var(--template-primary);color:#fff;font-weight:900;cursor:pointer}
+.premium-wishes-success,.premium-album-success{margin-top:24px;padding:16px;border-radius:14px;background:#eef8f0;color:#226a35;font-weight:800}
+.premium-album-icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;margin:0 auto 18px;background:color-mix(in srgb,var(--template-primary) 12%,transparent);color:var(--template-primary);font-size:24px}
+.premium-album-upload{display:grid;gap:7px;margin-top:26px;padding:24px;border:1px dashed color-mix(in srgb,var(--template-primary) 35%,transparent);border-radius:16px;cursor:pointer;background:color-mix(in srgb,var(--template-primary) 4%,transparent)}
+.premium-album-upload input{display:none}
+.premium-album-upload span{font-weight:900;color:var(--template-primary)}
+.premium-album-upload small{color:var(--template-muted)}
+.premium-album-privacy{margin-top:16px;font-size:11px;color:var(--template-muted)}

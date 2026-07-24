@@ -77,3 +77,25 @@
 .studio-block-builder .studio-block-row.enabled .studio-block-icon{box-shadow:inset 0 0 0 1px rgba(114,38,79,.06)}
 .studio-block-builder .studio-block-row[data-premium="true"]{background:linear-gradient(135deg,#fff,#fff9fc)}
 .studio-fields textarea{resize:vertical}
+
+
+/* InvitaPro v2.11.3 — Biblioteca de Bloques PRO */
+.studio-block-library{border-top:1px solid #eadde4;padding:16px;background:#fff}
+.studio-block-library-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.studio-block-library-head>div{display:grid;gap:3px}
+.studio-block-library-head strong{font-size:15px;color:#35272e}
+.studio-block-library-head small{font-size:12px;color:#806d77}
+.studio-block-library-head>span{font-size:11px;font-weight:800;color:#72264f;background:#f4e9ee;border-radius:999px;padding:7px 10px}
+.studio-block-library-tabs{display:flex;gap:7px;overflow:auto;padding-bottom:10px}
+.studio-block-library-tabs button{border:1px solid #eadde4;background:#fff;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:800;color:#78616c;cursor:pointer;white-space:nowrap}
+.studio-block-library-tabs button.active{background:#72264f;color:#fff;border-color:#72264f}
+.studio-block-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.studio-block-library-card{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;text-align:left;border:1px solid #eee3e8;background:linear-gradient(135deg,#fff,#fffafd);border-radius:15px;padding:13px;cursor:pointer}
+.studio-block-library-card:hover{border-color:#d4b5c4;box-shadow:0 10px 26px rgba(74,34,55,.07);transform:translateY(-1px)}
+.studio-block-library-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#f4e9ee;color:#72264f;font-size:18px}
+.studio-block-library-card>div{display:grid;gap:2px}
+.studio-block-library-card strong{font-size:13px;color:#35272e}
+.studio-block-library-card small{font-size:11px;color:#806d77;line-height:1.4}
+.studio-block-library-card em{font-style:normal;font-size:11px;font-weight:900;color:#26703b;white-space:nowrap}
+.studio-block-library-badge{font-size:9px!important;font-weight:900;color:#9a667f!important;letter-spacing:.08em}
+@media(max-width:780px){.studio-block-library-grid{grid-template-columns:1fr}.studio-block-library-card{grid-template-columns:42px 1fr}.studio-block-library-card>em{grid-column:2}}

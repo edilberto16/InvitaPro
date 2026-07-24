@@ -14,6 +14,10 @@ export const SECTION_META: Record<TemplateSectionId,{title:string;description:st
   gifts:{title:'Mesa de regalos',description:'Opciones de regalos',icon:'♢'},
   video:{title:'Video',description:'Mensaje o recuerdo audiovisual',icon:'▶'},
   faq:{title:'Preguntas frecuentes',description:'Dudas de los invitados',icon:'?'},
+  special_people:{title:'Personas especiales',description:'Padrinos, familia y corte',icon:'♙'},
+  hashtag:{title:'Hashtag y redes',description:'Contenido social del evento',icon:'#'},
+  wishes:{title:'Buzón de deseos',description:'Mensajes de tus invitados',icon:'💌'},
+  album:{title:'Álbum colaborativo',description:'Fotografías subidas por invitados',icon:'▧'},
   location:{title:'Ubicación',description:'Dirección y mapa',icon:'⌖'},
   rsvp:{title:'Confirmación RSVP',description:'Asistencia de invitados',icon:'✓'}
 };
