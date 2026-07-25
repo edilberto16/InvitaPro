@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useMemo,useRef,useState} from "react";
 import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,getTemplateById} from "@/lib/template-catalog";
@@ -58,6 +58,15 @@ const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;lock
 
 const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",personas:"special_people",hashtag:"hashtag",deseos:"wishes",album:"album",rsvp:"rsvp"};
 const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",special_people:"personas",hashtag:"hashtag",wishes:"deseos",album:"album",rsvp:"rsvp"};
+
+type BlockVariantMap=Partial<Record<TemplateSectionId,string>>;
+const BLOCK_VARIANTS:Partial<Record<TemplateSectionId,{value:string;label:string}[]>>={
+ gallery:[{value:"grid",label:"Cuadrícula"},{value:"editorial",label:"Editorial"},{value:"carousel",label:"Carrusel"}],
+ program:[{value:"timeline",label:"Línea de tiempo"},{value:"cards",label:"Tarjetas"},{value:"compact",label:"Compacto"}],
+ history:[{value:"classic",label:"Clásica"},{value:"quote",label:"Editorial"},{value:"split",label:"Dividida"}],
+ location:[{value:"card",label:"Tarjeta"},{value:"full",label:"Destacada"},{value:"minimal",label:"Minimal"}],
+ rsvp:[{value:"card",label:"Tarjeta"},{value:"featured",label:"Destacada"},{value:"minimal",label:"Minimal"}],
+};
 
 type BlockCategory="todos"|"evento"|"multimedia"|"invitados"|"premium";
 const BLOCK_CATEGORY:Record<TemplateSectionId,BlockCategory>={
@@ -131,6 +140,65 @@ export default function StudioPage(){
  const [draggedBlock,setDraggedBlock]=useState<TemplateSectionId|null>(null);
  const [showAddSection,setShowAddSection]=useState(false);
  const [blockCategory,setBlockCategory]=useState<BlockCategory>("todos");
+ const [previewDevice,setPreviewDevice]=useState<"mobile"|"tablet"|"desktop">("mobile");
+ const [previewRevision,setPreviewRevision]=useState(0);
+ const [selectedPreviewSection,setSelectedPreviewSection]=useState<TemplateSectionId|null>(null);
+ const [blockVariants,setBlockVariants]=useState<BlockVariantMap>({});
+ const previewRef=useRef<HTMLIFrameElement|null>(null);
+
+ useEffect(()=>{
+  function handlePreviewMessage(event:MessageEvent){
+   if(event.origin!==window.location.origin)return;
+   const payload=event.data as {type?:string;sectionId?:TemplateSectionId;sourceId?:TemplateSectionId;targetId?:TemplateSectionId;order?:TemplateSectionId[];direction?:"up"|"down";variant?:string};
+   if(payload?.type==="invitapro:select-section"&&payload.sectionId){
+    setSelectedPreviewSection(payload.sectionId);
+    const editorId=BLOCK_TO_EDITOR[payload.sectionId]||"estructura";
+    setActive(editorId);
+    return;
+   }
+   if(payload?.type==="invitapro:toggle-section"&&payload.sectionId&&payload.sectionId!=="hero"){
+    setBlockVisibility(current=>({...current,[payload.sectionId!]:!current[payload.sectionId!]}));
+    setSaved("Visibilidad actualizada · guarda los cambios");
+    return;
+   }
+   if(payload?.type==="invitapro:move-section"&&payload.sectionId&&payload.direction){
+    setSectionOrder(current=>{
+     const index=current.indexOf(payload.sectionId!);
+     const target=payload.direction==="up"?index-1:index+1;
+     if(index<=0&&payload.direction==="up"||index<0||target<1||target>=current.length)return current;
+     const next=[...current];[next[index],next[target]]=[next[target],next[index]];return next;
+    });
+    setSaved("Orden actualizado · guarda los cambios");
+    return;
+   }
+   if(payload?.type==="invitapro:set-variant"&&payload.sectionId&&payload.variant){
+    setBlockVariants(current=>({...current,[payload.sectionId!]:payload.variant!}));
+    setSaved("Variante actualizada · guarda los cambios");
+    return;
+   }
+   if(payload?.type==="invitapro:reorder-sections"&&payload.sourceId&&payload.targetId){
+    if(payload.sourceId==="hero"||payload.targetId==="hero")return;
+    setSectionOrder(current=>{
+     if(Array.isArray(payload.order))return normalizeTemplateSectionOrder(payload.order);
+     const sourceIndex=current.indexOf(payload.sourceId!);
+     const targetIndex=current.indexOf(payload.targetId!);
+     if(sourceIndex<0||targetIndex<0)return current;
+     const next=[...current];
+     const [moved]=next.splice(sourceIndex,1);
+     next.splice(targetIndex,0,moved);
+     return next;
+    });
+    setSaved("Orden actualizado · guarda los cambios");
+   }
+  }
+  window.addEventListener("message",handlePreviewMessage);
+  return()=>window.removeEventListener("message",handlePreviewMessage);
+ },[]);
+ useEffect(()=>{
+  const frame=previewRef.current?.contentWindow;
+  if(!frame)return;
+  frame.postMessage({type:"invitapro:set-composer-state",order:sectionOrder,visibility:blockVisibility,variants:blockVariants,selectedSection:selectedPreviewSection},window.location.origin);
+ },[sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,previewRevision]);
 
  async function load(){
   setLoading(true);setError("");
@@ -152,6 +220,7 @@ export default function StudioPage(){
   setDate(i.eventos?.fecha||"");setTime(i.eventos?.hora?.slice(0,5)||"");setVenue(i.eventos?.lugar||"");setAddress(i.eventos?.direccion||"");setMapsUrl(i.eventos?.maps_url||"");
   setVisibility(v=>({...v,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})}));
   setSectionOrder(normalizeTemplateSectionOrder(d.section_order));
+  setBlockVariants(typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{});
   setBlockVisibility({
    hero:true,
    intro:d.mostrar_intro!==false,
@@ -185,7 +254,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.11.3",plantilla:invite.template_key||current.plantilla}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.12.4",plantilla:invite.template_key||current.plantilla}
   };
   const [{error:inviteError},{error:eventError}]=await Promise.all([
     supabase.from("invitaciones").update(payload).eq("id",invite.id),
@@ -195,7 +264,7 @@ export default function StudioPage(){
   const error=inviteError||eventError;
   if(error){setError(error.message);return;}
   const updatedEvent=invite.eventos?{...invite.eventos,fecha:date,hora:time||null,lugar:venue||null,direccion:address||null,maps_url:mapsUrl||null}:invite.eventos;
-  setSaved("Guardado ✓");setInvite({...invite,...payload,eventos:updatedEvent});
+  setSaved("Guardado ✓");setInvite({...invite,...payload,eventos:updatedEvent});setPreviewRevision(value=>value+1);
   window.setTimeout(()=>setSaved(""),2200);
  }
 
@@ -416,21 +485,16 @@ export default function StudioPage(){
     {active==="deseos"&&<div className="studio-fields"><label className="full">Título del buzón<input value={wishesTitle} onChange={e=>setWishesTitle(e.target.value)} placeholder="Déjanos un mensaje"/></label><label className="full">Introducción<textarea rows={4} value={wishesText} onChange={e=>setWishesText(e.target.value)} placeholder="Tus palabras también serán parte de este día."/></label><div className="studio-note full">💌 Los mensajes se guardan de forma independiente en Supabase y no se publican automáticamente en la invitación.</div></div>}
     {active==="album"&&<div className="studio-fields"><label className="full">Título del álbum<input value={albumTitle} onChange={e=>setAlbumTitle(e.target.value)} placeholder="Comparte tus recuerdos"/></label><label className="full">Texto para tus invitados<textarea rows={4} value={albumText} onChange={e=>setAlbumText(e.target.value)} placeholder="Sube las fotografías que captures durante nuestra celebración."/></label><div className="studio-note full">▧ Las fotografías de invitados se almacenan en un bucket privado separado de la Biblioteca del cliente.</div></div>}
     {active==="rsvp"&&<div className="studio-fields"><label className="full">Texto para confirmar asistencia<input value={rsvpText} onChange={e=>setRsvpText(e.target.value)}/></label><label className="full">WhatsApp de contacto<input value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} placeholder="529981234567"/></label></div>}
+    {EDITOR_TO_BLOCK[active]&&BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]?.length?<div className="studio-variant-panel"><div><strong>Diseño de la sección</strong><small>Elige cómo se presenta este bloque.</small></div><div className="studio-variant-options">{BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]!.map(option=><button key={option.value} className={(blockVariants[EDITOR_TO_BLOCK[active]! ]||BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]! ]![0].value)===option.value?"active":""} onClick={()=>setBlockVariants(current=>({...current,[EDITOR_TO_BLOCK[active]!]:option.value}))}>{option.label}</button>)}</div></div>:null}
     {error&&<p className="form-error">{error}</p>}
    </section>
 
-   <aside className="studio-preview">
-    <div className="studio-preview-head"><strong>Vista previa</strong><span>Celular</span></div>
-    <div className="studio-phone"><div className="studio-phone-notch"/><div className="studio-phone-screen" style={{background:cover?`linear-gradient(rgba(25,15,20,.45),rgba(25,15,20,.58)),url("${cover}") center/cover`:`linear-gradient(160deg,${color},#21171d 55%,#fff 55%)`}}>
-      <div className="studio-phone-hero"><small>{template?.name||"InvitaPro"}</small><span>ESTÁS INVITADO A</span><h2>{title||"Tu evento"}</h2><p>{subtitle}</p></div>
-      <div className="studio-phone-body">
-       {visibility.fecha&&<div><small>FECHA</small><strong>{date||"Por definir"} · {time||""}</strong></div>}
-       {visibility.ubicacion&&<div><small>UBICACIÓN</small><strong>{venue||"Por definir"}</strong></div>}
-       {visibility.vestimenta&&<div><small>VESTIMENTA</small><strong>{dress||"Por definir"}</strong></div>}
-       {visibility.rsvp&&<button style={{background:color}}>{rsvpText||"Confirmar asistencia"}</button>}
-      </div>
-    </div></div>
-    <p>La vista final incluirá las fotografías, música, animaciones y composición propia de la plantilla.</p>
+   <aside className={`studio-preview studio-preview-${previewDevice}`}>
+    <div className="studio-preview-head"><div><strong>Vista previa real</strong><small>Haz clic para editar o arrastra para reordenar</small></div><div className="studio-preview-devices"><button className={previewDevice==="mobile"?"active":""} onClick={()=>setPreviewDevice("mobile")} title="Celular">▯</button><button className={previewDevice==="tablet"?"active":""} onClick={()=>setPreviewDevice("tablet")} title="Tableta">▭</button><button className={previewDevice==="desktop"?"active":""} onClick={()=>setPreviewDevice("desktop")} title="Escritorio">▰</button></div></div>
+    <div className="studio-live-preview-shell">
+     <iframe ref={previewRef} key={previewRevision} title="Vista previa real de la invitación" src={`/invitacion/${invite.slug}?preview=1&studio=1&v=${previewRevision}`}/>
+    </div>
+    <div className="studio-preview-status"><span>●</span><p>Arrastra cualquier bloque excepto la portada. El nuevo orden se guarda al presionar “Guardar cambios”.</p></div>
    </aside>
   </div>
 
