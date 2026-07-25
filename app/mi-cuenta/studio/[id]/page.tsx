@@ -94,6 +94,8 @@ export default function StudioPage(){
  const [invite,setInvite]=useState<Invite|null>(null);
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
+ const [publishingChanges,setPublishingChanges]=useState(false);
+ const [saveError,setSaveError]=useState(false);
  const [saved,setSaved]=useState("");
  const [error,setError]=useState("");
  const [active,setActive]=useState("portada");
@@ -157,10 +159,15 @@ export default function StudioPage(){
  const applyingHistoryRef=useRef(false);
  const initializedRef=useRef(false);
  const savedSignatureRef=useRef("");
+ const currentSignatureRef=useRef("");
+ const savingRef=useRef(false);
 
  const currentSnapshot=useMemo<StudioSnapshot>(()=>({title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants}),[title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants]);
  const currentSignature=useMemo(()=>JSON.stringify(currentSnapshot),[currentSnapshot]);
+ currentSignatureRef.current=currentSignature;
  const hasUnsavedChanges=initializedRef.current&&currentSignature!==savedSignatureRef.current;
+ const publishedSignature=typeof invite?.design_json?.published_signature==="string"?invite.design_json.published_signature:"";
+ const hasUnpublishedChanges=invite?.estado==="publicada"&&currentSignature!==publishedSignature;
 
  const applySnapshot=useCallback((snapshot:StudioSnapshot)=>{
   applyingHistoryRef.current=true;
@@ -186,6 +193,11 @@ export default function StudioPage(){
   const beforeUnload=(event:BeforeUnloadEvent)=>{if(!hasUnsavedChanges||saving)return;event.preventDefault();event.returnValue=""};
   window.addEventListener("beforeunload",beforeUnload);return()=>window.removeEventListener("beforeunload",beforeUnload);
  },[hasUnsavedChanges,saving]);
+ useEffect(()=>{
+  if(!invite||!initializedRef.current||!hasUnsavedChanges||savingRef.current||applyingHistoryRef.current)return;
+  const timer=window.setTimeout(()=>{void save({silent:true})},1800);
+  return()=>window.clearTimeout(timer);
+ },[currentSignature,invite?.id]);
  useEffect(()=>{
   const keyboard=(event:KeyboardEvent)=>{if(!(event.ctrlKey||event.metaKey))return;if(event.key.toLowerCase()!=="z")return;event.preventDefault();if(event.shiftKey)redo();else undo()};
   window.addEventListener("keydown",keyboard);return()=>window.removeEventListener("keydown",keyboard);
@@ -311,27 +323,65 @@ export default function StudioPage(){
  useEffect(()=>{void load()},[params.id]);
  useEffect(()=>{void (async()=>{const{data}=await supabase.from("planes_comerciales").select("*").eq("activo",true).order("orden");if(data?.length)setCommercialPlans(data as CommercialPlan[])})()},[]);
 
- async function save(){
-  if(!invite)return;
-  setSaving(true);setError("");setSaved("");
+ function buildDraftPayload(){
+  if(!invite)return null;
   const current=invite.design_json||{};
-  const payload={
+  return {
+   invitation:{
     titulo:title.trim()||invite.titulo,
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.12.6",plantilla:invite.template_key||current.plantilla}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.12.7",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+   },
+   event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
+ }
+
+ async function save(options:{silent?:boolean}={}){
+  if(!invite||savingRef.current)return false;
+  const built=buildDraftPayload();if(!built)return false;
+  const signatureAtStart=currentSignatureRef.current;
+  savingRef.current=true;setSaving(true);setSaveError(false);setError("");
+  if(!options.silent)setSaved("");
   const [{error:inviteError},{error:eventError}]=await Promise.all([
-    supabase.from("invitaciones").update(payload).eq("id",invite.id),
-    supabase.from("eventos").update({fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}).eq("id",invite.evento_id)
+   supabase.from("invitaciones").update(built.invitation).eq("id",invite.id),
+   supabase.from("eventos").update(built.event).eq("id",invite.evento_id)
   ]);
-  setSaving(false);
-  const error=inviteError||eventError;
-  if(error){setError(error.message);return;}
-  const updatedEvent=invite.eventos?{...invite.eventos,fecha:date,hora:time||null,lugar:venue||null,direccion:address||null,maps_url:mapsUrl||null}:invite.eventos;
-  savedSignatureRef.current=currentSignature;setSaved("Guardado ✓");setInvite({...invite,...payload,eventos:updatedEvent});setPreviewRevision(value=>value+1);
+  savingRef.current=false;setSaving(false);
+  const saveFailure=inviteError||eventError;
+  if(saveFailure){setSaveError(true);setError(saveFailure.message);setSaved("Error al guardar");return false;}
+  const updatedEvent=invite.eventos?{...invite.eventos,...built.event}:invite.eventos;
+  if(currentSignatureRef.current===signatureAtStart)savedSignatureRef.current=signatureAtStart;
+  setSaved(options.silent?"Autoguardado ✓":"Guardado ✓");
+  setInvite(current=>current?{...current,...built.invitation,eventos:updatedEvent}:current);
+  if(!options.silent)setPreviewRevision(value=>value+1);
   window.setTimeout(()=>setSaved(""),2200);
+  return true;
+ }
+
+ async function publishChanges(){
+  if(!invite||publishingChanges)return;
+  setPublishingChanges(true);setError("");
+  const savedOk=hasUnsavedChanges?await save({silent:true}):true;
+  if(!savedOk){setPublishingChanges(false);return;}
+  const built=buildDraftPayload();if(!built){setPublishingChanges(false);return;}
+  const publishedAt=new Date().toISOString();
+  const publishedSnapshot={
+   titulo:built.invitation.titulo,
+   color_principal:built.invitation.color_principal,
+   musica_url:built.invitation.musica_url,
+   whatsapp:built.invitation.whatsapp,
+   template_key:invite.template_key,
+   design_json:{...(built.invitation.design_json as Record<string,unknown>),published_snapshot:undefined,published_event:undefined,published_signature:undefined}
+  };
+  const nextDesign={...(built.invitation.design_json as Record<string,unknown>),published_snapshot:publishedSnapshot,published_event:built.event,published_signature:currentSignatureRef.current,published_at:publishedAt};
+  const {error}=await supabase.from("invitaciones").update({design_json:nextDesign}).eq("id",invite.id);
+  setPublishingChanges(false);
+  if(error){setSaveError(true);setError(error.message);setSaved("Error al publicar");return;}
+  setInvite(current=>current?{...current,design_json:nextDesign}:current);
+  setSaved("Cambios publicados ✓");
+  window.setTimeout(()=>setSaved(""),2600);
  }
 
  async function applyTemplate(id:string){
@@ -485,8 +535,8 @@ export default function StudioPage(){
 
  return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
-   <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small className={saving?"studio-save-saving":hasUnsavedChanges?"studio-save-pending":"studio-save-ok"}>{saved||(saving?"Guardando…":hasUnsavedChanges?"Cambios pendientes":"Todo guardado")}</small></div></div>
-   <div className="studio-topbar-actions"><div className="studio-history-actions"><button className="client-secondary" onClick={undo} disabled={historyIndex<=0||saving} title="Deshacer (Ctrl+Z)">↶</button><button className="client-secondary" onClick={redo} disabled={historyIndex<0||historyIndex>=historyLength-1||saving} title="Rehacer (Ctrl+Shift+Z)">↷</button></div><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar cambios":"Guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link>}</div>
+   <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small className={saveError?"studio-save-error":saving?"studio-save-saving":hasUnsavedChanges?"studio-save-pending":"studio-save-ok"}>{saved||(saveError?"Error al guardar":saving?"Guardando…":hasUnsavedChanges?"Cambios pendientes":"Borrador guardado")}</small></div></div>
+   <div className="studio-topbar-actions"><div className="studio-history-actions"><button className="client-secondary" onClick={undo} disabled={historyIndex<=0||saving} title="Deshacer (Ctrl+Z)">↶</button><button className="client-secondary" onClick={redo} disabled={historyIndex<0||historyIndex>=historyLength-1||saving} title="Rehacer (Ctrl+Shift+Z)">↷</button></div><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar ahora":"Borrador guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<><button className="studio-publish-button" disabled={publishingChanges||!hasUnpublishedChanges} onClick={()=>void publishChanges()}>{publishingChanges?"Publicando…":hasUnpublishedChanges?"Publicar cambios":"Publicado"}</button><Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link></>}</div>
   </header>
 
   <div className="studio-workspace">
@@ -560,7 +610,7 @@ export default function StudioPage(){
     <div className="studio-live-preview-shell">
      <iframe ref={previewRef} key={previewRevision} title="Vista previa real de la invitación" src={`/invitacion/${invite.slug}?preview=1&studio=1&v=${previewRevision}`}/>
     </div>
-    <div className="studio-preview-status"><span>●</span><p>Arrastra cualquier bloque excepto la portada. El nuevo orden se guarda al presionar “Guardar cambios”.</p></div>
+    <div className="studio-preview-status"><span>●</span><p>Arrastra cualquier bloque excepto la portada. Los cambios se guardan automáticamente como borrador. En invitaciones publicadas usa “Publicar cambios” para actualizar el enlace público.</p></div>
    </aside>
   </div>
 

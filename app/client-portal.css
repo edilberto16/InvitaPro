@@ -128,3 +128,5 @@
 .studio-save-pending{color:#bd7a16!important;font-weight:700}
 .studio-save-saving{color:#6d5bd0!important;font-weight:700}
 @media(max-width:980px){.studio-history-actions{order:-1}.studio-history-actions button{min-width:34px;padding:8px}}
+
+.studio-save-error{color:#b42318!important;font-weight:700}
