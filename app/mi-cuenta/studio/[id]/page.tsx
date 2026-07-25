@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useMemo,useRef,useState} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,getTemplateById} from "@/lib/template-catalog";
@@ -66,6 +66,11 @@ const BLOCK_VARIANTS:Partial<Record<TemplateSectionId,{value:string;label:string
  history:[{value:"classic",label:"Clásica"},{value:"quote",label:"Editorial"},{value:"split",label:"Dividida"}],
  location:[{value:"card",label:"Tarjeta"},{value:"full",label:"Destacada"},{value:"minimal",label:"Minimal"}],
  rsvp:[{value:"card",label:"Tarjeta"},{value:"featured",label:"Destacada"},{value:"minimal",label:"Minimal"}],
+};
+
+
+type StudioSnapshot={
+ title:string;message:string;subtitle:string;color:string;music:string;whatsapp:string;program:string;dress:string;historyTitle:string;historyText:string;lodging:string;gift:string;videoUrl:string;faqText:string;specialPeople:string;hashtag:string;socialText:string;wishesTitle:string;wishesText:string;albumTitle:string;albumText:string;rsvpText:string;cover:string;gallery:string[];date:string;time:string;venue:string;address:string;mapsUrl:string;visibility:Record<string,boolean>;sectionOrder:TemplateSectionId[];blockVisibility:Record<TemplateSectionId,boolean>;blockVariants:BlockVariantMap;
 };
 
 type BlockCategory="todos"|"evento"|"multimedia"|"invitados"|"premium";
@@ -145,11 +150,72 @@ export default function StudioPage(){
  const [selectedPreviewSection,setSelectedPreviewSection]=useState<TemplateSectionId|null>(null);
  const [blockVariants,setBlockVariants]=useState<BlockVariantMap>({});
  const previewRef=useRef<HTMLIFrameElement|null>(null);
+ const [historyIndex,setHistoryIndex]=useState(-1);
+ const [historyLength,setHistoryLength]=useState(0);
+ const historyRef=useRef<StudioSnapshot[]>([]);
+ const historyIndexRef=useRef(-1);
+ const applyingHistoryRef=useRef(false);
+ const initializedRef=useRef(false);
+ const savedSignatureRef=useRef("");
+
+ const currentSnapshot=useMemo<StudioSnapshot>(()=>({title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants}),[title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants]);
+ const currentSignature=useMemo(()=>JSON.stringify(currentSnapshot),[currentSnapshot]);
+ const hasUnsavedChanges=initializedRef.current&&currentSignature!==savedSignatureRef.current;
+
+ const applySnapshot=useCallback((snapshot:StudioSnapshot)=>{
+  applyingHistoryRef.current=true;
+  setTitle(snapshot.title);setMessage(snapshot.message);setSubtitle(snapshot.subtitle);setColor(snapshot.color);setMusic(snapshot.music);setWhatsapp(snapshot.whatsapp);setProgram(snapshot.program);setDress(snapshot.dress);setHistoryTitle(snapshot.historyTitle);setHistoryText(snapshot.historyText);setLodging(snapshot.lodging);setGift(snapshot.gift);setVideoUrl(snapshot.videoUrl);setFaqText(snapshot.faqText);setSpecialPeople(snapshot.specialPeople);setHashtag(snapshot.hashtag);setSocialText(snapshot.socialText);setWishesTitle(snapshot.wishesTitle);setWishesText(snapshot.wishesText);setAlbumTitle(snapshot.albumTitle);setAlbumText(snapshot.albumText);setRsvpText(snapshot.rsvpText);setCover(snapshot.cover);setGallery([...snapshot.gallery]);setDate(snapshot.date);setTime(snapshot.time);setVenue(snapshot.venue);setAddress(snapshot.address);setMapsUrl(snapshot.mapsUrl);setVisibility({...snapshot.visibility});setSectionOrder([...snapshot.sectionOrder]);setBlockVisibility({...snapshot.blockVisibility});setBlockVariants({...snapshot.blockVariants});
+  window.setTimeout(()=>{applyingHistoryRef.current=false},0);
+ },[]);
+ function undo(){const next=historyIndexRef.current-1;if(next<0)return;historyIndexRef.current=next;setHistoryIndex(next);applySnapshot(historyRef.current[next]);setSaved("Cambio deshecho");}
+ function redo(){const next=historyIndexRef.current+1;if(next>=historyRef.current.length)return;historyIndexRef.current=next;setHistoryIndex(next);applySnapshot(historyRef.current[next]);setSaved("Cambio rehecho");}
+
+ useEffect(()=>{
+  if(!initializedRef.current||applyingHistoryRef.current)return;
+  const timer=window.setTimeout(()=>{
+   const current=historyRef.current[historyIndexRef.current];
+   if(current&&JSON.stringify(current)===currentSignature)return;
+   const nextHistory=historyRef.current.slice(0,historyIndexRef.current+1);
+   nextHistory.push(JSON.parse(currentSignature) as StudioSnapshot);
+   if(nextHistory.length>50)nextHistory.shift();
+   historyRef.current=nextHistory;historyIndexRef.current=nextHistory.length-1;setHistoryIndex(historyIndexRef.current);setHistoryLength(nextHistory.length);
+  },300);
+  return()=>window.clearTimeout(timer);
+ },[currentSignature]);
+ useEffect(()=>{
+  const beforeUnload=(event:BeforeUnloadEvent)=>{if(!hasUnsavedChanges||saving)return;event.preventDefault();event.returnValue=""};
+  window.addEventListener("beforeunload",beforeUnload);return()=>window.removeEventListener("beforeunload",beforeUnload);
+ },[hasUnsavedChanges,saving]);
+ useEffect(()=>{
+  const keyboard=(event:KeyboardEvent)=>{if(!(event.ctrlKey||event.metaKey))return;if(event.key.toLowerCase()!=="z")return;event.preventDefault();if(event.shiftKey)redo();else undo()};
+  window.addEventListener("keydown",keyboard);return()=>window.removeEventListener("keydown",keyboard);
+ },[historyIndex,historyLength]);
+
+ const sendPreviewState=useCallback(()=>{
+  const frame=previewRef.current?.contentWindow;
+  if(!frame)return;
+  frame.postMessage({
+   type:"invitapro:set-composer-state",
+   order:sectionOrder,
+   visibility:blockVisibility,
+   variants:blockVariants,
+   selectedSection:selectedPreviewSection,
+   draft:{
+    title,
+    color,
+    music,
+    whatsapp,
+    event:{fecha:date,hora:time||null,lugar:venue,direccion:address,maps_url:mapsUrl},
+    designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
+   }
+  },window.location.origin);
+ },[sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
 
  useEffect(()=>{
   function handlePreviewMessage(event:MessageEvent){
    if(event.origin!==window.location.origin)return;
    const payload=event.data as {type?:string;sectionId?:TemplateSectionId;sourceId?:TemplateSectionId;targetId?:TemplateSectionId;order?:TemplateSectionId[];direction?:"up"|"down";variant?:string};
+   if(payload?.type==="invitapro:preview-ready"){sendPreviewState();return;}
    if(payload?.type==="invitapro:select-section"&&payload.sectionId){
     setSelectedPreviewSection(payload.sectionId);
     const editorId=BLOCK_TO_EDITOR[payload.sectionId]||"estructura";
@@ -193,12 +259,8 @@ export default function StudioPage(){
   }
   window.addEventListener("message",handlePreviewMessage);
   return()=>window.removeEventListener("message",handlePreviewMessage);
- },[]);
- useEffect(()=>{
-  const frame=previewRef.current?.contentWindow;
-  if(!frame)return;
-  frame.postMessage({type:"invitapro:set-composer-state",order:sectionOrder,visibility:blockVisibility,variants:blockVariants,selectedSection:selectedPreviewSection},window.location.origin);
- },[sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,previewRevision]);
+ },[sendPreviewState]);
+ useEffect(()=>{sendPreviewState()},[sendPreviewState,previewRevision]);
 
  async function load(){
   setLoading(true);setError("");
@@ -240,6 +302,10 @@ export default function StudioPage(){
    location:d.mostrar_mapa!==false,
    rsvp:d.mostrar_rsvp!==false,
   });
+  window.setTimeout(()=>{
+   const snapshot:StudioSnapshot={title:i.titulo,message:typeof d.mensaje==="string"?d.mensaje:"",subtitle:typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento",color:i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f",music:i.musica_url||"",whatsapp:i.whatsapp||"",program:typeof d.programa==="string"?d.programa:"",dress:typeof d.vestimenta==="string"?d.vestimenta:"Formal",historyTitle:typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia",historyText:typeof d.historia_texto==="string"?d.historia_texto:"",lodging:typeof d.hospedaje==="string"?d.hospedaje:"",gift:typeof d.regalos==="string"?d.regalos:"",videoUrl:typeof d.video_url==="string"?d.video_url:"",faqText:typeof d.faq==="string"?d.faq:"",specialPeople:typeof d.personas_especiales==="string"?d.personas_especiales:"",hashtag:typeof d.hashtag==="string"?d.hashtag:"",socialText:typeof d.hashtag_texto==="string"?d.hashtag_texto:"Comparte tus mejores momentos con nosotros",wishesTitle:typeof d.deseos_titulo==="string"?d.deseos_titulo:"Déjanos un mensaje",wishesText:typeof d.deseos_texto==="string"?d.deseos_texto:"Tus palabras también serán parte de este día.",albumTitle:typeof d.album_titulo==="string"?d.album_titulo:"Comparte tus recuerdos",albumText:typeof d.album_texto==="string"?d.album_texto:"Sube las fotografías que captures durante nuestra celebración.",rsvpText:typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia",cover:typeof d.portada_url==="string"?d.portada_url:"",gallery:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[],date:i.eventos?.fecha||"",time:i.eventos?.hora?.slice(0,5)||"",venue:i.eventos?.lugar||"",address:i.eventos?.direccion||"",mapsUrl:i.eventos?.maps_url||"",visibility:{...visibility,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})},sectionOrder:normalizeTemplateSectionOrder(d.section_order),blockVisibility:{hero:true,intro:d.mostrar_intro!==false,countdown:d.mostrar_contador!==false,details:d.mostrar_detalles!==false,program:d.mostrar_programa!==false,gallery:d.mostrar_galeria!==false,history:d.mostrar_historia===true,lodging:d.mostrar_hospedaje===true,gifts:d.mostrar_regalos===true,video:d.mostrar_video===true,faq:d.mostrar_faq===true,special_people:d.mostrar_personas_especiales===true,hashtag:d.mostrar_hashtag===true,wishes:d.mostrar_deseos===true,album:d.mostrar_album===true,location:d.mostrar_mapa!==false,rsvp:d.mostrar_rsvp!==false},blockVariants:typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{}};
+   const signature=JSON.stringify(snapshot);historyRef.current=[snapshot];historyIndexRef.current=0;setHistoryIndex(0);setHistoryLength(1);savedSignatureRef.current=signature;initializedRef.current=true;
+  },0);
   setLoading(false);
  }
  useEffect(()=>{void load()},[params.id]);
@@ -254,7 +320,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.12.4",plantilla:invite.template_key||current.plantilla}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.12.6",plantilla:invite.template_key||current.plantilla}
   };
   const [{error:inviteError},{error:eventError}]=await Promise.all([
     supabase.from("invitaciones").update(payload).eq("id",invite.id),
@@ -264,7 +330,7 @@ export default function StudioPage(){
   const error=inviteError||eventError;
   if(error){setError(error.message);return;}
   const updatedEvent=invite.eventos?{...invite.eventos,fecha:date,hora:time||null,lugar:venue||null,direccion:address||null,maps_url:mapsUrl||null}:invite.eventos;
-  setSaved("Guardado ✓");setInvite({...invite,...payload,eventos:updatedEvent});setPreviewRevision(value=>value+1);
+  savedSignatureRef.current=currentSignature;setSaved("Guardado ✓");setInvite({...invite,...payload,eventos:updatedEvent});setPreviewRevision(value=>value+1);
   window.setTimeout(()=>setSaved(""),2200);
  }
 
@@ -419,8 +485,8 @@ export default function StudioPage(){
 
  return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
-   <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small>{saved||"Borrador · Guardado manual"}</small></div></div>
-   <div className="studio-topbar-actions"><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving}>{saving?"Guardando…":"Guardar cambios"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link>}</div>
+   <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small className={saving?"studio-save-saving":hasUnsavedChanges?"studio-save-pending":"studio-save-ok"}>{saved||(saving?"Guardando…":hasUnsavedChanges?"Cambios pendientes":"Todo guardado")}</small></div></div>
+   <div className="studio-topbar-actions"><div className="studio-history-actions"><button className="client-secondary" onClick={undo} disabled={historyIndex<=0||saving} title="Deshacer (Ctrl+Z)">↶</button><button className="client-secondary" onClick={redo} disabled={historyIndex<0||historyIndex>=historyLength-1||saving} title="Rehacer (Ctrl+Shift+Z)">↷</button></div><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar cambios":"Guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link>}</div>
   </header>
 
   <div className="studio-workspace">

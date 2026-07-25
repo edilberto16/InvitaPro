@@ -119,3 +119,12 @@
 .block-variant-quote .premium-story-copy{max-width:760px;font-family:Georgia,serif;font-size:1.25em;font-style:italic}.block-variant-split .premium-story-section{display:grid;grid-template-columns:.7fr 1.3fr;gap:32px;align-items:start}
 .block-variant-full .premium-location-card{max-width:none;border-radius:0;padding-block:70px}.block-variant-minimal .premium-location-card{box-shadow:none;border:0;background:transparent}.block-variant-featured .premium-rsvp-card{transform:scale(1.02);box-shadow:0 25px 70px rgba(74,34,55,.18)}.block-variant-minimal .premium-rsvp-card{box-shadow:none;border:1px solid rgba(114,38,79,.12)}
 @media(max-width:640px){.studio-preview-toolbar{opacity:1;transform:none;top:7px;right:7px;max-width:calc(100% - 52px);overflow:auto}.studio-preview-toolbar select{max-width:94px}.block-variant-editorial .premium-gallery-grid,.block-variant-cards .premium-program-list,.block-variant-split .premium-story-section{grid-template-columns:1fr}.block-variant-editorial .gallery-item:first-child{min-height:260px}}
+
+/* InvitaPro Studio v2.12.5 — historial y estado de guardado */
+.studio-history-actions{display:flex;gap:6px;align-items:center}
+.studio-history-actions button{min-width:38px;padding:9px 11px;font-size:18px;line-height:1}
+.studio-history-actions button:disabled{opacity:.38;cursor:not-allowed}
+.studio-save-ok{color:#2f8f62!important}
+.studio-save-pending{color:#bd7a16!important;font-weight:700}
+.studio-save-saving{color:#6d5bd0!important;font-weight:700}
+@media(max-width:980px){.studio-history-actions{order:-1}.studio-history-actions button{min-width:34px;padding:8px}}
