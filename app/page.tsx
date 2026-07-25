@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { InvitaProLogo } from '@/components/marketing/invitapro-logo';
+import { DEFAULT_COMMERCIAL_PLANS, CommercialPlan, moneyMXN } from '@/lib/commercial-plans';
+import { createClient } from '@/lib/supabase/server';
 
 const features = [
   { icon: '✓', title: 'RSVP en tiempo real', text: 'Recibe confirmaciones, acompañantes y respuestas desde un solo panel.' },
@@ -23,6 +25,29 @@ const steps = [
   ['04', 'Administra', 'Consulta confirmaciones e invitados desde tu panel InvitaPro.'],
 ];
 
+function featuresForPlan(plan: CommercialPlan) {
+  const features: string[] = [];
+  features.push(plan.limite_invitados === null ? 'Invitados ilimitados' : `Hasta ${plan.limite_invitados} invitados`);
+  if (plan.permite_rsvp) features.push('Confirmaciones RSVP');
+  if (plan.permite_musica) features.push(`Música y galería de hasta ${plan.limite_galeria ?? 'fotos ilimitadas'} fotos`);
+  else features.push(`Galería de hasta ${plan.limite_galeria ?? 'fotos ilimitadas'} fotos`);
+  if (plan.permite_signature) features.push('Experiencias Signature exclusivas');
+  else if (plan.permite_plantillas_premium) features.push('Plantillas Premium');
+  else features.push('Ubicación, agenda y cuenta regresiva');
+  return features;
+}
+
+async function loadCommercialPlans(): Promise<CommercialPlan[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from('planes_comerciales').select('*').eq('activo', true).order('orden');
+    if (error || !data?.length) return DEFAULT_COMMERCIAL_PLANS.filter(plan => plan.activo);
+    return data as CommercialPlan[];
+  } catch {
+    return DEFAULT_COMMERCIAL_PLANS.filter(plan => plan.activo);
+  }
+}
+
 const faqs = [
   ['¿Necesito instalar una aplicación?', 'No. InvitaPro funciona desde el navegador y tus invitados pueden abrir la invitación desde cualquier celular, tableta o computadora.'],
   ['¿Puedo usar mis propias fotografías y música?', 'Sí. Puedes subir tus recursos o elegirlos desde la biblioteca multimedia de tu evento.'],
@@ -30,7 +55,8 @@ const faqs = [
   ['¿La invitación se puede modificar después de compartirla?', 'Sí. Los cambios publicados se reflejan en el mismo enlace, sin necesidad de reenviarlo.'],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const commercialPlans = await loadCommercialPlans();
   return (
     <main className="marketing-site">
       <header className="marketing-header">
@@ -40,7 +66,8 @@ export default function Home() {
             <a href="#caracteristicas">Características</a>
             <a href="#plantillas">Plantillas</a>
             <a href="#como-funciona">Cómo funciona</a>
-            <a href="#preguntas">Preguntas</a><Link href="/solicitar">Solicitar invitación</Link>
+            <a href="#precios">Precios</a>
+            <a href="#preguntas">Preguntas</a>
           </nav>
           <div className="marketing-nav-actions">
             <Link className="marketing-login" href="/login">Iniciar sesión</Link>
@@ -184,6 +211,39 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="marketing-section marketing-pricing" id="precios">
+        <div className="marketing-container">
+          <div className="marketing-section-heading marketing-heading-center">
+            <span className="marketing-eyebrow">Planes claros, sin complicaciones</span>
+            <h2>Elige la experiencia ideal para tu evento.</h2>
+            <p>Un solo pago por invitación. Crea y personaliza gratis; paga únicamente cuando esté lista para publicarse.</p>
+          </div>
+          <div className="marketing-pricing-grid">
+            {commercialPlans.map((plan) => {
+              const featured = plan.clave === 'premium';
+              return (
+                <article className={`marketing-price-card${featured ? ' marketing-price-card--featured' : ''}`} key={plan.clave}>
+                  {featured && <span className="marketing-price-badge">Más elegido</span>}
+                  <div className="marketing-price-head">
+                    <span>{plan.nombre}</span>
+                    <h3>{moneyMXN(plan.precio_mxn)}</h3>
+                    <small>MXN · pago único</small>
+                  </div>
+                  <p>{plan.descripcion}</p>
+                  <ul>
+                    {featuresForPlan(plan).map((feature) => <li key={feature}><span>✓</span>{feature}</li>)}
+                  </ul>
+                  <Link className={`marketing-button${featured ? '' : ' marketing-button-ghost'}`} href={`/registro?plan=${plan.clave}`}>
+                    Elegir {plan.nombre} <span>→</span>
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+          <p className="marketing-pricing-note">Puedes comenzar sin pagar, guardar tu diseño y solicitar la activación cuando estés listo para compartirlo.</p>
+        </div>
+      </section>
+
       <section className="managed-choice" id="solicitar">
         <div className="marketing-container">
           <div className="managed-choice-heading"><span className="marketing-eyebrow">Tú eliges cómo empezar</span><h2>¿Cómo quieres crear tu invitación?</h2><p>Elige entre nuestro servicio personalizado o crea tu invitación tú mismo desde Mi InvitaPro.</p></div>
@@ -229,8 +289,8 @@ export default function Home() {
         <div className="marketing-container">
           <div className="marketing-footer-main">
             <div><InvitaProLogo /><p>Invitaciones digitales y gestión de eventos, todo en un solo lugar.</p></div>
-            <div><strong>Producto</strong><a href="#caracteristicas">Características</a><a href="#plantillas">Plantillas</a><Link href="/inspiracion">Inspiración</Link></div>
-            <div><strong>Cuenta</strong><Link href="/login">Iniciar sesión</Link><Link href="/solicitar">Solicitar invitación</Link><Link href="/login">Iniciar sesión</Link></div>
+            <div><strong>Producto</strong><a href="#caracteristicas">Características</a><a href="#plantillas">Plantillas</a><a href="#precios">Precios</a><Link href="/inspiracion">Inspiración</Link></div>
+            <div><strong>Cuenta</strong><Link href="/registro">Crear cuenta</Link><Link href="/login">Iniciar sesión</Link><Link href="/solicitar">Solicitar invitación</Link></div>
             <div><strong>Legal</strong><span>Aviso de privacidad</span><span>Términos y condiciones</span><span>Contacto</span></div>
           </div>
           <div className="marketing-footer-bottom"><span>© 2026 InvitaPro. Todos los derechos reservados.</span><span>Hecho para celebrar momentos inolvidables ✦</span></div>

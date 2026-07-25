@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import {moneyMXN} from '@/lib/commercial-plans';
+import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey} from '@/lib/commercial-plans';
 import { DragEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ShareInvitationModal from '@/components/share-invitation-modal';
@@ -38,8 +38,8 @@ function normalizeSectionSettings(value:unknown):SectionSettings{
     return [id,{...defaults,...current,alignment:['left','center','right'].includes(String(current.alignment))?String(current.alignment) as 'left'|'center'|'right':defaults.alignment}];
   })) as SectionSettings;
 }
-type FormState={evento_id:string;titulo:string;slug:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;portada_efecto:string;pantalla_bienvenida:boolean;texto_bienvenida:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;theme_id:string;theme_overrides:ThemeStudioOverrides;section_order:TemplateSectionId[];mostrar_intro:boolean;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean;section_settings:SectionSettings};
-const EMPTY:FormState={evento_id:'',titulo:'',slug:'',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',portada_efecto:'cinematic-zoom',pantalla_bienvenida:true,texto_bienvenida:'Abrir invitación',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',theme_id:'elegant-classic',theme_overrides:{},section_order:[...DEFAULT_TEMPLATE_SECTION_ORDER],mostrar_intro:true,mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true,section_settings:normalizeSectionSettings(null)};
+type FormState={evento_id:string;titulo:string;slug:string;plan_clave:string;modalidad:Invitacion['modalidad'];estado:Invitacion['estado'];plantilla:string;mensaje:string;subtitulo:string;vestimenta:string;programa:string;color_principal:string;portada_url:string;portada_efecto:string;pantalla_bienvenida:boolean;texto_bienvenida:string;galeria_urls:string[];musica_url:string;whatsapp:string;fecha_expiracion:string;theme_id:string;theme_overrides:ThemeStudioOverrides;section_order:TemplateSectionId[];mostrar_intro:boolean;mostrar_contador:boolean;mostrar_detalles:boolean;mostrar_programa:boolean;mostrar_galeria:boolean;mostrar_mapa:boolean;mostrar_rsvp:boolean;section_settings:SectionSettings};
+const EMPTY:FormState={evento_id:'',titulo:'',slug:'',plan_clave:'clasico',modalidad:'simple',estado:'borrador',plantilla:'elegante-classic',mensaje:'Será un honor contar con tu presencia para celebrar este día tan especial.',subtitulo:'Queremos compartir contigo este momento',vestimenta:'Formal',programa:'18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración',color_principal:'#8f5c38',portada_url:'',portada_efecto:'cinematic-zoom',pantalla_bienvenida:true,texto_bienvenida:'Abrir invitación',galeria_urls:[],musica_url:'',whatsapp:'',fecha_expiracion:'',theme_id:'elegant-classic',theme_overrides:{},section_order:[...DEFAULT_TEMPLATE_SECTION_ORDER],mostrar_intro:true,mostrar_contador:true,mostrar_detalles:true,mostrar_programa:true,mostrar_galeria:true,mostrar_mapa:true,mostrar_rsvp:true,section_settings:normalizeSectionSettings(null)};
 const DEMO_CONTENT={
   portada_url:'/demo/portada-boda.jpg',
   galeria_urls:[
@@ -78,8 +78,8 @@ function ArchiveIcon(){return <Icon><path d="M3 6h18"/><path d="M5 6v14h14V6"/><
 function TrashIcon(){return <Icon><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></Icon>}
 function CopyIcon(){return <Icon><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></Icon>}
 
-export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);const[mediaPicker,setMediaPicker]=useState<'cover'|'gallery'|'audio'|null>(null);const[reviewing,setReviewing]=useState<Invitacion|null>(null);const[reviewBusy,setReviewBusy]=useState(false);const[templateFilter,setTemplateFilter]=useState('todas');const[copiedSlug,setCopiedSlug]=useState('');const[activating,setActivating]=useState<Invitacion|null>(null);const[activationBusy,setActivationBusy]=useState(false);const[activationAmount,setActivationAmount]=useState('');const[activationMethod,setActivationMethod]=useState('transferencia');const[activationReference,setActivationReference]=useState('');const[activationNotes,setActivationNotes]=useState('');const[activationCourtesy,setActivationCourtesy]=useState(false);const[draggedSection,setDraggedSection]=useState<TemplateSectionId|null>(null);const[selectedSection,setSelectedSection]=useState<TemplateSectionId>('hero');
-async function load(){setLoading(true);const[e,i]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false})]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);setLoading(false)}useEffect(()=>{void load()},[]);
+export default function InvitacionesPage(){const supabase=useMemo(()=>createClient(),[]);const[eventos,setEventos]=useState<Evento[]>([]);const[commercialPlans,setCommercialPlans]=useState<CommercialPlan[]>(DEFAULT_COMMERCIAL_PLANS);const[items,setItems]=useState<Invitacion[]>([]);const[loading,setLoading]=useState(true);const[modal,setModal]=useState(false);const[editing,setEditing]=useState<Invitacion|null>(null);const[deleting,setDeleting]=useState<Invitacion|null>(null);const[form,setForm]=useState<FormState>(EMPTY);const[error,setError]=useState('');const[search,setSearch]=useState('');const[filter,setFilter]=useState('todas');const[saving,setSaving]=useState(false);const[uploading,setUploading]=useState<'cover'|'gallery'|'audio'|null>(null);const[sharing,setSharing]=useState<Invitacion|null>(null);const[mediaPicker,setMediaPicker]=useState<'cover'|'gallery'|'audio'|null>(null);const[reviewing,setReviewing]=useState<Invitacion|null>(null);const[reviewBusy,setReviewBusy]=useState(false);const[templateFilter,setTemplateFilter]=useState('todas');const[copiedSlug,setCopiedSlug]=useState('');const[activating,setActivating]=useState<Invitacion|null>(null);const[activationBusy,setActivationBusy]=useState(false);const[activationAmount,setActivationAmount]=useState('');const[activationMethod,setActivationMethod]=useState('transferencia');const[activationReference,setActivationReference]=useState('');const[activationNotes,setActivationNotes]=useState('');const[activationCourtesy,setActivationCourtesy]=useState(false);const[draggedSection,setDraggedSection]=useState<TemplateSectionId|null>(null);const[selectedSection,setSelectedSection]=useState<TemplateSectionId>('hero');
+async function load(){setLoading(true);const[e,i,p]=await Promise.all([supabase.from('eventos').select('*, clientes(id,nombre)').order('fecha'),supabase.from('invitaciones').select('*, eventos(id,nombre,tipo,fecha,hora,lugar,direccion,maps_url,cliente_id,clientes(id,nombre))').order('created_at',{ascending:false}),supabase.from('planes_comerciales').select('*').eq('activo',true).order('orden')]);if(e.error)setError(messageFromError(e.error));else setEventos((e.data??[]) as Evento[]);if(i.error)setError(messageFromError(i.error));else setItems((i.data??[]) as Invitacion[]);if(!p.error&&p.data?.length)setCommercialPlans(p.data as CommercialPlan[]);setLoading(false)}useEffect(()=>{void load()},[]);
 useEffect(()=>{
   if(typeof window==='undefined'||eventos.length===0)return;
   const params=new URLSearchParams(window.location.search);
@@ -95,7 +95,7 @@ useEffect(()=>{
   setModal(true);
   window.history.replaceState({},'',window.location.pathname);
 },[eventos]);
-function openNew(){const ev=eventos[0];setEditing(null);setForm({...EMPTY,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),portada_efecto:designValue(x,'portada_efecto','cinematic-zoom'),pantalla_bienvenida:d.pantalla_bienvenida!==false,texto_bienvenida:designValue(x,'texto_bienvenida','Abrir invitación'),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',theme_id:typeof d.theme_id==='string'?d.theme_id:'elegant-classic',theme_overrides:normalizeThemeStudioOverrides(d.theme_overrides),section_order:normalizeTemplateSectionOrder(d.section_order),mostrar_intro:d.mostrar_intro!==false,mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false,section_settings:normalizeSectionSettings(d.section_settings)});setError('');setModal(true)}
+function openNew(){const ev=eventos[0];const firstPlan=commercialPlans[0]?.clave||'clasico';setEditing(null);setForm({...EMPTY,plan_clave:firstPlan,evento_id:ev?.id??'',titulo:ev?.nombre??'',slug:slugify(ev?.nombre??'')});setError('');setModal(true)}function openEdit(x:Invitacion){const d=x.design_json||{};setEditing(x);setForm({evento_id:x.evento_id,titulo:x.titulo,slug:x.slug,plan_clave:typeof d.commercial_plan_key==='string'?d.commercial_plan_key:(typeof d.activation_plan==='string'?d.activation_plan:'clasico'),modalidad:x.modalidad,estado:x.estado,plantilla:designValue(x,'plantilla','elegante'),mensaje:designValue(x,'mensaje',''),subtitulo:designValue(x,'subtitulo','Queremos compartir contigo este momento'),vestimenta:designValue(x,'vestimenta','Formal'),programa:designValue(x,'programa','18:00 | Recepción\n19:00 | Ceremonia\n20:30 | Cena\n22:00 | Celebración'),color_principal:x.color_principal??'#8f5c38',portada_url:designValue(x,'portada_url',''),portada_efecto:designValue(x,'portada_efecto','cinematic-zoom'),pantalla_bienvenida:d.pantalla_bienvenida!==false,texto_bienvenida:designValue(x,'texto_bienvenida','Abrir invitación'),galeria_urls:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((url):url is string=>typeof url==='string'):[],musica_url:x.musica_url??'',whatsapp:x.whatsapp??'',fecha_expiracion:x.fecha_expiracion?.slice(0,16)??'',theme_id:typeof d.theme_id==='string'?d.theme_id:'elegant-classic',theme_overrides:normalizeThemeStudioOverrides(d.theme_overrides),section_order:normalizeTemplateSectionOrder(d.section_order),mostrar_intro:d.mostrar_intro!==false,mostrar_contador:d.mostrar_contador!==false,mostrar_detalles:d.mostrar_detalles!==false,mostrar_programa:d.mostrar_programa!==false,mostrar_galeria:d.mostrar_galeria!==false,mostrar_mapa:d.mostrar_mapa!==false,mostrar_rsvp:d.mostrar_rsvp!==false,section_settings:normalizeSectionSettings(d.section_settings)});setError('');setModal(true)}
 
 function loadDemoContent(){
   setForm(current=>({
@@ -236,7 +236,7 @@ async function handleAudio(file?:File){
   catch(e){setError(messageFromError(e))}
   finally{setUploading(null)}
 }
-async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');setSaving(true);const design_json={version:6,componentes:[],theme_id:form.theme_id,theme_overrides:form.theme_overrides,section_order:form.section_order,section_settings:form.section_settings,mostrar_intro:form.mostrar_intro,plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,portada_efecto:form.portada_efecto,pantalla_bienvenida:form.pantalla_bienvenida,texto_bienvenida:form.texto_bienvenida.trim()||'Abrir invitación',galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
+async function save(e:FormEvent){e.preventDefault();const slug=slugify(form.slug||form.titulo);if(!form.evento_id)return setError('Selecciona un evento.');if(!form.titulo.trim()||!slug)return setError('Título y enlace son obligatorios.');const selectedCommercialPlan=planByKey(commercialPlans,form.plan_clave);if(form.modalidad==='rsvp'&&!selectedCommercialPlan.permite_rsvp)return setError('El plan seleccionado no incluye RSVP.');if(form.modalidad==='pases'&&selectedCommercialPlan.clave==='clasico')return setError('Pases personalizados requiere Premium o Signature.');setSaving(true);const design_json={version:7,commercial_plan_key:selectedCommercialPlan.clave,commercial_plan_name:selectedCommercialPlan.nombre,commercial_plan_price_snapshot:selectedCommercialPlan.precio_mxn,componentes:[],theme_id:form.theme_id,theme_overrides:form.theme_overrides,section_order:form.section_order,section_settings:form.section_settings,mostrar_intro:form.mostrar_intro,plantilla:form.plantilla,mensaje:form.mensaje.trim(),subtitulo:form.subtitulo.trim(),vestimenta:form.vestimenta.trim(),programa:form.programa.trim(),portada_url:form.portada_url,portada_efecto:form.portada_efecto,pantalla_bienvenida:form.pantalla_bienvenida,texto_bienvenida:form.texto_bienvenida.trim()||'Abrir invitación',galeria_urls:form.galeria_urls,mostrar_contador:form.mostrar_contador,mostrar_detalles:form.mostrar_detalles,mostrar_programa:form.mostrar_programa,mostrar_galeria:form.mostrar_galeria,mostrar_mapa:form.mostrar_mapa,mostrar_rsvp:form.mostrar_rsvp};const payload={evento_id:form.evento_id,titulo:form.titulo.trim(),slug,modalidad:form.modalidad,estado:form.estado,design_json,color_principal:form.color_principal,musica_url:form.musica_url.trim()||null,whatsapp:form.whatsapp.replace(/\D/g,'')||null,fecha_publicacion:form.estado==='publicada'?(editing?.fecha_publicacion??new Date().toISOString()):null,fecha_expiracion:form.fecha_expiracion?new Date(form.fecha_expiracion).toISOString():null};const r=editing?await supabase.from('invitaciones').update(payload).eq('id',editing.id):await supabase.from('invitaciones').insert(payload);setSaving(false);if(r.error)return setError(messageFromError(r.error));setModal(false);await load()}
 async function changeStatus(x:Invitacion,estado:Invitacion['estado']){const r=await supabase.from('invitaciones').update({estado,fecha_publicacion:estado==='publicada'?(x.fecha_publicacion??new Date().toISOString()):x.fecha_publicacion}).eq('id',x.id);if(r.error)setError(messageFromError(r.error));else{await load();setEditing(current=>current?.id===x.id?{...current,estado}:current)}}
 async function toggle(x:Invitacion){await changeStatus(x,x.estado==='publicada'?'pausada':'publicada')}
 async function ensureReviewLink(x:Invitacion){setReviewBusy(true);setError('');const token=x.review_token||crypto.randomUUID().replace(/-/g,'');const r=await supabase.from('invitaciones').update({review_token:token,review_enabled:true}).eq('id',x.id).select('*').single();setReviewBusy(false);if(r.error)return setError(messageFromError(r.error));const updated={...x,...r.data} as Invitacion;setReviewing(updated);setItems(current=>current.map(item=>item.id===updated.id?updated:item))}
@@ -254,7 +254,7 @@ const statusCounts=useMemo(()=>({
 const list=useMemo(()=>items.filter(x=>filter==='todas'||x.estado===filter).filter(x=>[x.titulo,x.slug,x.eventos?.nombre,x.eventos?.clientes?.nombre].join(' ').toLowerCase().includes(search.toLowerCase().trim())),[items,filter,search]);
 function activationPlan(x:Invitacion){
   const value=x.design_json?.activation_plan;
-  return typeof value==='string'?value:'classic';
+  return typeof value==='string'?value:'clasico';
 }
 function planLabel(value:string){
   return value==='signature'?'Signature':value==='premium'?'Premium':'Clásico';
@@ -306,7 +306,7 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
       <div>
         <p className="eyebrow">Constructor comercial</p>
         <h2>{editing?'Editar invitación':'Nueva invitación'}</h2>
-        <p>Elige la modalidad y configura la experiencia que recibirá tu cliente.</p>
+        <p>Selecciona el plan comercial, la modalidad y configura la experiencia que recibirá tu cliente.</p>
       </div>
       <button type="button" className="modal-close" aria-label="Cerrar" onClick={()=>setModal(false)}>×</button>
     </header>
@@ -317,29 +317,41 @@ return <div className="page-stack"><section className="page-heading"><div><p cla
           <div className="invitation-section-heading">
             <span>1</span>
             <div>
-              <strong>Tipo de invitación</strong>
-              <small>Selecciona el plan adecuado para este evento.</small>
+              <strong>Plan y modalidad</strong>
+              <small>El plan define los límites; la modalidad define cómo confirmarán los invitados.</small>
             </div>
           </div>
 
+          <div className="commercial-plan-selector">
+            <div className="commercial-plan-selector-heading"><span>Plan comercial</span><strong>{planByKey(commercialPlans,form.plan_clave).nombre} · {moneyMXN(planByKey(commercialPlans,form.plan_clave).precio_mxn)}</strong></div>
+            <div className="commercial-plan-selector-grid">
+              {commercialPlans.map(plan=><button key={plan.clave} type="button" className={form.plan_clave===plan.clave?'selected':''} onClick={()=>setForm(current=>({...current,plan_clave:plan.clave,modalidad:current.modalidad==='pases'&&plan.clave==='clasico'?'rsvp':current.modalidad==='rsvp'&&!plan.permite_rsvp?'simple':current.modalidad}))}><span>{plan.nombre}</span><strong>{moneyMXN(plan.precio_mxn)}</strong><small>{plan.descripcion}</small></button>)}
+            </div>
+          </div>
+
+          <div className="modality-label-row"><div><span>Modalidad de invitación</span><small>Elige cómo accederán y confirmarán los invitados.</small></div><strong>Plan: {planByKey(commercialPlans,form.plan_clave).nombre}</strong></div>
           <div className="modality-card-grid">
             {MODALITIES.map(option=>{
               const selected=form.modalidad===option.id;
+              const currentPlan=planByKey(commercialPlans,form.plan_clave);
+              const locked=(option.id==='rsvp'&&!currentPlan.permite_rsvp)||(option.id==='pases'&&currentPlan.clave==='clasico');
+              const required=option.id==='pases'?'Premium o Signature':'un plan con RSVP';
               return <button
                 key={option.id}
                 type="button"
-                className={`modality-card ${selected?'selected':''}`}
-                onClick={()=>setForm({...form,modalidad:option.id})}
+                className={`modality-card ${selected?'selected':''} ${locked?'locked':''}`}
+                onClick={()=>!locked&&setForm({...form,modalidad:option.id})}
                 aria-pressed={selected}
+                aria-disabled={locked}
               >
                 <div className="modality-card-top">
                   <span className="modality-icon">{option.icon}</span>
-                  <span className="modality-tag">{option.tag}</span>
+                  <span className="modality-tag">{locked?'Bloqueada':option.tag}</span>
                 </div>
                 <strong>{option.title}</strong>
                 <p>{option.description}</p>
                 <ul>{option.features.map(feature=><li key={feature}>{feature}</li>)}</ul>
-                <span className="modality-select-state">{selected?'✓ Seleccionada':'Seleccionar'}</span>
+                <span className="modality-select-state">{locked?`Disponible con ${required}`:selected?'✓ Seleccionada':'Seleccionar'}</span>
               </button>
             })}
           </div>

@@ -56,7 +56,7 @@ export default function PlanesPage(){
   </section>
 
   <section className="panel-card">
-   <div className="panel-header"><div><h2>Configuración de planes</h2><p>Los cambios se reflejan en nuevas solicitudes de activación. Las ventas anteriores conservan su precio histórico.</p></div></div>
+   <div className="panel-header"><div><h2>Configuración de planes</h2><p>Los cambios se reflejan en la landing y en nuevas invitaciones. Las ventas anteriores conservan su precio histórico.</p></div></div>
    <div className="commercial-plan-admin-grid">
     {plans.map(plan=><article className={`commercial-plan-admin-card ${plan.activo?'':'inactive'}`} key={plan.id}>
      <header><div><span className="plan-key">{plan.clave}</span><input value={plan.nombre} onChange={e=>updateLocal(plan.id,{nombre:e.target.value})}/></div><label className="plan-active-toggle"><input type="checkbox" checked={plan.activo} onChange={e=>updateLocal(plan.id,{activo:e.target.checked})}/><span>Activo</span></label></header>
