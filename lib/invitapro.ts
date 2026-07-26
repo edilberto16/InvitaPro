@@ -21,7 +21,7 @@ export type Invitacion = {
 export type Invitado = {
   id: string; invitacion_id: string; nombre: string; telefono: string | null; correo: string | null;
   adultos_permitidos: number; ninos_permitidos: number; mesa: string | null; codigo: string;
-  estado: 'pendiente' | 'confirmado' | 'no_asistira'; notas: string | null; checkin_at?: string | null; checkin_by?: string | null; checkin_count?: number; ultimo_checkin_at?: string | null; created_at: string; updated_at: string;
+  estado: 'pendiente' | 'confirmado' | 'no_asistira'; notas: string | null; checkin_at?: string | null; checkin_by?: string | null; checkin_count?: number; ultimo_checkin_at?: string | null; checkin_adultos?: number; checkin_ninos?: number; created_at: string; updated_at: string;
   invitaciones?: { id: string; titulo: string; slug: string; estado: string } | null;
 };
 export type Confirmacion = {

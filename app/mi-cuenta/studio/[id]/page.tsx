@@ -59,6 +59,10 @@ const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;lock
 const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",personas:"special_people",hashtag:"hashtag",deseos:"wishes",album:"album",rsvp:"rsvp"};
 const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",special_people:"personas",hashtag:"hashtag",wishes:"deseos",album:"album",rsvp:"rsvp"};
 
+const EDITOR_BLOCKS:Partial<Record<string,TemplateSectionId[]>>={
+ portada:["hero"],fecha:["countdown"],ubicacion:["location"],galeria:["gallery"],programa:["program"],vestimenta:["details"],historia:["history"],hospedaje:["lodging"],regalos:["gifts"],video:["video"],faq:["faq"],personas:["special_people"],hashtag:["hashtag"],deseos:["wishes"],album:["album"],rsvp:["rsvp"]
+};
+
 type BlockVariantMap=Partial<Record<TemplateSectionId,string>>;
 const BLOCK_VARIANTS:Partial<Record<TemplateSectionId,{value:string;label:string}[]>>={
  gallery:[{value:"grid",label:"Cuadrícula"},{value:"editorial",label:"Editorial"},{value:"carousel",label:"Carrusel"}],
@@ -202,6 +206,7 @@ export default function StudioPage(){
   const keyboard=(event:KeyboardEvent)=>{if(!(event.ctrlKey||event.metaKey))return;if(event.key.toLowerCase()!=="z")return;event.preventDefault();if(event.shiftKey)redo();else undo()};
   window.addEventListener("keydown",keyboard);return()=>window.removeEventListener("keydown",keyboard);
  },[historyIndex,historyLength]);
+ useEffect(()=>{const sectionId=EDITOR_TO_BLOCK[active];if(sectionId)setSelectedPreviewSection(sectionId)},[active]);
 
  const sendPreviewState=useCallback(()=>{
   const frame=previewRef.current?.contentWindow;
@@ -332,7 +337,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.12.7",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.13.1-hotfix.4",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -532,6 +537,16 @@ export default function StudioPage(){
      : allAvailableTemplates.filter(t=>t.collection===templateFilter);
  const enabled=Object.values(visibility).filter(Boolean).length;
  const progress=Math.round((enabled/SECTIONS.length)*70 + (title?10:0)+(invite.eventos?.fecha?10:0)+(message?10:0));
+ const activeEditorSections=SECTIONS.filter(section=>{
+  if(section.id==="musica")return true;
+  const blocks=EDITOR_BLOCKS[section.id];
+  return !blocks||blocks.some(blockId=>blockVisibility[blockId]);
+ });
+ const editorSectionVisible=(sectionId:string)=>{
+  const blocks=EDITOR_BLOCKS[sectionId];
+  if(blocks?.length)return blocks.some(blockId=>blockVisibility[blockId])&&(visibility[sectionId]??true);
+  return visibility[sectionId]??true;
+ };
 
  return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
@@ -543,7 +558,7 @@ export default function StudioPage(){
    <aside className="studio-sidebar">
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
     <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?.premium?"Premium":"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
-    <nav className="studio-section-list"><button className={active==="estructura"?"active studio-structure-entry":"studio-structure-entry"} onClick={()=>setActive("estructura")}><span>☰</span><div><strong>Estructura</strong><small>Ordena y muestra tus bloques</small></div><em className="on">{sectionOrder.filter(id=>blockVisibility[id]).length}/{sectionOrder.length}</em></button>{SECTIONS.map(s=><button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={visibility[s.id]?"on":"off"}>{visibility[s.id]?"Visible":"Oculto"}</em></button>)}</nav>
+    <nav className="studio-section-list"><button className={active==="estructura"?"active studio-structure-entry":"studio-structure-entry"} onClick={()=>setActive("estructura")}><span>☰</span><div><strong>Estructura</strong><small>Ordena y muestra tus bloques</small></div><em className="on">{sectionOrder.filter(id=>blockVisibility[id]).length}/{sectionOrder.length}</em></button>{activeEditorSections.map(s=>{const isVisible=editorSectionVisible(s.id);return <button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={isVisible?"on":"off"}>{isVisible?"Visible":"Oculto"}</em></button>})}</nav>
    </aside>
 
    <section className="studio-editor">

@@ -1,6 +1,6 @@
 {
   "name": "invitapro",
-  "version": "2.13.0",
+  "version": "2.13.1-hotfix.4",
   "private": true,
   "engines": {
     "node": "22.x"
