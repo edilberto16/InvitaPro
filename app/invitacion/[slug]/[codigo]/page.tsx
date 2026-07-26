@@ -32,6 +32,7 @@ type PassData = {
     mesa: string | null;
     codigo: string;
     estado: string;
+    checkin_at?: string | null;
   };
 };
 
@@ -101,7 +102,7 @@ export default function PersonalizedPassPage() {
 
         const { data: guest, error: guestError } = await supabase
           .from('invitados')
-          .select('id,nombre,adultos_permitidos,ninos_permitidos,mesa,codigo,estado')
+          .select('id,nombre,adultos_permitidos,ninos_permitidos,mesa,codigo,estado,checkin_at')
           .eq('invitacion_id', invitation.id)
           .eq('codigo', params.codigo)
           .maybeSingle();
@@ -440,6 +441,24 @@ export default function PersonalizedPassPage() {
           <div className="personalized-pass-code">
             <span>Código de acceso</span>
             <strong>{data.invitado.codigo}</strong>
+          </div>
+
+          <div className="personalized-pass-qr">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=12&data=${encodeURIComponent(
+                typeof window === 'undefined'
+                  ? data.invitado.codigo
+                  : `${window.location.origin}/invitacion/${data.invitacion.slug}/${data.invitado.codigo}`
+              )}`}
+              alt={`Código QR del pase de ${data.invitado.nombre}`}
+              width={220}
+              height={220}
+            />
+            <div>
+              <strong>Presenta este QR al llegar</strong>
+              <span>El personal del evento lo escaneará para registrar tu acceso.</span>
+              {data.invitado.checkin_at && <em>✓ Llegada registrada</em>}
+            </div>
           </div>
         </div>
       </section>

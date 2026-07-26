@@ -5289,3 +5289,36 @@ a { color: inherit; }
 .marketing-pricing-note{margin:30px auto 0;text-align:center;color:var(--m-muted);font-size:12px}
 @media(max-width:900px){.marketing-pricing-grid{grid-template-columns:1fr;max-width:620px;margin:auto}.marketing-price-card--featured{transform:none}.marketing-price-card>p{min-height:0}}
 @media(max-width:520px){.marketing-price-card{padding:28px 24px}.marketing-price-head h3{font-size:40px}}
+
+/* InvitaPro v2.13.0 — Check-in con QR */
+.personalized-pass-qr { margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(90,70,55,.16); display: flex; align-items: center; justify-content: center; gap: 24px; text-align: left; }
+.personalized-pass-qr img { width: 180px; height: 180px; padding: 8px; background: #fff; border-radius: 18px; box-shadow: 0 12px 35px rgba(50,35,25,.12); }
+.personalized-pass-qr div { display: grid; gap: 8px; max-width: 280px; }
+.personalized-pass-qr strong { font-size: 18px; }
+.personalized-pass-qr span { line-height: 1.55; color: #76685e; }
+.personalized-pass-qr em { color: #18794e; font-style: normal; font-weight: 800; }
+.checkin-console .panel-header select { min-width: 280px; padding: 11px 14px; border: 1px solid #ddd5cd; border-radius: 10px; background: #fff; }
+.checkin-workspace { display: grid; grid-template-columns: minmax(280px,.9fr) minmax(320px,1.1fr); gap: 24px; padding: 24px; }
+.checkin-scanner-card, .checkin-manual-card { border: 1px solid #e7e0d9; border-radius: 18px; padding: 20px; background: #fff; }
+.checkin-scanner-card { display: grid; gap: 14px; }
+.checkin-camera { display: none; width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 14px; background: #171717; }
+.checkin-camera.active { display: block; }
+.checkin-camera-placeholder { min-height: 270px; display: grid; place-content: center; justify-items: center; gap: 8px; border: 2px dashed #d9cfc5; border-radius: 14px; background: #faf8f5; text-align: center; }
+.checkin-camera-placeholder span { font-size: 46px; }
+.checkin-camera-placeholder small { color: #80756c; }
+.checkin-manual-card { display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+.checkin-result { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 14px; }
+.checkin-result > span { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; flex: 0 0 auto; }
+.checkin-result div { display: grid; gap: 4px; }
+.checkin-result p { margin: 0; }
+.checkin-result small { color: #6f655d; }
+.checkin-result-llego { background: #eaf8f0; border: 1px solid #b9e3c9; }
+.checkin-result-llego > span { background: #198754; color: #fff; }
+.checkin-result-duplicado { background: #fff7df; border: 1px solid #efd58b; }
+.checkin-result-duplicado > span { background: #b7791f; color: #fff; }
+.checkin-result-rechazado { background: #fff0f0; border: 1px solid #edbaba; }
+.checkin-result-rechazado > span { background: #c0392b; color: #fff; }
+.checkin-arrived, .checkin-pending { display: inline-flex; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.checkin-arrived { background: #e5f7ec; color: #18794e; }
+.checkin-pending { background: #fff3d6; color: #986a11; }
+@media (max-width: 760px) { .personalized-pass-qr { flex-direction: column; text-align: center; } .checkin-workspace { grid-template-columns: 1fr; padding: 14px; } .checkin-console .panel-header select { min-width: 0; width: 100%; } }
