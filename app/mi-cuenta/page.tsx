@@ -5,6 +5,11 @@ import ShareInvitationModal from "../../components/share-invitation-modal";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
+import {
+  invitationModalityLabel,
+  modalityCapabilities,
+  normalizeInvitationModality,
+} from "../../lib/invitation-modality";
 
 type Event = {
   id: string;
@@ -183,7 +188,9 @@ export default function MiCuenta() {
       .toLowerCase()
       .includes(guestSearch.trim().toLowerCase())
   );
-  const personalized = invite?.modalidad === "pases" || invite?.modalidad === "codigo";
+  const modality = normalizeInvitationModality(invite?.modalidad);
+  const modalityFeatures = modalityCapabilities(modality);
+  const personalized = modalityFeatures.personalizedPasses;
   const expectedPeople = related.reduce(
     (total, item) => total + (item.adultos_permitidos || 0) + (item.ninos_permitidos || 0),
     0
@@ -299,7 +306,7 @@ export default function MiCuenta() {
         </a>
         <nav>
           <a href="#evento">Mi evento</a>
-          <a href="#invitados">Invitados</a>
+          {modalityFeatures.publicRsvp && <a href="#invitados">{personalized ? "Invitados" : "Confirmaciones"}</a>}
           <a href="/mi-cuenta/biblioteca">Biblioteca</a>
           <a href="#compartir">Compartir</a>
           <button onClick={salir}>Salir</button>
@@ -395,27 +402,38 @@ export default function MiCuenta() {
             <div className="client-event-side">
               <small>Estado</small>
               <strong>{invite?.estado || next.estado}</strong>
-              <span>{invite?.modalidad ? `Modalidad ${invite.modalidad}` : ""}</span>
+              <span>{invite?.modalidad ? invitationModalityLabel(invite.modalidad) : ""}</span>
             </div>
           </section>
 
-          <section id="invitados" className="client-stats">
-            <article>
-              <span>Invitados</span>
-              <strong>{related.length}</strong>
-              <small>Registros</small>
-            </article>
-            <article>
-              <span>Confirmados</span>
-              <strong>{confirmed}</strong>
-              <small>RSVP recibidos</small>
-            </article>
-            <article>
-              <span>Pendientes</span>
-              <strong>{pending}</strong>
-              <small>Por responder</small>
-            </article>
-          </section>
+          {modalityFeatures.publicRsvp ? (
+            <section id="invitados" className="client-stats">
+              <article>
+                <span>{personalized ? "Invitados" : "Respuestas"}</span>
+                <strong>{related.length}</strong>
+                <small>{personalized ? "Registros con pase" : "Registros RSVP"}</small>
+              </article>
+              <article>
+                <span>Confirmados</span>
+                <strong>{confirmed}</strong>
+                <small>RSVP recibidos</small>
+              </article>
+              <article>
+                <span>Pendientes</span>
+                <strong>{pending}</strong>
+                <small>Por responder</small>
+              </article>
+            </section>
+          ) : (
+            <section className="client-modality-notice">
+              <div>
+                <p className="eyebrow">Modalidad activa</p>
+                <h2>Solo enlace</h2>
+                <p>Esta invitación se comparte con un enlace público y no recibe confirmaciones ni utiliza pases individuales.</p>
+              </div>
+              <span>Sin RSVP</span>
+            </section>
+          )}
 
           {personalized && (
             <section className="client-checkin-summary">
@@ -439,20 +457,25 @@ export default function MiCuenta() {
 
           <section className="client-grid">
             <article>
-              <p className="eyebrow">Control</p>
-              <h3>Invitados y confirmaciones</h3>
-              <p>Consulta el avance de las respuestas de tus invitados.</p>
-              <div className="client-progress">
-                <span
-                  style={{
-                    width: `${related.length ? Math.round((confirmed / related.length) * 100) : 0}%`,
-                  }}
-                />
-              </div>
-              <small>
-                {related.length ? Math.round((confirmed / related.length) * 100) : 0}% de registros
-                confirmados
-              </small>
+              <p className="eyebrow">Modalidad</p>
+              <h3>{invitationModalityLabel(modality)}</h3>
+              {modalityFeatures.publicRsvp ? (
+                <>
+                  <p>Consulta el avance de las respuestas de tus invitados.</p>
+                  <div className="client-progress">
+                    <span
+                      style={{
+                        width: `${related.length ? Math.round((confirmed / related.length) * 100) : 0}%`,
+                      }}
+                    />
+                  </div>
+                  <small>
+                    {related.length ? Math.round((confirmed / related.length) * 100) : 0}% de registros confirmados
+                  </small>
+                </>
+              ) : (
+                <p>Comparte el enlace general. Esta modalidad no muestra RSVP, pases individuales ni check-in.</p>
+              )}
             </article>
 
             <article id="compartir">
@@ -463,7 +486,9 @@ export default function MiCuenta() {
                   <p>
                     {personalized
                       ? "Comparte el enlace general o envía el pase individual de cada invitado."
-                      : "Comparte el mismo enlace público por WhatsApp, correo o redes sociales."}
+                      : modalityFeatures.publicRsvp
+                        ? "Comparte el enlace público para recibir confirmaciones RSVP."
+                        : "Comparte el mismo enlace público por WhatsApp, correo o redes sociales."}
                   </p>
                   <div className="client-link">/invitacion/{invite.slug}</div>
                   <div className="client-share-actions">
@@ -490,7 +515,7 @@ export default function MiCuenta() {
             </article>
           </section>
 
-          {invite && (
+          {invite && personalized && (
             <section className="client-guests-panel">
               <div className="client-guests-heading">
                 <div>
@@ -656,7 +681,7 @@ export default function MiCuenta() {
         />
       )}
 
-      {invite && csvImport && (
+      {invite && csvImport && modalityFeatures.csvImport && (
         <GuestCsvImportModal
           open={csvImport}
           invitations={[invite as unknown as Invitacion]}

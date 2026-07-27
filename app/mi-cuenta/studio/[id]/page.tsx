@@ -7,6 +7,7 @@ import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,get
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
+import { invitationModalityLabel, modalityCapabilities, normalizeInvitationModality } from "@/lib/invitation-modality";
 import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
 
 type Invite={
@@ -321,7 +322,7 @@ export default function StudioPage(){
    rsvp:d.mostrar_rsvp!==false,
   });
   window.setTimeout(()=>{
-   const snapshot:StudioSnapshot={title:i.titulo,message:typeof d.mensaje==="string"?d.mensaje:"",subtitle:typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento",color:i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f",music:i.musica_url||"",whatsapp:i.whatsapp||"",program:typeof d.programa==="string"?d.programa:"",dress:typeof d.vestimenta==="string"?d.vestimenta:"Formal",historyTitle:typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia",historyText:typeof d.historia_texto==="string"?d.historia_texto:"",lodging:typeof d.hospedaje==="string"?d.hospedaje:"",gift:typeof d.regalos==="string"?d.regalos:"",videoUrl:typeof d.video_url==="string"?d.video_url:"",faqText:typeof d.faq==="string"?d.faq:"",specialPeople:typeof d.personas_especiales==="string"?d.personas_especiales:"",hashtag:typeof d.hashtag==="string"?d.hashtag:"",socialText:typeof d.hashtag_texto==="string"?d.hashtag_texto:"Comparte tus mejores momentos con nosotros",wishesTitle:typeof d.deseos_titulo==="string"?d.deseos_titulo:"Déjanos un mensaje",wishesText:typeof d.deseos_texto==="string"?d.deseos_texto:"Tus palabras también serán parte de este día.",albumTitle:typeof d.album_titulo==="string"?d.album_titulo:"Comparte tus recuerdos",albumText:typeof d.album_texto==="string"?d.album_texto:"Sube las fotografías que captures durante nuestra celebración.",rsvpText:typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia",cover:typeof d.portada_url==="string"?d.portada_url:"",gallery:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[],date:i.eventos?.fecha||"",time:i.eventos?.hora?.slice(0,5)||"",venue:i.eventos?.lugar||"",address:i.eventos?.direccion||"",mapsUrl:i.eventos?.maps_url||"",visibility:{...visibility,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})},sectionOrder:normalizeTemplateSectionOrder(d.section_order),blockVisibility:{hero:true,intro:d.mostrar_intro!==false,countdown:d.mostrar_contador!==false,details:d.mostrar_detalles!==false,program:d.mostrar_programa!==false,gallery:d.mostrar_galeria!==false,history:d.mostrar_historia===true,lodging:d.mostrar_hospedaje===true,gifts:d.mostrar_regalos===true,video:d.mostrar_video===true,faq:d.mostrar_faq===true,special_people:d.mostrar_personas_especiales===true,hashtag:d.mostrar_hashtag===true,wishes:d.mostrar_deseos===true,album:d.mostrar_album===true,location:d.mostrar_mapa!==false,rsvp:d.mostrar_rsvp!==false},blockVariants:typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{}};
+   const snapshot:StudioSnapshot={title:i.titulo,message:typeof d.mensaje==="string"?d.mensaje:"",subtitle:typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento",color:i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f",music:i.musica_url||"",whatsapp:i.whatsapp||"",program:typeof d.programa==="string"?d.programa:"",dress:typeof d.vestimenta==="string"?d.vestimenta:"Formal",historyTitle:typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia",historyText:typeof d.historia_texto==="string"?d.historia_texto:"",lodging:typeof d.hospedaje==="string"?d.hospedaje:"",gift:typeof d.regalos==="string"?d.regalos:"",videoUrl:typeof d.video_url==="string"?d.video_url:"",faqText:typeof d.faq==="string"?d.faq:"",specialPeople:typeof d.personas_especiales==="string"?d.personas_especiales:"",hashtag:typeof d.hashtag==="string"?d.hashtag:"",socialText:typeof d.hashtag_texto==="string"?d.hashtag_texto:"Comparte tus mejores momentos con nosotros",wishesTitle:typeof d.deseos_titulo==="string"?d.deseos_titulo:"Déjanos un mensaje",wishesText:typeof d.deseos_texto==="string"?d.deseos_texto:"Tus palabras también serán parte de este día.",albumTitle:typeof d.album_titulo==="string"?d.album_titulo:"Comparte tus recuerdos",albumText:typeof d.album_texto==="string"?d.album_texto:"Sube las fotografías que captures durante nuestra celebración.",rsvpText:typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia",cover:typeof d.portada_url==="string"?d.portada_url:"",gallery:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[],date:i.eventos?.fecha||"",time:i.eventos?.hora?.slice(0,5)||"",venue:i.eventos?.lugar||"",address:i.eventos?.direccion||"",mapsUrl:i.eventos?.maps_url||"",visibility:{...visibility,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})},sectionOrder:normalizeTemplateSectionOrder(d.section_order),blockVisibility:{hero:true,intro:d.mostrar_intro!==false,countdown:d.mostrar_contador!==false,details:d.mostrar_detalles!==false,program:d.mostrar_programa!==false,gallery:d.mostrar_galeria!==false,history:d.mostrar_historia===true,lodging:d.mostrar_hospedaje===true,gifts:d.mostrar_regalos===true,video:d.mostrar_video===true,faq:d.mostrar_faq===true,special_people:d.mostrar_personas_especiales===true,hashtag:d.mostrar_hashtag===true,wishes:d.mostrar_deseos===true,album:d.mostrar_album===true,location:d.mostrar_mapa!==false,rsvp:normalizeInvitationModality(i.modalidad)!=="simple"&&d.mostrar_rsvp!==false},blockVariants:typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{}};
    const signature=JSON.stringify(snapshot);historyRef.current=[snapshot];historyIndexRef.current=0;setHistoryIndex(0);setHistoryLength(1);savedSignatureRef.current=signature;initializedRef.current=true;
   },0);
   setLoading(false);
@@ -434,13 +435,14 @@ export default function StudioPage(){
   });
  }
  function addBlock(sectionId:TemplateSectionId){
+  if(sectionId==="rsvp"&&!modalityFeatures.publicRsvp)return;
   setBlockVisibility(current=>({...current,[sectionId]:true}));
   const editorId=BLOCK_TO_EDITOR[sectionId];
   if(editorId)setVisibility(current=>({...current,[editorId]:true}));
   setShowAddSection(false);
  }
  function toggleBlock(sectionId:TemplateSectionId){
-  if(BLOCKS[sectionId].locked)return;
+  if(BLOCKS[sectionId].locked||(sectionId==="rsvp"&&!modalityFeatures.publicRsvp))return;
   const next=!blockVisibility[sectionId];
   setBlockVisibility(current=>({...current,[sectionId]:next}));
   const editorId=BLOCK_TO_EDITOR[sectionId];
@@ -469,7 +471,7 @@ export default function StudioPage(){
   if(!selected.permite_musica&&music.trim()){
     issues.push(`El plan ${selected.nombre} no incluye música. Elimina la música o elige un plan superior.`);
   }
-  if(!selected.permite_rsvp&&(invite.modalidad==="rsvp"||invite.modalidad==="pases")){
+  if(!selected.permite_rsvp&&normalizeInvitationModality(invite.modalidad)!=="simple"){
     issues.push(`El plan ${selected.nombre} no incluye RSVP/pases para esta modalidad.`);
   }
   if(currentTemplate){
@@ -541,6 +543,8 @@ export default function StudioPage(){
  const template=getTemplateById(invite.template_key||"");
  const currentPlanKey=normalizeTemplatePlan(resolveInvitationCommercialPlanKey(invite.design_json,selectedPlan)) as TemplatePlanTier;
  const currentPlanName=currentPlanKey==="signature"?"Signature":currentPlanKey==="premium"?"Premium":"Clásico";
+ const currentModality=normalizeInvitationModality(invite.modalidad);
+ const modalityFeatures=modalityCapabilities(currentModality);
  const collection=collectionForTipo(invite.eventos?.tipo||"");
  const allAvailableTemplates=TEMPLATE_CATALOG.filter(t=>t.available);
  const templates=templateFilter==="recommended"
@@ -551,6 +555,7 @@ export default function StudioPage(){
  const enabled=Object.values(visibility).filter(Boolean).length;
  const progress=Math.round((enabled/SECTIONS.length)*70 + (title?10:0)+(invite.eventos?.fecha?10:0)+(message?10:0));
  const activeEditorSections=SECTIONS.filter(section=>{
+  if(section.id==="rsvp"&&!modalityFeatures.publicRsvp)return false;
   if(section.id==="musica")return true;
   const blocks=EDITOR_BLOCKS[section.id];
   return !blocks||blocks.some(blockId=>blockVisibility[blockId]);
@@ -570,6 +575,7 @@ export default function StudioPage(){
   <div className="studio-workspace">
    <aside className="studio-sidebar">
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
+    <div className="studio-modality-summary"><small>MODALIDAD</small><strong>{invitationModalityLabel(currentModality)}</strong><span>{modalityFeatures.personalizedPasses?"Pases, RSVP y check-in":modalityFeatures.publicRsvp?"Confirmación pública":"Enlace público sin confirmaciones"}</span></div>
     <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?templatePlanLabel(template):"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
     <nav className="studio-section-list"><button className={active==="estructura"?"active studio-structure-entry":"studio-structure-entry"} onClick={()=>setActive("estructura")}><span>☰</span><div><strong>Estructura</strong><small>Ordena y muestra tus bloques</small></div><em className="on">{sectionOrder.filter(id=>blockVisibility[id]).length}/{sectionOrder.length}</em></button>{activeEditorSections.map(s=>{const isVisible=editorSectionVisible(s.id);return <button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={isVisible?"on":"off"}>{isVisible?"Visible":"Oculto"}</em></button>})}</nav>
    </aside>

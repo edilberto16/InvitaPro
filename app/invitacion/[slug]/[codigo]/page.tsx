@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { normalizeInvitationModality } from '@/lib/invitation-modality';
 
 type PassData = {
   invitacion: {
@@ -100,6 +101,12 @@ export default function PersonalizedPassPage() {
           return;
         }
 
+        if (normalizeInvitationModality(invitation.modalidad) !== 'pases') {
+          setError('Esta invitación no utiliza pases personalizados.');
+          setLoading(false);
+          return;
+        }
+
         const { data: guest, error: guestError } = await supabase
           .from('invitados')
           .select('id,nombre,adultos_permitidos,ninos_permitidos,mesa,codigo,estado,checkin_at')
@@ -147,9 +154,13 @@ export default function PersonalizedPassPage() {
         setError('Pase no encontrado o invitación no disponible.');
       } else {
         const loaded = response as PassData;
-        setData(loaded);
-        setAdults(Math.min(1, loaded.invitado.adultos_permitidos));
-        setChildren(0);
+        if (normalizeInvitationModality(loaded.invitacion.modalidad) !== 'pases') {
+          setError('Esta invitación no utiliza pases personalizados.');
+        } else {
+          setData(loaded);
+          setAdults(Math.min(1, loaded.invitado.adultos_permitidos));
+          setChildren(0);
+        }
       }
       setLoading(false);
     }

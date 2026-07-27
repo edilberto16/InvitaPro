@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent,ReactNode,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';import { normalizeTemplateSectionOrder,resolveTemplateEngine,TemplateSectionId,templateEngineStyle } from '@/lib/template-engine';import { applyThemeStudioOverrides,resolveThemeStudio,themeStudioStyle } from '@/lib/theme-studio';
+import { FormEvent,ReactNode,useEffect,useMemo,useRef,useState } from 'react';import { useParams } from 'next/navigation';import { createClient } from '@/lib/supabase/client';import { normalizeTemplateSectionOrder,resolveTemplateEngine,TemplateSectionId,templateEngineStyle } from '@/lib/template-engine';import { applyThemeStudioOverrides,resolveThemeStudio,themeStudioStyle } from '@/lib/theme-studio';import { modalityCapabilities,normalizeInvitationModality } from '@/lib/invitation-modality';
 type PublicData={invitacion:{id:string;titulo:string;slug:string;modalidad:'simple'|'rsvp'|'pases'|'autoservicio';design_json:Record<string,unknown>;color_principal:string|null;musica_url:string|null;whatsapp:string|null;fecha_expiracion:string|null;template_key?:string|null};evento:{nombre:string;tipo:string;fecha:string;hora:string|null;zona_horaria:string;lugar:string|null;direccion:string|null;maps_url:string|null};invitado:null};
 type StudioDraft={title?:string;color?:string;music?:string;whatsapp?:string;designJson?:Record<string,unknown>;event?:Partial<PublicData['evento']>};
 function longDate(v:string){return new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${v}T00:00:00Z`))}
@@ -68,8 +68,8 @@ const videoEmbedUrl=videoUrl.includes('youtube.com/watch?v=')?`https://www.youtu
 const showMap=design.mostrar_mapa!==false;
 const sectionVisibility=design.section_visibility&&typeof design.section_visibility==='object'?design.section_visibility as Record<string,unknown>:{};
 const showRsvp=design.mostrar_rsvp!==false&&sectionVisibility.rsvp!==false;
-const normalizedModalidad=String(viewInvitation.modalidad||'').trim().toLowerCase();
-const rsvpEnabledForInvitation=normalizedModalidad==='rsvp'||normalizedModalidad==='autoservicio'||studioMode;
+const normalizedModalidad=normalizeInvitationModality(viewInvitation.modalidad);
+const rsvpEnabledForInvitation=modalityCapabilities(normalizedModalidad).publicRsvp||studioMode;
 const shouldRenderRsvp=!eventFinished&&showRsvp&&rsvpEnabledForInvitation;
 const rsvpText=String(design.rsvp_text||'Agradecemos confirmar tu asistencia.');
 const program=String(design.programa||'').split('\n').map(x=>x.trim()).filter(Boolean).map((line,index)=>{
