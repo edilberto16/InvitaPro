@@ -66,6 +66,18 @@ export function getTemplateById(id: string) {
   return TEMPLATE_CATALOG.find((template) => template.id === id);
 }
 
+
+export function getTemplateFamilyVariants(templateOrId: TemplateDefinition | string) {
+  const template = typeof templateOrId === 'string' ? getTemplateById(templateOrId) : templateOrId;
+  if (!template) return [];
+  if (!template.familyName) return [template];
+  return TEMPLATE_CATALOG.filter((item) => item.available && item.familyName === template.familyName);
+}
+
+export function isSignatureFamily(template: TemplateDefinition) {
+  return Boolean(template.signature && template.familyName);
+}
+
 export function getTemplateRequiredPlan(template: TemplateDefinition): TemplatePlanTier {
   if (template.requiredPlan) return template.requiredPlan;
   if (template.signature) return 'signature';

@@ -3,7 +3,7 @@ import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
-import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateRequiredPlan,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
+import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
@@ -702,7 +702,7 @@ export default function StudioPage(){
       </article>})}
     </div>
    </section>
-  </div>}{pendingTemplate&&(()=>{const selected=getTemplateById(pendingTemplate);const currentCollection=collectionForTipo(invite.eventos?.tipo||"");const sourceLabel=selected?TEMPLATE_COLLECTIONS.find(c=>c.id===selected.collection)?.label:"";const different=selected?.collection!==currentCollection;return selected?<div className="modal-backdrop template-confirm-backdrop" onMouseDown={()=>!applyingTemplate&&setPendingTemplate(null)}>
+  </div>}{pendingTemplate&&(()=>{const selected=getTemplateById(pendingTemplate);const currentCollection=collectionForTipo(invite.eventos?.tipo||"");const sourceLabel=selected?TEMPLATE_COLLECTIONS.find(c=>c.id===selected.collection)?.label:"";const different=selected?.collection!==currentCollection;const familyVariants=selected?getTemplateFamilyVariants(selected):[];return selected?<div className="modal-backdrop template-confirm-backdrop" onMouseDown={()=>!applyingTemplate&&setPendingTemplate(null)}>
     <section className="template-confirm-modal" onMouseDown={e=>e.stopPropagation()}>
       <div className="template-confirm-preview" style={{background:`linear-gradient(145deg,${selected.color},#21171d)`}}>
         <span>{sourceLabel}</span><strong>{selected.name}</strong>{selected.premium&&<small>Premium</small>}
@@ -715,6 +715,7 @@ export default function StudioPage(){
         <div className="template-preserve-grid">
           <span>✓ Nombre y textos</span><span>✓ Fecha y hora</span><span>✓ Portada y galería</span><span>✓ Música</span><span>✓ Ubicación</span><span>✓ Itinerario</span><span>✓ Dress code</span><span>✓ RSVP</span>
         </div>
+        {familyVariants.length>1&&<div className="template-confirm-variants"><small>Variantes de {selected.familyName}</small><div>{familyVariants.map(variant=><button type="button" key={variant.id} className={variant.id===selected.id?"active":""} onClick={()=>setPendingTemplate(variant.id)}><i style={{background:variant.color}}/><span>{variant.variantName||variant.name}</span></button>)}</div></div>}
       </div>
       <footer className="template-confirm-actions">
         <button className="client-secondary" disabled={applyingTemplate} onClick={()=>setPendingTemplate(null)}>Cancelar</button>
