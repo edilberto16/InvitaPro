@@ -37,6 +37,10 @@ type Guest = {
   ninos_permitidos: number;
   mesa: string | null;
   codigo: string;
+  checkin_adultos: number;
+  checkin_ninos: number;
+  checkin_at: string | null;
+  ultimo_checkin_at: string | null;
 };
 
 function initials(value: string) {
@@ -141,7 +145,7 @@ export default function MiCuenta() {
     const { data: guestRows, error: guestError } = await supabase
       .from("invitados")
       .select(
-        "id,invitacion_id,nombre,telefono,correo,estado,adultos_permitidos,ninos_permitidos,mesa,codigo"
+        "id,invitacion_id,nombre,telefono,correo,estado,adultos_permitidos,ninos_permitidos,mesa,codigo,checkin_adultos,checkin_ninos,checkin_at,ultimo_checkin_at"
       )
       .in(
         "invitacion_id",
@@ -176,6 +180,54 @@ export default function MiCuenta() {
       .includes(guestSearch.trim().toLowerCase())
   );
   const personalized = invite?.modalidad === "pases" || invite?.modalidad === "codigo";
+  const expectedPeople = related.reduce(
+    (total, item) => total + (item.adultos_permitidos || 0) + (item.ninos_permitidos || 0),
+    0
+  );
+  const arrivedPeople = related.reduce(
+    (total, item) => total + (item.checkin_adultos || 0) + (item.checkin_ninos || 0),
+    0
+  );
+  const attendancePercent = expectedPeople
+    ? Math.round((arrivedPeople / expectedPeople) * 100)
+    : 0;
+
+  function exportGuestReport() {
+    if (!invite || !related.length) return;
+    const headers = [
+      "Invitado",
+      "Teléfono",
+      "Código",
+      "Mesa",
+      "Estado RSVP",
+      "Adultos permitidos",
+      "Niños permitidos",
+      "Adultos ingresaron",
+      "Niños ingresaron",
+      "Última llegada",
+    ];
+    const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const rows = related.map((guest) => [
+      guest.nombre,
+      guest.telefono || "",
+      guest.codigo,
+      guest.mesa || "",
+      guest.estado,
+      guest.adultos_permitidos,
+      guest.ninos_permitidos,
+      guest.checkin_adultos,
+      guest.checkin_ninos,
+      guest.ultimo_checkin_at || guest.checkin_at || "",
+    ]);
+    const csv = [headers, ...rows].map((row) => row.map(quote).join(",")).join("\n");
+    const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+    const href = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    anchor.download = `asistencia-${invite.slug}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(href);
+  }
 
   if (loading) {
     return (
@@ -306,6 +358,26 @@ export default function MiCuenta() {
               <small>Por responder</small>
             </article>
           </section>
+
+          {personalized && (
+            <section className="client-checkin-summary">
+              <div>
+                <p className="eyebrow">Check-in</p>
+                <h2>Asistencia del evento</h2>
+                <p>Consulta cuántas personas han ingresado y descarga el reporte para recepción.</p>
+              </div>
+              <div className="client-checkin-metrics">
+                <article><span>Esperados</span><strong>{expectedPeople}</strong></article>
+                <article><span>Han llegado</span><strong>{arrivedPeople}</strong></article>
+                <article><span>Asistencia</span><strong>{attendancePercent}%</strong></article>
+              </div>
+              <div className="client-checkin-progress"><span style={{ width: `${attendancePercent}%` }} /></div>
+              <div className="client-checkin-actions">
+                <button type="button" className="client-secondary" onClick={exportGuestReport} disabled={!related.length}>Exportar CSV</button>
+                <button type="button" className="client-secondary" onClick={() => window.print()} disabled={!related.length}>Imprimir lista</button>
+              </div>
+            </section>
+          )}
 
           <section className="client-grid">
             <article>
