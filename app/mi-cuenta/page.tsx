@@ -317,6 +317,11 @@ export default function MiCuenta() {
                     Ver invitación
                   </a>
                 )}
+                {invite && (
+                  <a className="client-secondary" href="/mi-cuenta/album">
+                    Álbum
+                  </a>
+                )}
                 {invite?.estado === "pendiente_activacion" && (
                   <span className="client-pending-activation">⏳ Activación solicitada</span>
                 )}
