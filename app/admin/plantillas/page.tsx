@@ -195,7 +195,7 @@ export default function PlantillasPage() {
               <ul>{selectedTemplate.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
               <div className="template-preview-modal-actions">
                 <button type="button" className="button button-ghost" onClick={() => setSelectedTemplate(null)}>Seguir explorando</button>
-                <Link target="_blank" href={`/mi-cuenta/crear/preview?tipo=${selectedTemplate.collection}&plantilla=${selectedTemplate.id}`} className="button button-ghost">Ver demo completa <EyeIcon /></Link>
+                <Link target="_blank" href={`/preview/plantilla?tipo=${selectedTemplate.collection}&plantilla=${selectedTemplate.id}&origen=admin`} className="button button-ghost">Ver demo completa <EyeIcon /></Link>
                 <Link href={`/admin/invitaciones?plantilla=${encodeURIComponent(selectedTemplate.id)}`} className="button button-primary">Usar esta plantilla <ArrowIcon /></Link>
               </div>
             </div>
