@@ -64,6 +64,9 @@ export default function MiCuenta() {
   const [sharingGuest, setSharingGuest] = useState<Guest | null>(null);
   const [csvImport, setCsvImport] = useState(false);
   const [guestSearch, setGuestSearch] = useState("");
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
+  const [guestsToDelete, setGuestsToDelete] = useState<Guest[]>([]);
+  const [deletingGuests, setDeletingGuests] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -155,6 +158,7 @@ export default function MiCuenta() {
 
     if (guestError) setError(guestError.message);
     setGuests((guestRows || []) as Guest[]);
+    setSelectedGuestIds([]);
     setLoading(false);
   }
 
@@ -191,6 +195,55 @@ export default function MiCuenta() {
   const attendancePercent = expectedPeople
     ? Math.round((arrivedPeople / expectedPeople) * 100)
     : 0;
+
+  function toggleGuestSelection(guestId: string) {
+    setSelectedGuestIds((current) =>
+      current.includes(guestId)
+        ? current.filter((id) => id !== guestId)
+        : [...current, guestId]
+    );
+  }
+
+  function toggleAllFilteredGuests() {
+    const filteredIds = filteredGuests.map((guest) => guest.id);
+    const allSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedGuestIds.includes(id));
+
+    setSelectedGuestIds((current) =>
+      allSelected
+        ? current.filter((id) => !filteredIds.includes(id))
+        : Array.from(new Set([...current, ...filteredIds]))
+    );
+  }
+
+  function requestDeleteGuests(items: Guest[]) {
+    if (!items.length) return;
+    setGuestsToDelete(items);
+  }
+
+  async function deleteGuests() {
+    if (!guestsToDelete.length || !invite) return;
+
+    setDeletingGuests(true);
+    setError("");
+
+    const ids = guestsToDelete.map((guest) => guest.id);
+    const { error: deleteError } = await supabase
+      .from("invitados")
+      .delete()
+      .in("id", ids)
+      .eq("invitacion_id", invite.id);
+
+    setDeletingGuests(false);
+
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
+    }
+
+    setGuestsToDelete([]);
+    setSelectedGuestIds((current) => current.filter((id) => !ids.includes(id)));
+    await load();
+  }
 
   function exportGuestReport() {
     if (!invite || !related.length) return;
@@ -467,10 +520,44 @@ export default function MiCuenta() {
                 />
               </label>
 
+              {filteredGuests.length > 0 && (
+                <div className="client-guest-bulkbar">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={
+                        filteredGuests.length > 0 &&
+                        filteredGuests.every((guest) => selectedGuestIds.includes(guest.id))
+                      }
+                      onChange={toggleAllFilteredGuests}
+                    />
+                    <span>Seleccionar todos</span>
+                  </label>
+                  <span>{selectedGuestIds.length} seleccionado(s)</span>
+                  <button
+                    type="button"
+                    className="client-danger"
+                    disabled={!selectedGuestIds.length}
+                    onClick={() =>
+                      requestDeleteGuests(related.filter((guest) => selectedGuestIds.includes(guest.id)))
+                    }
+                  >
+                    Eliminar seleccionados
+                  </button>
+                </div>
+              )}
+
               {filteredGuests.length ? (
                 <div className="client-guest-list">
                   {filteredGuests.map((guest) => (
-                    <article key={guest.id}>
+                    <article key={guest.id} className={selectedGuestIds.includes(guest.id) ? "is-selected" : ""}>
+                      <label className="client-guest-checkbox" aria-label={`Seleccionar ${guest.nombre}`}>
+                        <input
+                          type="checkbox"
+                          checked={selectedGuestIds.includes(guest.id)}
+                          onChange={() => toggleGuestSelection(guest.id)}
+                        />
+                      </label>
                       <span className="client-guest-avatar">{initials(guest.nombre)}</span>
                       <div className="client-guest-info">
                         <strong>{guest.nombre}</strong>
@@ -486,13 +573,22 @@ export default function MiCuenta() {
                       <span className={`client-guest-status status-${guest.estado}`}>
                         {guest.estado.replace("_", " ")}
                       </span>
-                      <button
-                        type="button"
-                        className="client-secondary"
-                        onClick={() => setSharingGuest(guest)}
-                      >
-                        WhatsApp
-                      </button>
+                      <div className="client-guest-row-actions">
+                        <button
+                          type="button"
+                          className="client-secondary"
+                          onClick={() => setSharingGuest(guest)}
+                        >
+                          WhatsApp
+                        </button>
+                        <button
+                          type="button"
+                          className="client-danger-outline"
+                          onClick={() => requestDeleteGuests([guest])}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </article>
                   ))}
                 </div>
@@ -508,6 +604,31 @@ export default function MiCuenta() {
             </section>
           )}
         </>
+      )}
+
+      {guestsToDelete.length > 0 && (
+        <div className="client-modal-backdrop" onMouseDown={() => !deletingGuests && setGuestsToDelete([])}>
+          <section className="client-delete-modal" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="client-delete-icon">✕</div>
+            <p className="eyebrow">Eliminar invitados</p>
+            <h2>¿Eliminar {guestsToDelete.length === 1 ? guestsToDelete[0].nombre : `${guestsToDelete.length} invitados`}?</h2>
+            <p>Esta acción eliminará sus pases y confirmaciones asociadas. No se puede deshacer.</p>
+            <div className="client-delete-list">
+              {guestsToDelete.slice(0, 5).map((guest) => (
+                <span key={guest.id}>{guest.nombre}</span>
+              ))}
+              {guestsToDelete.length > 5 && <span>y {guestsToDelete.length - 5} más…</span>}
+            </div>
+            <div className="client-delete-actions">
+              <button type="button" className="client-secondary" disabled={deletingGuests} onClick={() => setGuestsToDelete([])}>
+                Cancelar
+              </button>
+              <button type="button" className="client-danger" disabled={deletingGuests} onClick={deleteGuests}>
+                {deletingGuests ? "Eliminando…" : "Sí, eliminar"}
+              </button>
+            </div>
+          </section>
+        </div>
       )}
 
       {invite && (

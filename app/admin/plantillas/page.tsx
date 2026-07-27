@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS, type TemplateDefinition } from '@/lib/template-catalog';
+import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS, templatePlanLabel, type TemplateDefinition } from '@/lib/template-catalog';
+import TemplatePreviewArtwork from '@/components/templates/template-preview-artwork';
 
 type AvailabilityFilter = 'todas' | 'disponibles' | 'premium';
 type SortOption = 'destacadas' | 'nombre' | 'coleccion';
 
-const FEATURED_IDS = new Set(['elegante-classic', 'romantic-garden', 'luxury-black', 'golden-night', 'espacial', 'lanzamiento']);
-const NEW_IDS = new Set(['modern-editorial', 'luxury-pink', 'superheroes', 'networking']);
+const FEATURED_IDS = new Set(['midnight-gold', 'ivory-editorial', 'royal-amethyst', 'luxury-black', 'golden-night', 'espacial']);
+const NEW_IDS = new Set(['midnight-gold', 'midnight-platinum', 'midnight-sapphire', 'ivory-editorial', 'blush-editorial', 'terracotta-editorial', 'royal-amethyst', 'royal-rose', 'royal-emerald']);
 const POPULAR_IDS = new Set(['elegante-classic', 'romantic-garden', 'princess-rose', 'safari']);
 
 function SearchIcon() {
@@ -32,25 +33,6 @@ function SparklesIcon() {
 }
 
 
-function PreviewArtwork({ template, large = false }: { template: TemplateDefinition; large?: boolean }) {
-  const label = collectionName(template);
-  return (
-    <div className={`template-artwork template-artwork-${template.layout} ${large ? 'is-large' : ''}`} aria-hidden="true">
-      <span className="art-shape art-shape-one" />
-      <span className="art-shape art-shape-two" />
-      <span className="art-shape art-shape-three" />
-      <span className="art-spark art-spark-one">✦</span>
-      <span className="art-spark art-spark-two">✧</span>
-      <span className="art-icon">
-        {template.layout === 'space' ? '🪐' : template.layout === 'dino' ? '🦖' : template.layout === 'unicorn' ? '🦄' : template.layout === 'safari' ? '🦁' : template.layout === 'hero' ? '⚡' : template.layout === 'butterfly' ? '🦋' : template.collection === 'empresarial' ? '◆' : template.collection === 'xv' ? '♕' : '❦'}
-      </span>
-      <span className="art-kicker">{label}</span>
-      <strong>{template.name}</strong>
-      <i />
-      <em>{template.collection === 'empresarial' ? 'Ideas que conectan' : template.collection === 'infantil' ? 'Una aventura inolvidable' : template.collection === 'xv' ? 'Mis quince años' : 'Nuestra historia'}</em>
-    </div>
-  );
-}
 function collectionName(template: TemplateDefinition) {
   return TEMPLATE_COLLECTIONS.find((item) => item.id === template.collection)?.label ?? template.collection;
 }
@@ -171,9 +153,9 @@ export default function PlantillasPage() {
                         <HeartIcon filled={isFavorite} />
                       </button>
                     </div>
-                    <PreviewArtwork template={template} />
+                    <TemplatePreviewArtwork template={template} />
                     <div className="template-card-badges">
-                      {template.premium && <span className="premium"><SparklesIcon /> Premium</span>}
+                      {template.premium && <span className="premium"><SparklesIcon /> {templatePlanLabel(template)}</span>}
                       {NEW_IDS.has(template.id) && <span className="new">Nueva</span>}
                       {POPULAR_IDS.has(template.id) && <span className="popular">Popular</span>}
                     </div>
@@ -181,7 +163,7 @@ export default function PlantillasPage() {
 
                   <div className="template-marketplace-copy">
                     <div className="template-marketplace-title">
-                      <div><h2>{template.name}</h2><p>{template.description}</p></div>
+                      <div><h2>{template.name}</h2>{template.familyName&&<small className="template-family-label">{template.familyName} · {template.variantName}</small>}<p>{template.description}</p></div>
                       <span className="template-color-dot" style={{ background: template.color }} aria-hidden="true" />
                     </div>
                     <div className="template-feature-chips">
@@ -204,7 +186,7 @@ export default function PlantillasPage() {
           <div className="template-preview-dialog">
             <button type="button" className="template-preview-close" aria-label="Cerrar vista previa" onClick={() => setSelectedTemplate(null)}>×</button>
             <div className={`template-preview-large theme-preview-${selectedTemplate.id}`}>
-              <PreviewArtwork template={selectedTemplate} large />
+              <TemplatePreviewArtwork template={selectedTemplate} large />
             </div>
             <div className="template-preview-details">
               <p className="eyebrow">Vista previa</p>

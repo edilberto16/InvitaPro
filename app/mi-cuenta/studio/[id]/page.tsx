@@ -3,7 +3,8 @@ import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
-import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,getTemplateById} from "@/lib/template-catalog";
+import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateRequiredPlan,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
+import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey} from "@/lib/commercial-plans";
 import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
@@ -337,7 +338,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.13.1-hotfix.4",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.15.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -410,6 +411,11 @@ export default function StudioPage(){
  function requestTemplateChange(id:string){
   if(!invite)return;
   const t=getTemplateById(id); if(!t)return;
+  if(!canUseTemplate(t,currentPlanKey)){
+    setTemplateNotice(`🔒 ${t.name} requiere el plan ${templatePlanLabel(t)}.`);
+    window.setTimeout(()=>setTemplateNotice(""),3200);
+    return;
+  }
   setPendingTemplate(id);
  }
  function moveBlock(sectionId:TemplateSectionId,direction:-1|1){
@@ -466,8 +472,13 @@ export default function StudioPage(){
   if(!selected.permite_rsvp&&(invite.modalidad==="rsvp"||invite.modalidad==="pases")){
     issues.push(`El plan ${selected.nombre} no incluye RSVP/pases para esta modalidad.`);
   }
-  if(currentTemplate?.premium&&!selected.permite_plantillas_premium){
-    issues.push(`La plantilla "${currentTemplate.name}" es Premium y no está incluida en el plan ${selected.nombre}.`);
+  if(currentTemplate){
+    const requiredPlan=getTemplateRequiredPlan(currentTemplate);
+    if(requiredPlan==="signature"&&!selected.permite_signature){
+      issues.push(`La plantilla "${currentTemplate.name}" requiere el plan Signature.`);
+    }else if(requiredPlan==="premium"&&!selected.permite_plantillas_premium){
+      issues.push(`La plantilla "${currentTemplate.name}" requiere Premium o Signature.`);
+    }
   }
 
   if(selected.limite_invitados!==null){
@@ -528,6 +539,8 @@ export default function StudioPage(){
  if(!invite)return <main className="studio-page"><div className="client-empty"><h2>No pudimos abrir la invitación</h2><p>{error}</p><Link className="client-primary" href="/mi-cuenta">Volver</Link></div></main>;
 
  const template=getTemplateById(invite.template_key||"");
+ const currentPlanKey=normalizeTemplatePlan((invite.design_json as Record<string,unknown>|null)?.activation_plan||(invite.design_json as Record<string,unknown>|null)?.commercial_plan_key||(invite.design_json as Record<string,unknown>|null)?.plan||selectedPlan) as TemplatePlanTier;
+ const currentPlanName=currentPlanKey==="signature"?"Signature":currentPlanKey==="premium"?"Premium":"Clásico";
  const collection=collectionForTipo(invite.eventos?.tipo||"");
  const allAvailableTemplates=TEMPLATE_CATALOG.filter(t=>t.available);
  const templates=templateFilter==="recommended"
@@ -557,7 +570,7 @@ export default function StudioPage(){
   <div className="studio-workspace">
    <aside className="studio-sidebar">
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
-    <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?.premium?"Premium":"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
+    <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?templatePlanLabel(template):"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
     <nav className="studio-section-list"><button className={active==="estructura"?"active studio-structure-entry":"studio-structure-entry"} onClick={()=>setActive("estructura")}><span>☰</span><div><strong>Estructura</strong><small>Ordena y muestra tus bloques</small></div><em className="on">{sectionOrder.filter(id=>blockVisibility[id]).length}/{sectionOrder.length}</em></button>{activeEditorSections.map(s=>{const isVisible=editorSectionVisible(s.id);return <button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={isVisible?"on":"off"}>{isVisible?"Visible":"Oculto"}</em></button>})}</nav>
    </aside>
 
@@ -644,7 +657,7 @@ export default function StudioPage(){
   {showTemplates&&<div className="modal-backdrop" onMouseDown={()=>setShowTemplates(false)}>
    <section className="studio-template-modal studio-template-modal-global" onMouseDown={e=>e.stopPropagation()}>
     <header>
-      <div><p className="eyebrow">Catálogo completo</p><h2>Cambiar plantilla</h2><p>Explora cualquier categoría. Tu contenido se conservará al cambiar de diseño.</p></div>
+      <div><p className="eyebrow">Catálogo unificado</p><h2>Cambiar plantilla</h2><p>Plan actual: <strong>{currentPlanName}</strong>. Puedes explorar todo el catálogo; los diseños superiores se muestran bloqueados.</p></div>
       <button onClick={()=>setShowTemplates(false)}>×</button>
     </header>
 
@@ -663,21 +676,24 @@ export default function StudioPage(){
     </div>
 
     <div className="studio-template-grid">
-      {templates.map(t=><article key={t.id} className={`studio-global-template-card ${invite.template_key===t.id?"selected":""}`}>
-        <div className="studio-global-template-art" style={{background:`linear-gradient(145deg,${t.color},#21171d)`}}>
-          <div className="studio-template-badges"><small>{TEMPLATE_COLLECTIONS.find(c=>c.id===t.collection)?.label}</small>{t.premium&&<small>Premium</small>}</div>
-          <strong>{t.name}</strong>
+      {templates.map(t=>{const allowed=canUseTemplate(t,currentPlanKey);return <article key={t.id} className={`studio-global-template-card ${invite.template_key===t.id?"selected":""} ${allowed?"":"template-locked"}`}>
+        <div className="studio-global-template-art">
+          <TemplatePreviewArtwork template={t}/>
+          <div className="studio-template-badges"><small>{t.familyName||TEMPLATE_COLLECTIONS.find(c=>c.id===t.collection)?.label}</small><small>{templatePlanLabel(t)}</small></div>
+          {!allowed&&<div className="template-lock-overlay"><strong>🔒 Requiere {templatePlanLabel(t)}</strong><span>Tu plan actual es {currentPlanName}</span></div>}
         </div>
         <div className="studio-global-template-info">
-          <div><h3>{t.name}</h3><p>{t.description}</p></div>
+          <div><h3>{t.name}</h3>{t.variantName&&<small className="studio-template-variant">{t.variantName}</small>}<p>{t.description}</p></div>
           <div className="studio-global-template-actions">
             <Link className="client-secondary" target="_blank" href={`/mi-cuenta/crear/preview?tipo=${t.collection}&plantilla=${t.id}`}>Vista previa</Link>
             {invite.template_key===t.id
               ? <span className="template-current-label">✓ Plantilla actual</span>
-              : <button className="client-primary" onClick={()=>requestTemplateChange(t.id)}>Aplicar plantilla</button>}
+              : allowed
+                ? <button className="client-primary" onClick={()=>requestTemplateChange(t.id)}>Aplicar plantilla</button>
+                : <button className="client-secondary template-upgrade-button" type="button" onClick={()=>{setSelectedPlan(getTemplateRequiredPlan(t));setShowTemplates(false);setShowPublish(true)}}>Mejorar plan</button>}
           </div>
         </div>
-      </article>)}
+      </article>})}
     </div>
    </section>
   </div>}{pendingTemplate&&(()=>{const selected=getTemplateById(pendingTemplate);const currentCollection=collectionForTipo(invite.eventos?.tipo||"");const sourceLabel=selected?TEMPLATE_COLLECTIONS.find(c=>c.id===selected.collection)?.label:"";const different=selected?.collection!==currentCollection;return selected?<div className="modal-backdrop template-confirm-backdrop" onMouseDown={()=>!applyingTemplate&&setPendingTemplate(null)}>

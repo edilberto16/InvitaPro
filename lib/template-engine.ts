@@ -67,6 +67,15 @@ type TemplateEnginePreset = Omit<
 };
 
 const definitions: Record<string, TemplateEnginePreset> = {
+  'midnight-gold': { family:'wedding', layout:'immersive', typography:'editorial', decoration:'sparkle', palette:{primary:'#d5b46c',secondary:'#7a622f',background:'#090909',surface:'#15130f',text:'#fff6df',muted:'#bfb39b'} },
+  'midnight-platinum': { family:'wedding', layout:'immersive', typography:'editorial', decoration:'sparkle', palette:{primary:'#c8ced8',secondary:'#667080',background:'#080a0d',surface:'#14171c',text:'#f4f7fb',muted:'#a9b0bb'} },
+  'midnight-sapphire': { family:'wedding', layout:'immersive', typography:'editorial', decoration:'cosmic', palette:{primary:'#6f8fd8',secondary:'#273f7d',background:'#070b18',surface:'#111a33',text:'#edf3ff',muted:'#a7b6d8'} },
+  'ivory-editorial': { family:'wedding', layout:'editorial', typography:'editorial', decoration:'none', palette:{primary:'#9b7f61',secondary:'#ded2c4',background:'#f8f5ef',surface:'#fffdf9',text:'#27231f',muted:'#766f67'} },
+  'blush-editorial': { family:'wedding', layout:'editorial', typography:'editorial', decoration:'botanical', palette:{primary:'#b77b8a',secondary:'#ead0d6',background:'#fbf3f4',surface:'#fffafb',text:'#3f2c31',muted:'#8d747a'} },
+  'terracotta-editorial': { family:'wedding', layout:'editorial', typography:'editorial', decoration:'ornamental', palette:{primary:'#ad674c',secondary:'#dfb69f',background:'#f7eee7',surface:'#fffaf6',text:'#4b3027',muted:'#8c6b5d'} },
+  'royal-amethyst': { family:'xv', layout:'immersive', typography:'serif', decoration:'sparkle', palette:{primary:'#9d73c8',secondary:'#d6c2ea',background:'#170f24',surface:'#261638',text:'#fbf3ff',muted:'#c8b3d7'} },
+  'royal-rose': { family:'xv', layout:'immersive', typography:'serif', decoration:'sparkle', palette:{primary:'#d17a9e',secondary:'#efbfd0',background:'#250d19',surface:'#381324',text:'#fff0f6',muted:'#dfadbf'} },
+  'royal-emerald': { family:'xv', layout:'immersive', typography:'serif', decoration:'ornamental', palette:{primary:'#4fa889',secondary:'#d2b56f',background:'#071a17',surface:'#102d27',text:'#effff8',muted:'#a9cabe'} },
   'elegante-classic': { family:'wedding', layout:'classic', typography:'serif', decoration:'ornamental', palette:{primary:'#9a6845',secondary:'#d8c3aa',background:'#fbf7f1',surface:'#ffffff',text:'#33271f',muted:'#77685c'} },
   'luxury-black': { family:'wedding', layout:'immersive', typography:'serif', decoration:'sparkle', palette:{primary:'#c7a55b',secondary:'#6f5a2e',background:'#0d0d0d',surface:'#171717',text:'#f8f1df',muted:'#b9ad94'} },
   'royal-gold': { family:'wedding', layout:'classic', typography:'serif', decoration:'ornamental', palette:{primary:'#b6924b',secondary:'#234b42',background:'#f7f2e6',surface:'#fffdf7',text:'#26362f',muted:'#6f786f'} },

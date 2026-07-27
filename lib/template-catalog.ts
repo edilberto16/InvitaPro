@@ -1,4 +1,5 @@
 export type TemplateCollectionId = 'wedding' | 'xv' | 'infantil' | 'empresarial';
+export type TemplatePlanTier = 'clasico' | 'premium' | 'signature';
 
 export type TemplateDefinition = {
   id: string;
@@ -11,6 +12,10 @@ export type TemplateDefinition = {
   description: string;
   layout: string;
   features: string[];
+  familyName?: string;
+  variantName?: string;
+  signature?: boolean;
+  requiredPlan?: TemplatePlanTier;
 };
 
 export const TEMPLATE_COLLECTIONS = [
@@ -22,6 +27,15 @@ export const TEMPLATE_COLLECTIONS = [
 ] as const;
 
 export const TEMPLATE_CATALOG: TemplateDefinition[] = [
+  { id:'midnight-gold', name:'Midnight Gold', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Luxury Night', variantName:'Negro y oro', color:'#d5b46c', description:'Una experiencia nocturna cinematográfica con oro cálido, contrastes profundos y composición de gala.', layout:'midnight', features:['Portada cinematográfica','Detalles dorados','Todos los bloques compatibles'] },
+  { id:'midnight-platinum', name:'Midnight Platinum', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Luxury Night', variantName:'Negro y plata', color:'#c8ced8', description:'Lujo contemporáneo en negro, plata y reflejos fríos para bodas y eventos de noche.', layout:'midnight', features:['Acabado platino','Galería inmersiva','RSVP premium'] },
+  { id:'midnight-sapphire', name:'Midnight Sapphire', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Luxury Night', variantName:'Azul zafiro', color:'#6f8fd8', description:'Azul medianoche, destellos de zafiro y una presencia sofisticada para celebraciones exclusivas.', layout:'midnight', features:['Azul profundo','Brillos sutiles','Animación cinematográfica'] },
+  { id:'ivory-editorial', name:'Ivory Editorial', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Editorial Romance', variantName:'Marfil', color:'#b59b7d', description:'Diseño tipo revista con marfil, tipografía editorial y fotografía protagonista.', layout:'editorial-luxe', features:['Estilo revista','Composición asimétrica','Espacios elegantes'] },
+  { id:'blush-editorial', name:'Blush Editorial', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Editorial Romance', variantName:'Rosa palo', color:'#c68f9d', description:'Editorial romántica en rosa palo, crema y detalles delicados de alta gama.', layout:'editorial-luxe', features:['Rosa editorial','Historia destacada','Galería de autor'] },
+  { id:'terracotta-editorial', name:'Terracotta Editorial', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Editorial Romance', variantName:'Terracota', color:'#b66f52', description:'Terracota, arena y una composición orgánica inspirada en bodas destino.', layout:'editorial-luxe', features:['Paleta terracota','Bloques orgánicos','Ubicación destacada'] },
+  { id:'royal-amethyst', name:'Royal Amethyst', collection:'xv', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Royal XV', variantName:'Amatista', color:'#9d73c8', description:'Una experiencia real en amatista, plata y luz suave para unos XV inolvidables.', layout:'royal-xv', features:['Corona sutil','Brillo elegante','Apertura de gala'] },
+  { id:'royal-rose', name:'Royal Rose', collection:'xv', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Royal XV', variantName:'Rosa imperial', color:'#d17a9e', description:'Rosa imperial, oro rosado y detalles glam para una celebración protagonista.', layout:'royal-xv', features:['Rosa imperial','Detalles glam','Cuenta regresiva premium'] },
+  { id:'royal-emerald', name:'Royal Emerald', collection:'xv', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Royal XV', variantName:'Esmeralda', color:'#3f9a7b', description:'Verde esmeralda, oro y profundidad visual para una celebración moderna y majestuosa.', layout:'royal-xv', features:['Esmeralda y oro','Portada majestuosa','Pases y RSVP compatibles'] },
   { id:'elegante-classic', name:'Elegante Classic', collection:'wedding', badge:'Disponible', available:true, premium:false, color:'#9a6845', description:'Clásica, cálida y elegante. Ideal para bodas formales.', layout:'classic', features:['Portada cinematográfica','Cuenta regresiva','Galería y RSVP'] },
   { id:'luxury-black', name:'Luxury Black', collection:'wedding', badge:'Disponible', available:true, premium:true, color:'#c7a55b', description:'Negro profundo, detalles dorados y alto contraste.', layout:'dark', features:['Estética nocturna','Detalles dorados','Navegación elegante'] },
   { id:'royal-gold', name:'Royal Gold', collection:'wedding', badge:'Disponible', available:true, premium:true, color:'#b6924b', description:'Verde esmeralda, oro y detalles de inspiración real.', layout:'royal', features:['Paleta esmeralda','Ornamentos reales','Secciones premium'] },
@@ -50,4 +64,33 @@ export const TEMPLATE_CATALOG: TemplateDefinition[] = [
 
 export function getTemplateById(id: string) {
   return TEMPLATE_CATALOG.find((template) => template.id === id);
+}
+
+export function getTemplateRequiredPlan(template: TemplateDefinition): TemplatePlanTier {
+  if (template.requiredPlan) return template.requiredPlan;
+  if (template.signature) return 'signature';
+  if (template.premium) return 'premium';
+  return 'clasico';
+}
+
+const PLAN_LEVEL: Record<TemplatePlanTier, number> = {
+  clasico: 0,
+  premium: 1,
+  signature: 2,
+};
+
+export function normalizeTemplatePlan(value: unknown): TemplatePlanTier {
+  const normalized = String(value ?? '').toLowerCase();
+  if (normalized === 'signature') return 'signature';
+  if (normalized === 'premium') return 'premium';
+  return 'clasico';
+}
+
+export function canUseTemplate(template: TemplateDefinition, plan: TemplatePlanTier) {
+  return PLAN_LEVEL[normalizeTemplatePlan(plan)] >= PLAN_LEVEL[getTemplateRequiredPlan(template)];
+}
+
+export function templatePlanLabel(template: TemplateDefinition) {
+  const required = getTemplateRequiredPlan(template);
+  return required === 'signature' ? 'Signature' : required === 'premium' ? 'Premium' : 'Clásico';
 }
