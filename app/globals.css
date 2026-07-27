@@ -5363,3 +5363,18 @@ a { color: inherit; }
 .theme-royal-amethyst .premium-hero-content:before,.theme-royal-rose .premium-hero-content:before,.theme-royal-emerald .premium-hero-content:before{content:'♕';display:block;margin:0 auto 1rem;color:var(--template-primary);font-size:2.5rem;text-shadow:0 0 26px color-mix(in srgb,var(--template-primary) 60%,transparent)}
 .theme-royal-amethyst .premium-section-heading h2,.theme-royal-rose .premium-section-heading h2,.theme-royal-emerald .premium-section-heading h2{letter-spacing:.02em}
 @media(max-width:720px){.theme-ivory-editorial .premium-gallery-grid,.theme-blush-editorial .premium-gallery-grid,.theme-terracotta-editorial .premium-gallery-grid{grid-template-columns:1fr}.theme-ivory-editorial .premium-gallery-item:first-child,.theme-blush-editorial .premium-gallery-item:first-child,.theme-terracotta-editorial .premium-gallery-item:first-child{grid-row:auto}}
+
+
+/* InvitaPro v2.15.1 hotfix 1 — selector comercial unificado */
+.commercial-plan-selector{margin:0 0 24px;padding:18px;border:1px solid #eadfd9;border-radius:18px;background:#fcfaf9}
+.commercial-plan-selector-heading,.modality-label-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.commercial-plan-selector-heading span,.modality-label-row span{font-weight:800;color:#2a2522}
+.commercial-plan-selector-heading strong,.modality-label-row strong{color:#9b633d}
+.commercial-plan-selector-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.commercial-plan-selector-grid button{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:6px;padding:16px;border:1px solid #dfd3cd;border-radius:14px;background:#fff;text-align:left;white-space:normal;cursor:pointer}
+.commercial-plan-selector-grid button.selected{border-color:#9b633d;box-shadow:0 0 0 2px rgba(155,99,61,.12);background:#fffaf6}
+.commercial-plan-selector-grid button span{font-weight:800}
+.commercial-plan-selector-grid button strong{font-size:20px;color:#9b633d}
+.commercial-plan-selector-grid button small,.modality-label-row small{display:block;color:#756b65;line-height:1.45}
+.modality-label-row{margin-top:4px}.modality-label-row>div{display:flex;flex-direction:column;gap:3px}
+@media(max-width:900px){.commercial-plan-selector-grid{grid-template-columns:1fr}.commercial-plan-selector-heading,.modality-label-row{align-items:flex-start;flex-direction:column}}

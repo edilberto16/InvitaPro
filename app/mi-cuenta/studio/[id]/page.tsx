@@ -6,7 +6,7 @@ import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateRequiredPlan,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
-import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey} from "@/lib/commercial-plans";
+import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
 import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
 
 type Invite={
@@ -287,7 +287,7 @@ export default function StudioPage(){
     .eq("id",params.id).maybeSingle();
   if(error||!data){setError(error?.message||"No encontramos esta invitación.");setLoading(false);return;}
   const i=data as unknown as Invite; const d=i.design_json||{};
-  setInvite(i);setTitle(i.titulo);setMessage(typeof d.mensaje==="string"?d.mensaje:"");setSubtitle(typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento");
+  setInvite(i);setSelectedPlan(resolveInvitationCommercialPlanKey(d));setTitle(i.titulo);setMessage(typeof d.mensaje==="string"?d.mensaje:"");setSubtitle(typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento");
   setColor(i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f");setMusic(i.musica_url||"");setWhatsapp(i.whatsapp||"");
   setProgram(typeof d.programa==="string"?d.programa:"");setDress(typeof d.vestimenta==="string"?d.vestimenta:"Formal");
   setHistoryTitle(typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia");setHistoryText(typeof d.historia_texto==="string"?d.historia_texto:"");
@@ -539,7 +539,7 @@ export default function StudioPage(){
  if(!invite)return <main className="studio-page"><div className="client-empty"><h2>No pudimos abrir la invitación</h2><p>{error}</p><Link className="client-primary" href="/mi-cuenta">Volver</Link></div></main>;
 
  const template=getTemplateById(invite.template_key||"");
- const currentPlanKey=normalizeTemplatePlan((invite.design_json as Record<string,unknown>|null)?.activation_plan||(invite.design_json as Record<string,unknown>|null)?.commercial_plan_key||(invite.design_json as Record<string,unknown>|null)?.plan||selectedPlan) as TemplatePlanTier;
+ const currentPlanKey=normalizeTemplatePlan(resolveInvitationCommercialPlanKey(invite.design_json,selectedPlan)) as TemplatePlanTier;
  const currentPlanName=currentPlanKey==="signature"?"Signature":currentPlanKey==="premium"?"Premium":"Clásico";
  const collection=collectionForTipo(invite.eventos?.tipo||"");
  const allAvailableTemplates=TEMPLATE_CATALOG.filter(t=>t.available);

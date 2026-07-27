@@ -23,3 +23,22 @@ export const DEFAULT_COMMERCIAL_PLANS:CommercialPlan[]=[
 
 export function moneyMXN(value:number){return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(value)}
 export function planByKey(plans:CommercialPlan[],key:string){return plans.find(p=>p.clave===key)||DEFAULT_COMMERCIAL_PLANS.find(p=>p.clave===key)||DEFAULT_COMMERCIAL_PLANS[0]}
+
+
+export function normalizeCommercialPlanKey(value:unknown):CommercialPlanKey|null{
+  return value==='clasico'||value==='premium'||value==='signature'?value:null;
+}
+
+export function resolveInvitationCommercialPlanKey(design:unknown,fallback:CommercialPlanKey='clasico'):CommercialPlanKey{
+  const source=design&&typeof design==='object'?design as Record<string,unknown>:{};
+  const direct=normalizeCommercialPlanKey(source.commercial_plan_key);
+  if(direct)return direct;
+  const activation=normalizeCommercialPlanKey(source.activation_plan);
+  if(activation)return activation;
+  const snapshot=source.activation_plan_snapshot&&typeof source.activation_plan_snapshot==='object'
+    ? source.activation_plan_snapshot as Record<string,unknown>
+    : null;
+  const snapshotPlan=normalizeCommercialPlanKey(snapshot?.plan);
+  if(snapshotPlan)return snapshotPlan;
+  return normalizeCommercialPlanKey(source.plan)||fallback;
+}
