@@ -16,12 +16,34 @@ function Preview() {
   const tipo = query.get("tipo") || "wedding";
   const id = query.get("plantilla") || "";
   const origin = query.get("origen") === "admin" ? "admin" : "cliente";
+  const context = query.get("context") === "change" ? "change" : "create";
+  const eventId = query.get("eventId") || "";
+  const requestedReturnTo = query.get("returnTo") || "";
+  const safeReturnTo = requestedReturnTo.startsWith("/") && !requestedReturnTo.startsWith("//")
+    ? requestedReturnTo
+    : eventId
+      ? `/mi-cuenta/studio/${encodeURIComponent(eventId)}`
+      : `/mi-cuenta/crear/plantilla?tipo=${tipo}`;
   const template = getTemplateById(id);
   const label = TEMPLATE_COLLECTIONS.find((collection) => collection.id === tipo)?.label || "Evento";
-  const backHref = origin === "admin" ? "/admin/plantillas" : `/mi-cuenta/crear/plantilla?tipo=${tipo}`;
+  const backHref = origin === "admin"
+    ? "/admin/plantillas"
+    : context === "change"
+      ? safeReturnTo
+      : `/mi-cuenta/crear/plantilla?tipo=${tipo}`;
   const chooseHref = origin === "admin"
     ? `/admin/invitaciones?plantilla=${encodeURIComponent(id)}`
-    : `/mi-cuenta/crear/configurar?tipo=${tipo}&plantilla=${encodeURIComponent(id)}`;
+    : context === "change" && eventId
+      ? `/mi-cuenta/studio/${encodeURIComponent(eventId)}?applyTemplate=${encodeURIComponent(id)}`
+      : `/mi-cuenta/crear/configurar?tipo=${tipo}&plantilla=${encodeURIComponent(id)}`;
+
+  function previewHref(templateId: string, collection: string) {
+    const params = new URLSearchParams({ tipo: collection, plantilla: templateId, origen: origin });
+    if (context === "change") params.set("context", "change");
+    if (eventId) params.set("eventId", eventId);
+    if (requestedReturnTo) params.set("returnTo", requestedReturnTo);
+    return `/preview/plantilla?${params.toString()}`;
+  }
 
   if (!template) {
     return (
@@ -112,7 +134,7 @@ function Preview() {
                 <Link
                   key={variant.id}
                   className={variant.id === template.id ? "active" : ""}
-                  href={`/preview/plantilla?tipo=${variant.collection}&plantilla=${variant.id}&origen=${origin}`}
+                  href={previewHref(variant.id, variant.collection)}
                 >
                   <i style={{ background: variant.color }} />
                   <span>{variant.variantName || variant.name}</span>

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
-import {useParams} from "next/navigation";
+import {useParams,useSearchParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
@@ -96,6 +96,7 @@ function collectionForTipo(tipo:string){
 
 export default function StudioPage(){
  const params=useParams<{id:string}>();
+ const searchParams=useSearchParams();
  const supabase=useMemo(()=>createClient(),[]);
  const [invite,setInvite]=useState<Invite|null>(null);
  const [loading,setLoading]=useState(true);
@@ -110,6 +111,7 @@ export default function StudioPage(){
  const [pendingTemplate,setPendingTemplate]=useState<string|null>(null);
  const [applyingTemplate,setApplyingTemplate]=useState(false);
  const [templateNotice,setTemplateNotice]=useState("");
+ const processedTemplateQueryRef=useRef<string|null>(null);
  const [showPublish,setShowPublish]=useState(false);
  const [selectedPlan,setSelectedPlan]=useState<"clasico"|"premium"|"signature">("clasico");
  const [requestingActivation,setRequestingActivation]=useState(false);
@@ -409,6 +411,25 @@ export default function StudioPage(){
   window.setTimeout(()=>setTemplateNotice(""),2800);
  }
 
+ useEffect(()=>{
+  if(!invite)return;
+  const requested=searchParams.get("applyTemplate");
+  if(!requested||processedTemplateQueryRef.current===requested)return;
+  processedTemplateQueryRef.current=requested;
+  const template=getTemplateById(requested);
+  if(!template){setTemplateNotice("No encontramos la plantilla seleccionada.");return;}
+  const invitationPlanKey=normalizeTemplatePlan(resolveInvitationCommercialPlanKey(invite.design_json,selectedPlan)) as TemplatePlanTier;
+  if(!canUseTemplate(template,invitationPlanKey)){
+   setTemplateNotice(`🔒 ${template.name} requiere el plan ${templatePlanLabel(template)}.`);
+   return;
+  }
+  if(invite.template_key===requested){
+   setTemplateNotice(`✓ ${template.name} ya es tu plantilla actual.`);
+   return;
+  }
+  setPendingTemplate(requested);
+ },[invite,searchParams,selectedPlan]);
+
  function requestTemplateChange(id:string){
   if(!invite)return;
   const t=getTemplateById(id); if(!t)return;
@@ -691,7 +712,7 @@ export default function StudioPage(){
         <div className="studio-global-template-info">
           <div><h3>{t.name}</h3>{t.variantName&&<small className="studio-template-variant">{t.variantName}</small>}<p>{t.description}</p></div>
           <div className="studio-global-template-actions">
-            <Link className="client-secondary" target="_blank" href={`/mi-cuenta/crear/preview?tipo=${t.collection}&plantilla=${t.id}`}>Vista previa</Link>
+            <Link className="client-secondary" target="_blank" href={`/preview/plantilla?tipo=${t.collection}&plantilla=${t.id}&origen=cliente&context=change&eventId=${encodeURIComponent(invite.id)}&returnTo=${encodeURIComponent(`/mi-cuenta/studio/${invite.id}`)}`}>Vista previa</Link>
             {invite.template_key===t.id
               ? <span className="template-current-label">✓ Plantilla actual</span>
               : allowed

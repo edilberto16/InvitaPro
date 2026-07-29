@@ -5393,3 +5393,136 @@ a { color: inherit; }
 .theme-midnight-gold .premium-public-section:nth-of-type(even),.theme-midnight-platinum .premium-public-section:nth-of-type(even),.theme-midnight-sapphire .premium-public-section:nth-of-type(even){background-color:color-mix(in srgb,var(--template-surface) 72%,var(--template-background))}
 .theme-ivory-editorial .premium-public-section,.theme-blush-editorial .premium-public-section,.theme-terracotta-editorial .premium-public-section{border-radius:0}.theme-ivory-editorial .premium-section-heading h2,.theme-blush-editorial .premium-section-heading h2,.theme-terracotta-editorial .premium-section-heading h2{font-size:clamp(2.4rem,6vw,5rem);line-height:.95}
 .theme-royal-amethyst .premium-details-card,.theme-royal-rose .premium-details-card,.theme-royal-emerald .premium-details-card,.theme-royal-amethyst .premium-rsvp-card,.theme-royal-rose .premium-rsvp-card,.theme-royal-emerald .premium-rsvp-card{border:1px solid color-mix(in srgb,var(--template-primary) 32%,transparent);box-shadow:0 24px 70px color-mix(in srgb,var(--template-primary) 12%,transparent)}
+
+/* =========================================================
+   InvitaPro v2.15.4 — Motion premium y pulido Signature
+   Animaciones de bajo costo: opacity/transform/filter.
+   ========================================================= */
+.template-engine .invitation-section-slot {
+  position: relative;
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  transition:
+    opacity .78s cubic-bezier(.22,.72,0,1),
+    transform .78s cubic-bezier(.22,.72,0,1),
+    filter .78s ease;
+  will-change: opacity, transform;
+}
+.template-engine .invitation-section-slot.is-revealed,
+.template-engine.studio-preview-mode .invitation-section-slot {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+  will-change: auto;
+}
+.template-engine.motion-minimal .invitation-section-slot {
+  transform: translate3d(0,16px,0);
+  transition-duration: .56s;
+}
+.template-engine.motion-cinematic .invitation-section-slot {
+  transform: translate3d(0,42px,0) scale(.985);
+  filter: blur(3px);
+  transition-duration: .95s;
+}
+.template-engine.motion-cinematic .invitation-section-slot.is-revealed,
+.template-engine.motion-cinematic.studio-preview-mode .invitation-section-slot {
+  transform: translate3d(0,0,0) scale(1);
+  filter: blur(0);
+}
+.template-engine.motion-dynamic .invitation-section-slot {
+  transform: translate3d(0,28px,0) scale(.975);
+  transition-duration: .66s;
+}
+.template-engine .invitation-section-slot.is-revealed .premium-section-heading > *,
+.template-engine .invitation-section-slot.is-revealed .premium-detail-grid > *,
+.template-engine .invitation-section-slot.is-revealed .premium-program-list > *,
+.template-engine .invitation-section-slot.is-revealed .premium-gallery-grid > *,
+.template-engine .invitation-section-slot.is-revealed .premium-special-people-grid > * {
+  animation: invitaPremiumChildReveal .72s cubic-bezier(.22,.72,0,1) both;
+}
+.template-engine .invitation-section-slot.is-revealed :is(.premium-detail-grid,.premium-program-list,.premium-gallery-grid,.premium-special-people-grid) > *:nth-child(2){animation-delay:.07s}
+.template-engine .invitation-section-slot.is-revealed :is(.premium-detail-grid,.premium-program-list,.premium-gallery-grid,.premium-special-people-grid) > *:nth-child(3){animation-delay:.14s}
+.template-engine .invitation-section-slot.is-revealed :is(.premium-detail-grid,.premium-program-list,.premium-gallery-grid,.premium-special-people-grid) > *:nth-child(4){animation-delay:.21s}
+@keyframes invitaPremiumChildReveal { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:translateY(0) } }
+
+/* Luxury Night — profundidad, destellos y cristal oscuro */
+.template-engine:is(.theme-midnight-gold,.theme-midnight-platinum,.theme-midnight-sapphire) {
+  background:
+    radial-gradient(circle at 12% 12%,color-mix(in srgb,var(--template-primary) 11%,transparent),transparent 28rem),
+    radial-gradient(circle at 88% 58%,color-mix(in srgb,var(--template-secondary) 15%,transparent),transparent 32rem),
+    var(--template-background);
+}
+.template-engine:is(.theme-midnight-gold,.theme-midnight-platinum,.theme-midnight-sapphire) .premium-hero-content {
+  animation: luxuryHeroEntrance 1.15s cubic-bezier(.18,.76,.16,1) both;
+}
+.template-engine:is(.theme-midnight-gold,.theme-midnight-platinum,.theme-midnight-sapphire) .premium-hero::after {
+  animation: luxurySparkleDrift 7s ease-in-out infinite alternate;
+}
+.template-engine:is(.theme-midnight-gold,.theme-midnight-platinum,.theme-midnight-sapphire) :is(.premium-location-card,.premium-rsvp-card,.premium-wishes-card,.premium-album-card) {
+  border:1px solid color-mix(in srgb,var(--template-primary) 28%,transparent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--template-surface) 90%,transparent),color-mix(in srgb,var(--template-primary) 7%,var(--template-surface)));
+  box-shadow:0 28px 80px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.05);
+}
+@keyframes luxuryHeroEntrance { from { opacity:0; transform:translateY(28px) scale(.97); letter-spacing:.04em } to { opacity:1; transform:none; letter-spacing:normal } }
+@keyframes luxurySparkleDrift { from { transform:translate3d(-10px,-8px,0) rotate(-4deg); opacity:.55 } to { transform:translate3d(14px,12px,0) rotate(5deg); opacity:1 } }
+
+/* Editorial Romance — ritmo de revista y aparición lateral */
+.template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .premium-hero-content {
+  animation: editorialHeroSlide .95s cubic-bezier(.22,.72,0,1) both;
+}
+.template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .invitation-section-slot:nth-of-type(even) {
+  transform:translate3d(-34px,20px,0);
+}
+.template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .invitation-section-slot:nth-of-type(odd) {
+  transform:translate3d(34px,20px,0);
+}
+.template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .invitation-section-slot.is-revealed,
+.template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial).studio-preview-mode .invitation-section-slot {
+  transform:translate3d(0,0,0);
+}
+.template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .premium-section-heading h2 {
+  text-wrap:balance;
+}
+@keyframes editorialHeroSlide { from { opacity:0; transform:translateX(-36px) } to { opacity:1; transform:none } }
+
+/* Royal XV — brillo, corona y pulsos elegantes */
+.template-engine:is(.theme-royal-amethyst,.theme-royal-rose,.theme-royal-emerald) .premium-hero-content::before {
+  animation: royalCrownFloat 4.8s ease-in-out infinite;
+}
+.template-engine:is(.theme-royal-amethyst,.theme-royal-rose,.theme-royal-emerald) .premium-countdown-grid article {
+  box-shadow:0 18px 50px color-mix(in srgb,var(--template-primary) 18%,transparent);
+  animation: royalCardGlow 4.4s ease-in-out infinite alternate;
+}
+.template-engine:is(.theme-royal-amethyst,.theme-royal-rose,.theme-royal-emerald) .premium-countdown-grid article:nth-child(2){animation-delay:-1.4s}
+.template-engine:is(.theme-royal-amethyst,.theme-royal-rose,.theme-royal-emerald) .premium-countdown-grid article:nth-child(3){animation-delay:-2.8s}
+@keyframes royalCrownFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-9px) rotate(2deg)} }
+@keyframes royalCardGlow { from{transform:translateY(0);box-shadow:0 18px 50px color-mix(in srgb,var(--template-primary) 12%,transparent)} to{transform:translateY(-4px);box-shadow:0 24px 68px color-mix(in srgb,var(--template-primary) 28%,transparent)} }
+
+/* Demo Signature: entrada progresiva sin alterar el layout */
+.signature-demo-canvas > section {
+  animation: signatureDemoReveal .82s cubic-bezier(.22,.72,0,1) both;
+}
+.signature-demo-canvas > section:nth-child(2){animation-delay:.08s}
+.signature-demo-canvas > section:nth-child(3){animation-delay:.16s}
+.signature-demo-canvas > section:nth-child(4){animation-delay:.24s}
+.signature-demo-canvas > section:nth-child(5){animation-delay:.32s}
+.signature-demo-canvas > section:nth-child(6){animation-delay:.4s}
+.signature-demo-canvas > section:nth-child(7){animation-delay:.48s}
+@keyframes signatureDemoReveal { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+@media (max-width: 720px) {
+  .template-engine .invitation-section-slot { transform:translate3d(0,20px,0); transition-duration:.58s; }
+  .template-engine.motion-cinematic .invitation-section-slot { filter:none; transform:translate3d(0,24px,0) scale(.99); }
+  .template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .invitation-section-slot:nth-of-type(n) { transform:translate3d(0,20px,0); }
+  .template-engine:is(.theme-ivory-editorial,.theme-blush-editorial,.theme-terracotta-editorial) .invitation-section-slot.is-revealed { transform:none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-engine .invitation-section-slot,
+  .signature-demo-canvas > section {
+    opacity:1 !important;
+    transform:none !important;
+    filter:none !important;
+    transition:none !important;
+    animation:none !important;
+  }
+}
