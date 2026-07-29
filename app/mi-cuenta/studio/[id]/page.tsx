@@ -3,7 +3,7 @@ import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {useParams,useSearchParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
-import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
+import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
@@ -108,6 +108,7 @@ export default function StudioPage(){
  const [active,setActive]=useState("portada");
  const [showTemplates,setShowTemplates]=useState(false);
  const [templateFilter,setTemplateFilter]=useState<"recommended"|"todas"|"wedding"|"xv"|"infantil"|"empresarial">("recommended");
+ const [templateSearch,setTemplateSearch]=useState("");
  const [pendingTemplate,setPendingTemplate]=useState<string|null>(null);
  const [applyingTemplate,setApplyingTemplate]=useState(false);
  const [templateNotice,setTemplateNotice]=useState("");
@@ -568,11 +569,12 @@ export default function StudioPage(){
  const modalityFeatures=modalityCapabilities(currentModality);
  const collection=collectionForTipo(invite.eventos?.tipo||"");
  const allAvailableTemplates=TEMPLATE_CATALOG.filter(t=>t.available);
- const templates=templateFilter==="recommended"
+ const templates=(templateFilter==="recommended"
    ? allAvailableTemplates.filter(t=>t.collection===collection)
    : templateFilter==="todas"
      ? allAvailableTemplates
-     : allAvailableTemplates.filter(t=>t.collection===templateFilter);
+     : allAvailableTemplates.filter(t=>t.collection===templateFilter))
+   .filter(t=>matchesTemplateSearch(t,templateSearch));
  const enabled=Object.values(visibility).filter(Boolean).length;
  const progress=Math.round((enabled/SECTIONS.length)*70 + (title?10:0)+(invite.eventos?.fecha?10:0)+(message?10:0));
  const activeEditorSections=SECTIONS.filter(section=>{
@@ -688,6 +690,8 @@ export default function StudioPage(){
       <button onClick={()=>setShowTemplates(false)}>×</button>
     </header>
 
+    <div className="studio-template-search"><input value={templateSearch} onChange={e=>setTemplateSearch(e.target.value)} placeholder="Buscar por nombre, familia o estilo…" aria-label="Buscar plantillas"/>{templateSearch&&<button type="button" onClick={()=>setTemplateSearch("")}>Limpiar</button>}</div>
+
     <div className="template-category-tabs">
       <button className={templateFilter==="recommended"?"active":""} onClick={()=>setTemplateFilter("recommended")}>Recomendadas</button>
       <button className={templateFilter==="todas"?"active":""} onClick={()=>setTemplateFilter("todas")}>Todas</button>
@@ -703,6 +707,7 @@ export default function StudioPage(){
     </div>
 
     <div className="studio-template-grid">
+      {templates.length===0&&<div className="client-empty"><h3>No encontramos plantillas</h3><p>Prueba otra familia, estilo o categoría.</p></div>}
       {templates.map(t=>{const allowed=canUseTemplate(t,currentPlanKey);return <article key={t.id} className={`studio-global-template-card ${invite.template_key===t.id?"selected":""} ${allowed?"":"template-locked"}`}>
         <div className="studio-global-template-art">
           <TemplatePreviewArtwork template={t}/>

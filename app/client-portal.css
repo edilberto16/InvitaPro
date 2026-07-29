@@ -143,3 +143,7 @@
 
 /* InvitaPro v2.15.2 — modalidad unificada */
 .client-modality-notice{max-width:1180px;margin:24px auto;padding:24px 28px;border:1px solid #eadfe5;border-radius:22px;background:linear-gradient(135deg,#fff,#fbf6f8);display:flex;align-items:center;justify-content:space-between;gap:24px}.client-modality-notice h2{margin:4px 0 6px}.client-modality-notice p{margin:0;color:#786671}.client-modality-notice>span{padding:8px 12px;border-radius:999px;background:#f3e7ed;color:#72264f;font-weight:900;white-space:nowrap}.studio-modality-summary{margin:12px 0 14px;padding:13px 14px;border:1px solid #eadde4;border-radius:14px;background:#fffafd;display:grid;gap:3px}.studio-modality-summary small{font-size:9px;letter-spacing:.12em;font-weight:900;color:#a05b7d}.studio-modality-summary strong{font-size:13px;color:#35272e}.studio-modality-summary span{font-size:11px;color:#806d77}@media(max-width:700px){.client-modality-notice{margin:18px 14px;padding:20px;align-items:flex-start;flex-direction:column}}
+
+
+/* InvitaPro v2.15.5.2 — búsqueda del catálogo maestro en Studio */
+.studio-template-search{display:flex;gap:10px;align-items:center;margin:14px 0 8px}.studio-template-search input{min-width:0;flex:1;padding:12px 14px;border:1px solid rgba(72,44,66,.18);border-radius:12px;background:#fff;font:inherit}.studio-template-search input:focus{outline:2px solid rgba(137,92,124,.18);border-color:#89607f}.studio-template-search button{border:0;background:transparent;color:#76536d;font-weight:700;cursor:pointer}.studio-template-grid>.client-empty{grid-column:1/-1}

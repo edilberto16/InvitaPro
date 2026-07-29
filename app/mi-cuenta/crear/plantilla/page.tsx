@@ -2,10 +2,10 @@
 import {Suspense} from "react";
 import Link from "next/link";
 import {useSearchParams} from "next/navigation";
-import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS} from "@/lib/template-catalog";
+import {getAvailableTemplates,TEMPLATE_COLLECTIONS} from "@/lib/template-catalog";
 function Selector(){
  const q=useSearchParams(); const tipo=q.get("tipo")||"wedding";
- const templates=TEMPLATE_CATALOG.filter(t=>t.collection===tipo&&t.available);
+ const templates=getAvailableTemplates(tipo as Parameters<typeof getAvailableTemplates>[0]);
  const label=TEMPLATE_COLLECTIONS.find(c=>c.id===tipo)?.label||"Evento";
  return <main className="self-service-page"><header className="self-service-topbar"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><Link href="/mi-cuenta" className="self-service-exit">Guardar y salir</Link></header><section className="self-service-shell">
  <div className="wizard-progress"><span className="done">✓</span><i className="done"/><span className="active">2</span><i/><span>3</span></div>

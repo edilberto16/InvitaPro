@@ -3,15 +3,16 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getTemplateById, getTemplateFamilyVariants, TEMPLATE_COLLECTIONS, templatePlanLabel } from "@/lib/template-catalog";
+import { getAvailableTemplateById, getTemplateFamilyVariants, TEMPLATE_COLLECTIONS, templatePlanLabel } from "@/lib/template-catalog";
 import { resolveTemplateEngine, templateEngineStyle } from "@/lib/template-engine";
 
 function Preview() {
   const query = useSearchParams();
   const tipo = query.get("tipo") || "wedding";
   const id = query.get("plantilla") || "";
-  const template = getTemplateById(id);
-  const label = TEMPLATE_COLLECTIONS.find((collection) => collection.id === tipo)?.label || "Evento";
+  const template = getAvailableTemplateById(id);
+  const templateCollection = template?.collection || tipo;
+  const label = TEMPLATE_COLLECTIONS.find((collection) => collection.id === templateCollection)?.label || "Evento";
 
   if (!template) {
     return <main className="self-service-page"><header className="self-service-topbar"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link></header><section className="self-service-shell"><div className="client-empty"><h2>Plantilla no encontrada</h2><Link className="client-primary" href={`/mi-cuenta/crear/plantilla?tipo=${tipo}`}>Volver a plantillas</Link></div></section></main>;
@@ -19,13 +20,13 @@ function Preview() {
 
   const engine = resolveTemplateEngine(template.id, template.color);
   const variants = getTemplateFamilyVariants(template);
-  const demoName = tipo === "wedding" ? "Mariana & Alejandro" : tipo === "xv" ? "Valentina" : tipo === "infantil" ? "Mateo cumple 6" : "Future Summit";
-  const demoDate = tipo === "wedding" ? "12 · OCT · 2026" : tipo === "xv" ? "28 · NOV · 2026" : "16 · AGO · 2026";
+  const demoName = templateCollection === "wedding" ? "Mariana & Alejandro" : templateCollection === "xv" ? "Valentina" : templateCollection === "infantil" ? "Mateo cumple 6" : "Future Summit";
+  const demoDate = templateCollection === "wedding" ? "12 · OCT · 2026" : templateCollection === "xv" ? "28 · NOV · 2026" : "16 · AGO · 2026";
 
   return <main className="signature-demo-page" style={templateEngineStyle(engine)}>
     <header className="signature-demo-topbar">
       <Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link>
-      <div className="preview-top-actions"><Link className="client-secondary" href={`/mi-cuenta/crear/plantilla?tipo=${tipo}`}>← Volver</Link><Link className="client-primary" href={`/mi-cuenta/crear/configurar?tipo=${tipo}&plantilla=${template.id}`}>Elegir esta plantilla</Link></div>
+      <div className="preview-top-actions"><Link className="client-secondary" href={`/mi-cuenta/crear/plantilla?tipo=${tipo}`}>← Volver</Link><Link className="client-primary" href={`/mi-cuenta/crear/configurar?tipo=${template.collection}&plantilla=${template.id}`}>Elegir esta plantilla</Link></div>
     </header>
 
     <section className={`signature-demo-canvas theme-${template.id} layout-${engine.layout} decoration-${engine.decoration}`}>
@@ -69,7 +70,7 @@ function Preview() {
       <p className="eyebrow">Demo completa</p><h2>{template.name}</h2><p>{template.description}</p>
       {variants.length > 1 && <div className="signature-variant-switcher"><small>Variantes de la familia</small><div>{variants.map((variant) => <Link key={variant.id} className={variant.id === template.id ? "active" : ""} href={`/mi-cuenta/crear/preview?tipo=${variant.collection}&plantilla=${variant.id}`}><i style={{ background: variant.color }} /><span>{variant.variantName || variant.name}</span></Link>)}</div></div>}
       <ul>{template.features.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
-      <div className="template-preview-actions"><Link className="client-primary" href={`/mi-cuenta/crear/configurar?tipo=${tipo}&plantilla=${template.id}`}>Elegir esta plantilla →</Link><Link className="client-secondary" href={`/mi-cuenta/crear/plantilla?tipo=${tipo}`}>Ver otras plantillas</Link></div>
+      <div className="template-preview-actions"><Link className="client-primary" href={`/mi-cuenta/crear/configurar?tipo=${template.collection}&plantilla=${template.id}`}>Elegir esta plantilla →</Link><Link className="client-secondary" href={`/mi-cuenta/crear/plantilla?tipo=${tipo}`}>Ver otras plantillas</Link></div>
     </aside>
   </main>;
 }

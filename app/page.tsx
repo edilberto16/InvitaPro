@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { InvitaProLogo } from '@/components/marketing/invitapro-logo';
 import { DEFAULT_COMMERCIAL_PLANS, CommercialPlan, moneyMXN } from '@/lib/commercial-plans';
 import { createClient } from '@/lib/supabase/server';
+import { getPublicFeaturedTemplates, TEMPLATE_COLLECTIONS } from '@/lib/template-catalog';
 
 const features = [
   { icon: '✓', title: 'RSVP en tiempo real', text: 'Recibe confirmaciones, acompañantes y respuestas desde un solo panel.' },
@@ -12,11 +13,7 @@ const features = [
   { icon: '✦', title: 'Diseño personalizable', text: 'Adapta colores, tipografías y secciones a la identidad de cada celebración.' },
 ];
 
-const templates = [
-  { category: 'Boda', title: 'Romantic Garden', image: '/inspiracion/boda-romantic-garden.webp', tone: 'garden', slug: 'boda-romantic-garden' },
-  { category: 'XV años', title: 'Princess Rose', image: '/inspiracion/xv-princess-rose.webp', tone: 'rose', slug: 'xv-princess-rose' },
-  { category: 'Cumpleaños', title: 'Dino Adventure', image: '/inspiracion/cumple-dinosaurios.webp', tone: 'gold', slug: 'cumple-dinosaurios' },
-];
+const templates = getPublicFeaturedTemplates();
 
 const steps = [
   ['01', 'Elige tu estilo', 'Comienza con una plantilla que refleje la personalidad de tu evento.'],
@@ -163,18 +160,22 @@ export default async function Home() {
             <Link className="marketing-text-link" href="/inspiracion">Explorar inspiración <span>→</span></Link>
           </div>
           <div className="marketing-template-grid">
-            {templates.map((template) => (
-              <article className={`marketing-template-card marketing-template-${template.tone}`} key={template.title}>
-                <div className="marketing-template-image" style={{ backgroundImage: `url(${template.image})` }}>
-                  <span>{template.category}</span>
+            {templates.map((template) => {
+              const category = TEMPLATE_COLLECTIONS.find((item) => item.id === template.collection)?.label || 'Evento';
+              const inspirationHref = template.inspirationSlug ? `/inspiracion/${template.inspirationSlug}` : `/preview/plantilla?tipo=${template.collection}&plantilla=${template.id}`;
+              return (
+              <article className={`marketing-template-card marketing-template-${template.collection}`} key={template.id}>
+                <div className="marketing-template-image" style={{ backgroundImage: `url(${template.previewImage || ''})` }}>
+                  <span>{category}</span>
                   <div className="marketing-template-actions">
-                    <Link href={`/inspiracion/${template.slug}`} aria-label={`Ver experiencia ${template.title}`}>Ver experiencia <b>↗</b></Link>
-                    <Link className="marketing-template-request" href={`/solicitar?plantilla=${encodeURIComponent(template.title)}&categoria=${encodeURIComponent(template.category)}`}>Quiero una como esta</Link>
+                    <Link href={inspirationHref} aria-label={`Ver experiencia ${template.name}`}>Ver experiencia <b>↗</b></Link>
+                    <Link className="marketing-template-request" href={`/solicitar?plantilla=${encodeURIComponent(template.name)}&categoria=${encodeURIComponent(category)}`}>Quiero una como esta</Link>
                   </div>
                 </div>
-                <div className="marketing-template-info"><h3>{template.title}</h3><p>Diseño adaptable y personalizable</p></div>
+                <div className="marketing-template-info"><h3>{template.name}</h3><p>Diseño adaptable y personalizable</p></div>
               </article>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  getTemplateById,
+  getAvailableTemplateById,
   getTemplateFamilyVariants,
   TEMPLATE_COLLECTIONS,
   templatePlanLabel,
@@ -24,8 +24,9 @@ function Preview() {
     : eventId
       ? `/mi-cuenta/studio/${encodeURIComponent(eventId)}`
       : `/mi-cuenta/crear/plantilla?tipo=${tipo}`;
-  const template = getTemplateById(id);
-  const label = TEMPLATE_COLLECTIONS.find((collection) => collection.id === tipo)?.label || "Evento";
+  const template = getAvailableTemplateById(id);
+  const templateCollection = template?.collection || tipo;
+  const label = TEMPLATE_COLLECTIONS.find((collection) => collection.id === templateCollection)?.label || "Evento";
   const backHref = origin === "admin"
     ? "/admin/plantillas"
     : context === "change"
@@ -63,8 +64,8 @@ function Preview() {
 
   const engine = resolveTemplateEngine(template.id, template.color);
   const variants = getTemplateFamilyVariants(template);
-  const demoName = tipo === "wedding" ? "Mariana & Alejandro" : tipo === "xv" ? "Valentina" : tipo === "infantil" ? "Mateo cumple 6" : "Future Summit";
-  const demoDate = tipo === "wedding" ? "12 · OCT · 2026" : tipo === "xv" ? "28 · NOV · 2026" : "16 · AGO · 2026";
+  const demoName = templateCollection === "wedding" ? "Mariana & Alejandro" : templateCollection === "xv" ? "Valentina" : templateCollection === "infantil" ? "Mateo cumple 6" : "Future Summit";
+  const demoDate = templateCollection === "wedding" ? "12 · OCT · 2026" : templateCollection === "xv" ? "28 · NOV · 2026" : "16 · AGO · 2026";
 
   return (
     <main className="signature-demo-page" style={templateEngineStyle(engine)}>
