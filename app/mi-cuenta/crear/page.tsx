@@ -4,7 +4,8 @@ const TYPES=[
  {id:"wedding",label:"Boda",icon:"♥",desc:"Una celebración elegante y personal."},
  {id:"xv",label:"XV años",icon:"♕",desc:"Una experiencia especial para tus quince."},
  {id:"infantil",label:"Cumpleaños",icon:"★",desc:"Fiestas infantiles llenas de personalidad."},
- {id:"empresarial",label:"Empresarial",icon:"◆",desc:"Eventos profesionales y corporativos."}
+ {id:"empresarial",label:"Empresarial",icon:"◆",desc:"Eventos profesionales y corporativos."},
+ {id:"campamento",label:"Campamento o retiro",icon:"▲",desc:"Encuentros de fe, amistad y aventura al aire libre."}
 ];
 export default function CrearInvitacion(){
  return <main className="self-service-page"><header className="self-service-topbar"><Link href="/mi-cuenta" className="client-logo"><span>IP</span><strong>InvitaPro</strong></Link><Link href="/mi-cuenta" className="self-service-exit">Guardar y salir</Link></header>

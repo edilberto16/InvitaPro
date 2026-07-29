@@ -3,7 +3,7 @@ import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {useParams,useSearchParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
-import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplatePlanTier} from "@/lib/template-catalog";
+import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplateCollectionId,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
@@ -91,6 +91,7 @@ function collectionForTipo(tipo:string){
  if(t.includes("xv"))return "xv";
  if(t.includes("boda"))return "wedding";
  if(t.includes("empres"))return "empresarial";
+ if(t.includes("camp")||t.includes("retiro")||t.includes("iglesia"))return "campamento";
  return "infantil";
 }
 
@@ -107,7 +108,7 @@ export default function StudioPage(){
  const [error,setError]=useState("");
  const [active,setActive]=useState("portada");
  const [showTemplates,setShowTemplates]=useState(false);
- const [templateFilter,setTemplateFilter]=useState<"recommended"|"todas"|"wedding"|"xv"|"infantil"|"empresarial">("recommended");
+ const [templateFilter,setTemplateFilter]=useState<"recommended"|"todas"|TemplateCollectionId>("recommended");
  const [templateSearch,setTemplateSearch]=useState("");
  const [pendingTemplate,setPendingTemplate]=useState<string|null>(null);
  const [applyingTemplate,setApplyingTemplate]=useState(false);
@@ -694,11 +695,15 @@ export default function StudioPage(){
 
     <div className="template-category-tabs">
       <button className={templateFilter==="recommended"?"active":""} onClick={()=>setTemplateFilter("recommended")}>Recomendadas</button>
-      <button className={templateFilter==="todas"?"active":""} onClick={()=>setTemplateFilter("todas")}>Todas</button>
-      <button className={templateFilter==="wedding"?"active":""} onClick={()=>setTemplateFilter("wedding")}>Bodas</button>
-      <button className={templateFilter==="xv"?"active":""} onClick={()=>setTemplateFilter("xv")}>XV años</button>
-      <button className={templateFilter==="infantil"?"active":""} onClick={()=>setTemplateFilter("infantil")}>Cumpleaños</button>
-      <button className={templateFilter==="empresarial"?"active":""} onClick={()=>setTemplateFilter("empresarial")}>Empresarial</button>
+      {TEMPLATE_COLLECTIONS.map(category=>{
+        const count=category.id==="todas"
+          ? allAvailableTemplates.length
+          : allAvailableTemplates.filter(template=>template.collection===category.id).length;
+        return <button key={category.id} className={templateFilter===category.id?"active":""} onClick={()=>setTemplateFilter(category.id)}>
+          <span>{category.label}</span>
+          <small>{count}</small>
+        </button>;
+      })}
     </div>
 
     <div className="template-filter-summary">

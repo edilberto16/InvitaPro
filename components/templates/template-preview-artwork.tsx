@@ -14,12 +14,12 @@ export default function TemplatePreviewArtwork({ template, large = false }: { te
       <span className="art-spark art-spark-one">✦</span>
       <span className="art-spark art-spark-two">✧</span>
       <span className="art-icon">
-        {template.layout === 'space' ? '🪐' : template.layout === 'dino' ? '🦖' : template.layout === 'unicorn' ? '🦄' : template.layout === 'safari' ? '🦁' : template.layout === 'hero' ? '⚡' : template.layout === 'butterfly' ? '🦋' : template.collection === 'empresarial' ? '◆' : template.collection === 'xv' ? '♕' : '❦'}
+        {template.layout === 'camp-forest' ? '🏕️' : template.layout === 'space' ? '🪐' : template.layout === 'dino' ? '🦖' : template.layout === 'unicorn' ? '🦄' : template.layout === 'safari' ? '🦁' : template.layout === 'hero' ? '⚡' : template.layout === 'butterfly' ? '🦋' : template.collection === 'empresarial' ? '◆' : template.collection === 'xv' ? '♕' : '❦'}
       </span>
       <span className="art-kicker">{template.familyName || label}</span>
       <strong>{template.name}</strong>
       <i />
-      <em>{template.variantName || (template.collection === 'empresarial' ? 'Ideas que conectan' : template.collection === 'infantil' ? 'Una aventura inolvidable' : template.collection === 'xv' ? 'Mis quince años' : 'Nuestra historia')}</em>
+      <em>{template.variantName || (template.collection === 'campamento' ? 'Fe · amistad · aventura' : template.collection === 'empresarial' ? 'Ideas que conectan' : template.collection === 'infantil' ? 'Una aventura inolvidable' : template.collection === 'xv' ? 'Mis quince años' : 'Nuestra historia')}</em>
     </div>
   );
 }

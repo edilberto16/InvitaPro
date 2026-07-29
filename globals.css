@@ -4282,3 +4282,56 @@ a { color: inherit; }
 
 /* v2.12.1 — planes comerciales y modalidades */
 .commercial-plan-selector{margin:0 0 24px;padding:18px;border:1px solid #eadfd9;border-radius:18px;background:#fcfaf9}.commercial-plan-selector-heading,.modality-label-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.commercial-plan-selector-heading span,.modality-label-row span{font-weight:800;color:#2a2522}.commercial-plan-selector-heading strong,.modality-label-row strong{color:#9b633d}.commercial-plan-selector-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commercial-plan-selector-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px;border:1px solid #dfd3cd;border-radius:14px;background:#fff;text-align:left;cursor:pointer}.commercial-plan-selector-grid button.selected{border-color:#9b633d;box-shadow:0 0 0 2px rgba(155,99,61,.12);background:#fffaf6}.commercial-plan-selector-grid button span{font-weight:800}.commercial-plan-selector-grid button strong{font-size:20px;color:#9b633d}.commercial-plan-selector-grid button small,.modality-label-row small{color:#756b65}.modality-label-row{margin-top:4px}.modality-label-row>div{display:flex;flex-direction:column;gap:3px}.modality-card.locked{opacity:.62;cursor:not-allowed;background:#f8f6f5}.modality-card.locked .modality-select-state{color:#9a6a48}.modality-card.locked:hover{transform:none;box-shadow:none}@media(max-width:900px){.commercial-plan-selector-grid{grid-template-columns:1fr}.commercial-plan-selector-heading,.modality-label-row{align-items:flex-start;flex-direction:column}}
+
+/* v2.15.6.0 · Campamentos y retiros */
+.theme-preview-campamento-bosque .template-marketplace-preview,
+.theme-preview-campamento-bosque .template-library-preview {
+  background:
+    radial-gradient(circle at 50% 82%, rgba(240,138,50,.42), transparent 16%),
+    linear-gradient(158deg, transparent 56%, rgba(15,55,39,.92) 57%),
+    linear-gradient(202deg, transparent 62%, rgba(28,83,55,.9) 63%),
+    linear-gradient(180deg, #173a31 0%, #0d241d 100%);
+  color:#fff5df;
+}
+.template-artwork-camp-forest {
+  background:
+    radial-gradient(circle at 50% 78%, rgba(240,138,50,.62), transparent 14%),
+    linear-gradient(150deg, transparent 58%, rgba(28,83,55,.9) 59%),
+    linear-gradient(210deg, transparent 62%, rgba(14,55,39,.96) 63%),
+    linear-gradient(180deg,#244f43,#102b22)!important;
+  color:#fff8e9!important;
+}
+.template-artwork-camp-forest .art-icon { filter:drop-shadow(0 8px 18px rgba(0,0,0,.35)); }
+.template-engine.theme-campamento-bosque,
+.theme-campamento-bosque.signature-demo-canvas {
+  --template-shadow:0 24px 80px rgba(7,27,21,.28);
+  background:
+    radial-gradient(circle at 20% 8%, rgba(159,192,127,.12), transparent 24%),
+    linear-gradient(180deg,#102b22,#173a31 42%,#f6eddc 42%);
+}
+.theme-campamento-bosque .premium-hero,
+.theme-campamento-bosque .signature-demo-hero {
+  background:
+    radial-gradient(circle at 50% 76%, rgba(240,138,50,.48), transparent 14%),
+    linear-gradient(155deg, transparent 57%, rgba(30,86,59,.92) 58%),
+    linear-gradient(205deg, transparent 63%, rgba(12,48,34,.96) 64%),
+    linear-gradient(180deg,#244f43 0%,#102b22 100%);
+}
+.theme-campamento-bosque .premium-hero-content::before,
+.theme-campamento-bosque .signature-demo-hero::before {
+  content:'✦  CAMPAMENTO DE FE  ✦';
+  display:block;
+  margin-bottom:18px;
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.22em;
+  color:#f6c37d;
+}
+.theme-campamento-bosque :is(.premium-details-card,.premium-program-card,.premium-location-card,.premium-rsvp-card,.signature-demo-cards article,.signature-demo-rsvp) {
+  border:1px solid rgba(47,107,69,.2);
+  box-shadow:0 20px 55px rgba(16,43,34,.12);
+}
+.theme-campamento-bosque :is(.rsvp-submit,.signature-demo-rsvp button,.signature-demo-hero button) {
+  background:#f08a32;
+  color:#fff;
+}

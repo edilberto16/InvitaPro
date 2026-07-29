@@ -20,8 +20,9 @@ function Preview() {
 
   const engine = resolveTemplateEngine(template.id, template.color);
   const variants = getTemplateFamilyVariants(template);
-  const demoName = templateCollection === "wedding" ? "Mariana & Alejandro" : templateCollection === "xv" ? "Valentina" : templateCollection === "infantil" ? "Mateo cumple 6" : "Future Summit";
-  const demoDate = templateCollection === "wedding" ? "12 · OCT · 2026" : templateCollection === "xv" ? "28 · NOV · 2026" : "16 · AGO · 2026";
+  const isCamp = templateCollection === "campamento";
+  const demoName = templateCollection === "wedding" ? "Mariana & Alejandro" : templateCollection === "xv" ? "Valentina" : templateCollection === "infantil" ? "Mateo cumple 6" : isCamp ? "AVIVA 2027" : "Future Summit";
+  const demoDate = templateCollection === "wedding" ? "12 · OCT · 2026" : templateCollection === "xv" ? "28 · NOV · 2026" : isCamp ? "12–14 · AGO · 2027" : "16 · AGO · 2026";
 
   return <main className="signature-demo-page" style={templateEngineStyle(engine)}>
     <header className="signature-demo-topbar">
@@ -49,20 +50,20 @@ function Preview() {
       </section>
 
       <section className="signature-demo-editorial">
-        <div className="signature-demo-photo"><span>Nuestra historia</span></div>
-        <div><small>Una noche para recordar</small><h2>Celebramos el amor, la vida y todo lo que viene.</h2><p>Una composición real para revisar tipografía, ritmo, tarjetas, galería y profundidad antes de elegir el diseño.</p></div>
+        <div className="signature-demo-photo"><span>{isCamp ? "Una aventura con propósito" : "Nuestra historia"}</span></div>
+        <div><small>{isCamp ? "Fe · amistad · aventura" : "Una noche para recordar"}</small><h2>{isCamp ? "Tres días para conectar con Dios y crear recuerdos inolvidables." : "Celebramos el amor, la vida y todo lo que viene."}</h2><p>{isCamp ? "Alabanza, fogata, actividades, talleres y comunidad en una experiencia diseñada para jóvenes y familias." : "Una composición real para revisar tipografía, ritmo, tarjetas, galería y profundidad antes de elegir el diseño."}</p></div>
       </section>
 
       <section className="signature-demo-cards">
-        <article><small>17:00</small><strong>Ceremonia</strong><span>Jardín Magnolia</span></article>
-        <article><small>19:30</small><strong>Recepción</strong><span>Salón Imperial</span></article>
-        <article><small>21:00</small><strong>Celebración</strong><span>Código elegante</span></article>
+        <article><small>{isCamp ? "VIERNES" : "17:00"}</small><strong>{isCamp ? "Registro y bienvenida" : "Ceremonia"}</strong><span>{isCamp ? "Cena · Fogata · Alabanza" : "Jardín Magnolia"}</span></article>
+        <article><small>{isCamp ? "SÁBADO" : "19:30"}</small><strong>{isCamp ? "Aventura y talleres" : "Recepción"}</strong><span>{isCamp ? "Devocional · Retos · Noche especial" : "Salón Imperial"}</span></article>
+        <article><small>{isCamp ? "DOMINGO" : "21:00"}</small><strong>{isCamp ? "Celebración y cierre" : "Celebración"}</strong><span>{isCamp ? "Servicio · Comunidad · Regreso" : "Código elegante"}</span></article>
       </section>
 
       <section className="signature-demo-gallery"><div /><div /><div /></section>
 
       <section className="signature-demo-rsvp">
-        <small>Confirma tu asistencia</small><h2>Nos encantará celebrar contigo</h2><p>RSVP, pases y álbum utilizan el mismo renderizador central en todas las plantillas.</p><button type="button">Confirmar asistencia</button>
+        <small>{isCamp ? "Reserva tu lugar" : "Confirma tu asistencia"}</small><h2>{isCamp ? "Prepárate para vivir AVIVA" : "Nos encantará celebrar contigo"}</h2><p>{isCamp ? "Registra edad, iglesia, transporte, contacto de emergencia y necesidades especiales desde el mismo flujo RSVP." : "RSVP, pases y álbum utilizan el mismo renderizador central en todas las plantillas."}</p><button type="button">{isCamp ? "Quiero asistir" : "Confirmar asistencia"}</button>
       </section>
     </section>
 

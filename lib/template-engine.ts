@@ -21,7 +21,7 @@ export type TemplateSectionId =
 
 export type TemplateEngineDefinition = {
   id: string;
-  family: 'wedding' | 'xv' | 'infantil' | 'empresarial';
+  family: 'wedding' | 'xv' | 'infantil' | 'empresarial' | 'campamento';
   layout: 'classic' | 'editorial' | 'immersive' | 'playful' | 'business';
   typography: 'serif' | 'editorial' | 'rounded' | 'modern';
   decoration: 'ornamental' | 'botanical' | 'sparkle' | 'geometric' | 'cosmic' | 'none';
@@ -67,6 +67,7 @@ type TemplateEnginePreset = Omit<
 };
 
 const definitions: Record<string, TemplateEnginePreset> = {
+  'campamento-bosque': { family:'campamento', layout:'immersive', typography:'rounded', decoration:'botanical', sectionOrder:['hero','intro','countdown','details','program','gallery','faq','location','rsvp'], palette:{primary:'#f08a32',secondary:'#9fc07f',background:'#102b22',surface:'#f6eddc',text:'#fff8e9',muted:'#c9d8c8'} },
   'midnight-gold': { family:'wedding', layout:'immersive', typography:'editorial', decoration:'sparkle', palette:{primary:'#d5b46c',secondary:'#7a622f',background:'#090909',surface:'#15130f',text:'#fff6df',muted:'#bfb39b'} },
   'midnight-platinum': { family:'wedding', layout:'immersive', typography:'editorial', decoration:'sparkle', palette:{primary:'#c8ced8',secondary:'#667080',background:'#080a0d',surface:'#14171c',text:'#f4f7fb',muted:'#a9b0bb'} },
   'midnight-sapphire': { family:'wedding', layout:'immersive', typography:'editorial', decoration:'cosmic', palette:{primary:'#6f8fd8',secondary:'#273f7d',background:'#070b18',surface:'#111a33',text:'#edf3ff',muted:'#a7b6d8'} },

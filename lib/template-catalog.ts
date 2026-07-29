@@ -1,4 +1,4 @@
-export type TemplateCollectionId = 'wedding' | 'xv' | 'infantil' | 'empresarial';
+export type TemplateCollectionId = 'wedding' | 'xv' | 'infantil' | 'empresarial' | 'campamento';
 export type TemplatePlanTier = 'clasico' | 'premium' | 'signature';
 
 export type TemplateDefinition = {
@@ -28,9 +28,11 @@ export const TEMPLATE_COLLECTIONS = [
   { id: 'xv', label: 'XV años' },
   { id: 'infantil', label: 'Infantil' },
   { id: 'empresarial', label: 'Empresarial' },
+  { id: 'campamento', label: 'Campamentos y retiros' },
 ] as const;
 
 export const TEMPLATE_CATALOG: TemplateDefinition[] = [
+  { id:'campamento-bosque', name:'Campamento Bosque', collection:'campamento', badge:'Disponible', available:true, premium:true, familyName:'Campamentos de Fe', variantName:'Bosque y fogata', color:'#2f6b45', description:'Una experiencia juvenil entre pinos, montañas y fogata para campamentos cristianos, retiros y encuentros de iglesia.', layout:'camp-forest', features:['Programa por días','Lista de qué llevar','Registro y transporte'], searchTerms:['cristiano','iglesia','retiro espiritual','jóvenes','jovenes','fogata','montaña','montana','bosque','campamento juvenil','alabanza'], publicFeatured:true },
   { id:'midnight-gold', name:'Midnight Gold', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Luxury Night', variantName:'Negro y oro', color:'#d5b46c', description:'Una experiencia nocturna cinematográfica con oro cálido, contrastes profundos y composición de gala.', layout:'midnight', features:['Portada cinematográfica','Detalles dorados','Todos los bloques compatibles'] },
   { id:'midnight-platinum', name:'Midnight Platinum', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Luxury Night', variantName:'Negro y plata', color:'#c8ced8', description:'Lujo contemporáneo en negro, plata y reflejos fríos para bodas y eventos de noche.', layout:'midnight', features:['Acabado platino','Galería inmersiva','RSVP premium'] },
   { id:'midnight-sapphire', name:'Midnight Sapphire', collection:'wedding', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Luxury Night', variantName:'Azul zafiro', color:'#6f8fd8', description:'Azul medianoche, destellos de zafiro y una presencia sofisticada para celebraciones exclusivas.', layout:'midnight', features:['Azul profundo','Brillos sutiles','Animación cinematográfica'] },
@@ -72,6 +74,7 @@ const COLLECTION_SEARCH_ALIASES: Record<TemplateCollectionId, string[]> = {
   xv: ['xv', 'xv años', 'quinceañera', 'quinceanera', '15 años'],
   infantil: ['infantil', 'cumpleaños', 'cumpleanos', 'niños', 'ninos'],
   empresarial: ['empresarial', 'corporativo', 'empresa', 'conferencia'],
+  campamento: ['campamento', 'campamentos', 'retiro', 'retiros', 'cristiano', 'iglesia', 'jóvenes', 'jovenes', 'bosque', 'montaña', 'montana'],
 };
 
 function normalizeSearchValue(value: unknown) {

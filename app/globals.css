@@ -5526,3 +5526,51 @@ a { color: inherit; }
     animation:none !important;
   }
 }
+
+/* v2.15.6.1.2 · Miniatura visual Campamento Bosque en todos los catálogos */
+.template-artwork-camp-forest {
+  color:#fff8e9;
+  background:
+    radial-gradient(circle at 50% 79%, rgba(255,183,77,.88) 0 5%, rgba(240,138,50,.52) 6% 13%, transparent 14%),
+    linear-gradient(151deg, transparent 57%, rgba(39,103,69,.96) 58% 70%, transparent 71%),
+    linear-gradient(209deg, transparent 61%, rgba(18,70,48,.98) 62% 77%, transparent 78%),
+    linear-gradient(180deg,#315f52 0%,#173a31 52%,#0d241d 100%);
+  font-family:Georgia,serif;
+}
+.template-artwork-camp-forest::before {
+  inset:0;
+  background:
+    radial-gradient(circle at 12% 14%,rgba(255,255,255,.9) 0 1px,transparent 1.6px),
+    radial-gradient(circle at 26% 9%,rgba(255,255,255,.7) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 74% 13%,rgba(255,255,255,.85) 0 1px,transparent 1.6px),
+    radial-gradient(circle at 88% 24%,rgba(255,255,255,.65) 0 1px,transparent 1.5px);
+}
+.template-artwork-camp-forest::after {
+  content:'▲  ▲   ▲  ▲';
+  left:0;
+  right:0;
+  bottom:-10px;
+  color:#082019;
+  font-size:74px;
+  letter-spacing:-18px;
+  line-height:1;
+  opacity:.95;
+  transform:scaleX(1.35);
+}
+.template-artwork-camp-forest .art-icon {
+  font-size:34px;
+  filter:drop-shadow(0 8px 18px rgba(0,0,0,.4));
+}
+.template-artwork-camp-forest .art-kicker,
+.template-artwork-camp-forest strong,
+.template-artwork-camp-forest i,
+.template-artwork-camp-forest em,
+.template-artwork-camp-forest .art-icon {
+  position:relative;
+  z-index:2;
+}
+.template-artwork-camp-forest strong { text-shadow:0 4px 18px rgba(0,0,0,.45); }
+.theme-preview-campamento-bosque .template-marketplace-preview,
+.theme-preview-campamento-bosque .template-library-preview {
+  background:linear-gradient(180deg,#173a31,#0d241d);
+}
