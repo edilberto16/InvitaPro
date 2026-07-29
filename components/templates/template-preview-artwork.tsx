@@ -14,7 +14,7 @@ export default function TemplatePreviewArtwork({ template, large = false }: { te
       <span className="art-spark art-spark-one">✦</span>
       <span className="art-spark art-spark-two">✧</span>
       <span className="art-icon">
-        {template.layout === 'camp-forest' ? '🏕️' : template.layout === 'space' ? '🪐' : template.layout === 'dino' ? '🦖' : template.layout === 'unicorn' ? '🦄' : template.layout === 'safari' ? '🦁' : template.layout === 'hero' ? '⚡' : template.layout === 'butterfly' ? '🦋' : template.collection === 'empresarial' ? '◆' : template.collection === 'xv' ? '♕' : '❦'}
+        {template.layout === 'camp-forest' ? '🏕️' : template.layout === 'camp-fire' ? '🔥' : template.layout === 'camp-mountain' ? '🏔️' : template.layout === 'camp-sunrise' ? '🌅' : template.layout === 'camp-stars' ? '✦' : template.layout === 'camp-trail' ? '🥾' : template.layout === 'camp-revival' ? '⚡' : template.layout === 'space' ? '🪐' : template.layout === 'dino' ? '🦖' : template.layout === 'unicorn' ? '🦄' : template.layout === 'safari' ? '🦁' : template.layout === 'hero' ? '⚡' : template.layout === 'butterfly' ? '🦋' : template.collection === 'empresarial' ? '◆' : template.collection === 'xv' ? '♕' : '❦'}
       </span>
       <span className="art-kicker">{template.familyName || label}</span>
       <strong>{template.name}</strong>

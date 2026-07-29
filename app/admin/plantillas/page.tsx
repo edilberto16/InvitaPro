@@ -8,8 +8,8 @@ import TemplatePreviewArtwork from '@/components/templates/template-preview-artw
 type AvailabilityFilter = 'todas' | 'disponibles' | 'premium';
 type SortOption = 'destacadas' | 'nombre' | 'coleccion';
 
-const FEATURED_IDS = new Set(['midnight-gold', 'ivory-editorial', 'royal-amethyst', 'luxury-black', 'golden-night', 'espacial', 'campamento-bosque']);
-const NEW_IDS = new Set(['midnight-gold', 'midnight-platinum', 'midnight-sapphire', 'ivory-editorial', 'blush-editorial', 'terracotta-editorial', 'royal-amethyst', 'royal-rose', 'royal-emerald', 'campamento-bosque']);
+const FEATURED_IDS = new Set(['midnight-gold', 'ivory-editorial', 'royal-amethyst', 'luxury-black', 'golden-night', 'espacial', 'campamento-bosque', 'noche-de-fogata', 'aviva']);
+const NEW_IDS = new Set(['midnight-gold', 'midnight-platinum', 'midnight-sapphire', 'ivory-editorial', 'blush-editorial', 'terracotta-editorial', 'royal-amethyst', 'royal-rose', 'royal-emerald', 'campamento-bosque', 'noche-de-fogata', 'aviva']);
 const POPULAR_IDS = new Set(['elegante-classic', 'romantic-garden', 'princess-rose', 'safari']);
 
 function SearchIcon() {

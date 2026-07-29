@@ -700,8 +700,8 @@ export default function StudioPage(){
           ? allAvailableTemplates.length
           : allAvailableTemplates.filter(template=>template.collection===category.id).length;
         return <button key={category.id} className={templateFilter===category.id?"active":""} onClick={()=>setTemplateFilter(category.id)}>
-          <span>{category.label}</span>
-          <small>{count}</small>
+          <span className="template-category-label">{category.label}</span>
+          <small className="template-category-count" aria-label={`${count} diseños`}>{count}</small>
         </button>;
       })}
     </div>

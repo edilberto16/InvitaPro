@@ -5574,3 +5574,26 @@ a { color: inherit; }
 .theme-preview-campamento-bosque .template-library-preview {
   background:linear-gradient(180deg,#173a31,#0d241d);
 }
+
+
+/* v2.15.7.0 · Colección Campamentos de Fe */
+.template-artwork-camp-fire{color:#fff0d5;background:radial-gradient(circle at 50% 78%,rgba(255,154,64,.68),transparent 18%),linear-gradient(180deg,#171326 0 52%,#3a2018 100%);font-family:Georgia,serif}
+.template-artwork-camp-fire::before{content:'🔥';position:absolute;left:50%;bottom:2px;transform:translateX(-50%);font-size:86px;filter:drop-shadow(0 0 18px rgba(255,133,48,.75));opacity:.92}
+.template-artwork-camp-fire::after{content:'';position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(155deg,transparent 48%,#0e1c17 49% 62%,transparent 63%),linear-gradient(205deg,transparent 48%,#13271f 49% 62%,transparent 63%);opacity:.9}
+.template-artwork-camp-mountain{color:#f8fbfa;background:linear-gradient(180deg,#8fb3c1 0 45%,#d9dfd5 45% 52%,#536d62 52% 100%);font-family:Georgia,serif}
+.template-artwork-camp-mountain::before{content:'';position:absolute;left:-8%;right:35%;bottom:32%;height:42%;background:#e7ece8;clip-path:polygon(0 100%,46% 5%,100% 100%)}
+.template-artwork-camp-mountain::after{content:'';position:absolute;left:30%;right:-8%;bottom:25%;height:50%;background:#738a85;clip-path:polygon(0 100%,55% 0,100% 100%)}
+.template-artwork-camp-sunrise{color:#64432d;background:linear-gradient(180deg,#ffe2a8 0 50%,#e9b66e 50% 58%,#78906a 58% 100%);font-family:Georgia,serif}
+.template-artwork-camp-sunrise::before{content:'';position:absolute;width:135px;height:135px;border-radius:50%;left:50%;bottom:18%;transform:translateX(-50%);background:#fff4c8;box-shadow:0 0 50px rgba(255,237,170,.9)}
+.template-artwork-camp-sunrise::after{content:'';position:absolute;left:-10%;right:-10%;bottom:-5%;height:48%;background:linear-gradient(155deg,transparent 49%,#506f54 50%),linear-gradient(205deg,transparent 49%,#385b43 50%);opacity:.95}
+.template-artwork-camp-stars{color:#f7f2ff;background:radial-gradient(circle at 70% 18%,rgba(142,130,255,.38),transparent 28%),linear-gradient(160deg,#080b22,#20245e 60%,#0a1428);font-family:Arial,sans-serif}
+.template-artwork-camp-stars::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.7px),radial-gradient(circle,#b9c2ff 0 1.2px,transparent 1.8px);background-position:0 0,18px 22px;background-size:37px 37px,53px 53px;opacity:.62}
+.template-artwork-camp-stars::after{content:'';position:absolute;left:-8%;right:-8%;bottom:-2%;height:34%;background:#091813;clip-path:polygon(0 100%,0 76%,12% 48%,22% 74%,35% 28%,48% 72%,62% 34%,76% 72%,88% 42%,100% 78%,100% 100%)}
+.template-artwork-camp-trail{color:#31422d;background:linear-gradient(180deg,#dfead2 0 55%,#98af7d 55% 100%);font-family:Georgia,serif}
+.template-artwork-camp-trail::before{content:'';position:absolute;left:42%;bottom:-20%;width:28%;height:85%;background:#e9d8b2;clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);transform:rotate(-4deg)}
+.template-artwork-camp-trail::after{content:'🌲  🌲';position:absolute;left:4%;right:4%;bottom:5px;font-size:72px;letter-spacing:42px;opacity:.72;white-space:nowrap}
+.template-artwork-camp-revival{color:#fff;background:linear-gradient(135deg,#ef5f47 0 46%,#ffbd4a 46% 62%,#2d214d 62% 100%);font-family:Arial Black,Arial,sans-serif;text-transform:uppercase}
+.template-artwork-camp-revival::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(120deg,transparent 0 18px,rgba(255,255,255,.08) 19px 21px);mix-blend-mode:screen}
+.template-artwork-camp-revival::after{content:'AVIVA';position:absolute;right:-14px;bottom:-25px;font-size:82px;font-weight:950;letter-spacing:-.09em;color:rgba(255,255,255,.1);transform:rotate(-7deg)}
+.template-artwork-camp-fire .art-icon,.template-artwork-camp-mountain .art-icon,.template-artwork-camp-sunrise .art-icon,.template-artwork-camp-stars .art-icon,.template-artwork-camp-trail .art-icon,.template-artwork-camp-revival .art-icon{position:absolute;right:18px;top:18px;font-size:28px;z-index:2}
+.template-artwork-camp-fire>*:not(.art-shape),.template-artwork-camp-mountain>*:not(.art-shape),.template-artwork-camp-sunrise>*:not(.art-shape),.template-artwork-camp-stars>*:not(.art-shape),.template-artwork-camp-trail>*:not(.art-shape),.template-artwork-camp-revival>*:not(.art-shape){position:relative;z-index:3}
