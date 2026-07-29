@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS, templatePlanLabel, type TemplateDefinition } from '@/lib/template-catalog';
+import { TEMPLATE_CATALOG, TEMPLATE_COLLECTIONS, matchesTemplateSearch, templatePlanLabel, type TemplateDefinition } from '@/lib/template-catalog';
 import TemplatePreviewArtwork from '@/components/templates/template-preview-artwork';
 
 type AvailabilityFilter = 'todas' | 'disponibles' | 'premium';
@@ -58,10 +58,7 @@ export default function PlantillasPage() {
       const matchesAvailability = availability === 'todas'
         || (availability === 'disponibles' && template.available)
         || (availability === 'premium' && template.premium);
-      const matchesQuery = !normalized
-        || template.name.toLowerCase().includes(normalized)
-        || template.description.toLowerCase().includes(normalized)
-        || template.features.some((feature) => feature.toLowerCase().includes(normalized));
+      const matchesQuery = matchesTemplateSearch(template, normalized);
       return matchesCollection && matchesAvailability && matchesQuery;
     });
 
@@ -109,7 +106,7 @@ export default function PlantillasPage() {
         <div className="template-marketplace-toolbar">
           <div className="template-marketplace-search">
             <SearchIcon />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre, estilo o función" aria-label="Buscar plantilla" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nombre, familia, variante, estilo o función" aria-label="Buscar plantilla" />
           </div>
           <select value={availability} onChange={(event) => setAvailability(event.target.value as AvailabilityFilter)} aria-label="Filtrar plantillas">
             <option value="todas">Todas las plantillas</option>

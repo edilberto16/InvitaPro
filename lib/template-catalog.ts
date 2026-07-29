@@ -16,6 +16,7 @@ export type TemplateDefinition = {
   variantName?: string;
   signature?: boolean;
   requiredPlan?: TemplatePlanTier;
+  searchTerms?: string[];
 };
 
 export const TEMPLATE_COLLECTIONS = [
@@ -61,6 +62,48 @@ export const TEMPLATE_CATALOG: TemplateDefinition[] = [
   { id:'conferencia', name:'Conferencia', collection:'empresarial', badge:'Disponible', available:true, premium:false, color:'#2b6f75', description:'Agenda, ponentes e información ejecutiva.', layout:'conference', features:['Agenda por horarios','Ponentes','Ubicación y registro'] },
   { id:'networking', name:'Networking', collection:'empresarial', badge:'Disponible', available:true, premium:false, color:'#3d708a', description:'Conexiones, comunidad y encuentros profesionales.', layout:'network', features:['Perfiles destacados','Agenda social','Confirmación rápida'] },
 ];
+
+
+const COLLECTION_SEARCH_ALIASES: Record<TemplateCollectionId, string[]> = {
+  wedding: ['boda', 'bodas', 'wedding', 'matrimonio'],
+  xv: ['xv', 'xv años', 'quinceañera', 'quinceanera', '15 años'],
+  infantil: ['infantil', 'cumpleaños', 'cumpleanos', 'niños', 'ninos'],
+  empresarial: ['empresarial', 'corporativo', 'empresa', 'conferencia'],
+};
+
+function normalizeSearchValue(value: unknown) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+export function getTemplateSearchText(template: TemplateDefinition) {
+  return normalizeSearchValue([
+    template.id,
+    template.name,
+    template.familyName,
+    template.variantName,
+    template.description,
+    template.layout,
+    template.features.join(' '),
+    template.searchTerms?.join(' '),
+    COLLECTION_SEARCH_ALIASES[template.collection].join(' '),
+    templatePlanLabel(template),
+    template.signature ? 'signature lujo luxury' : '',
+    template.premium ? 'premium' : 'clasico standard',
+  ].join(' '));
+}
+
+export function matchesTemplateSearch(template: TemplateDefinition, query: string) {
+  const normalizedQuery = normalizeSearchValue(query);
+  if (!normalizedQuery) return true;
+  return normalizedQuery
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((term) => getTemplateSearchText(template).includes(term));
+}
 
 export function getTemplateById(id: string) {
   return TEMPLATE_CATALOG.find((template) => template.id === id);
