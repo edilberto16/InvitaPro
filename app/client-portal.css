@@ -201,3 +201,84 @@
 .studio-workspace-focus .studio-live-preview-shell iframe{height:calc(100vh - 225px);min-height:650px}
 @media(max-width:1180px){.studio-preview-toolbar-main{justify-content:flex-start}.studio-workspace-focus>.studio-preview{display:block}}
 @media(max-width:640px){.studio-preview-shortcuts{display:none}.studio-preview-toolbar-main{gap:5px}.studio-preview-zoom{display:none}.studio-workspace-focus>.studio-preview{padding:10px}.studio-workspace-focus>.studio-preview-mobile .studio-live-preview-shell{width:min(390px,calc(100vw - 36px))}}
+
+/* v2.16.2 · Studio 3.0 Fase 2 — Drag & Drop preciso */
+.studio-block-row{position:relative;outline:none}
+.studio-block-row:focus-visible{border-color:#72264f;box-shadow:0 0 0 3px rgba(114,38,79,.13)}
+.studio-block-row.drop-before::before,.studio-block-row.drop-after::after{content:"";position:absolute;left:14px;right:14px;height:4px;border-radius:999px;background:#72264f;box-shadow:0 0 0 4px rgba(114,38,79,.12);z-index:3;pointer-events:none}
+.studio-block-row.drop-before::before{top:-7px}.studio-block-row.drop-after::after{bottom:-7px}
+.studio-block-row.drop-before,.studio-block-row.drop-after{border-color:#c99eb3;background:#fffafd}
+.studio-block-row.dragging{opacity:.34;transform:scale(.98)}
+.studio-reorder-announcer{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(pointer:coarse){.studio-block-handle{cursor:default}.studio-block-row[draggable="true"]{cursor:default}.studio-block-order button{width:40px;height:40px;font-size:17px}.studio-block-row{touch-action:pan-y}}
+
+
+/* InvitaPro v2.16.3 · Studio UI Refresh */
+.studio-topbar{
+  min-height:78px;
+  height:auto;
+  gap:18px;
+  padding-top:12px;
+  padding-bottom:12px;
+}
+.studio-topbar-actions{
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  row-gap:8px;
+}
+.studio-workspace{min-height:calc(100vh - 102px)}
+.studio-preview{
+  position:relative;
+  padding-top:16px;
+}
+.studio-preview-head{
+  position:sticky;
+  top:0;
+  z-index:12;
+  align-items:center;
+  gap:12px;
+  min-height:52px;
+  margin:0 0 14px;
+  padding:10px 0 12px;
+  background:rgba(251,248,249,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(232,221,227,.85);
+}
+.studio-preview-toolbar-main{
+  flex:0 0 auto;
+  justify-content:flex-end;
+  background:#fff;
+  border:1px solid #eadfe4;
+  border-radius:12px;
+  padding:5px;
+  box-shadow:0 8px 22px rgba(64,37,51,.07);
+}
+.studio-preview-canvas{padding-top:18px}
+.studio-template-toast{
+  top:auto;
+  right:24px;
+  bottom:24px;
+  max-width:min(440px,calc(100vw - 48px));
+  z-index:250;
+  animation:studioToastIn .2s ease-out;
+}
+@keyframes studioToastIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(max-width:1350px){
+  .studio-topbar{align-items:flex-start}
+  .studio-topbar-actions{max-width:760px}
+}
+@media(max-width:1180px){
+  .studio-preview-head{position:static}
+}
+@media(max-width:800px){
+  .studio-topbar{min-height:68px;align-items:center}
+  .studio-template-toast{left:16px;right:16px;bottom:16px;top:auto;text-align:center;max-width:none}
+}
+@media(max-width:560px){
+  .studio-topbar-actions{flex-wrap:nowrap}
+  .studio-preview-head{align-items:flex-start;flex-direction:column}
+  .studio-preview-toolbar-main{width:100%;justify-content:space-between}
+}

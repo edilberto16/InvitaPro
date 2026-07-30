@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties,type DragEvent} from "react";
 import {useParams,useSearchParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplateCollectionId,type TemplatePlanTier} from "@/lib/template-catalog";
@@ -155,6 +155,8 @@ export default function StudioPage(){
  const [sectionOrder,setSectionOrder]=useState<TemplateSectionId[]>([...DEFAULT_TEMPLATE_SECTION_ORDER]);
  const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,history:false,lodging:false,gifts:false,video:false,faq:false,special_people:false,hashtag:false,wishes:false,album:false,location:true,rsvp:true});
  const [draggedBlock,setDraggedBlock]=useState<TemplateSectionId|null>(null);
+ const [blockDropTarget,setBlockDropTarget]=useState<{id:TemplateSectionId;position:"before"|"after"}|null>(null);
+ const [reorderAnnouncement,setReorderAnnouncement]=useState("");
  const [showAddSection,setShowAddSection]=useState(false);
  const [blockCategory,setBlockCategory]=useState<BlockCategory>("todos");
  const [previewDevice,setPreviewDevice]=useState<"mobile"|"tablet"|"desktop">("mobile");
@@ -214,7 +216,6 @@ export default function StudioPage(){
   const keyboard=(event:KeyboardEvent)=>{
    const target=event.target as HTMLElement|null;
    const editing=target?.tagName==="INPUT"||target?.tagName==="TEXTAREA"||target?.isContentEditable;
-   if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(event.shiftKey)redo();else undo();return;}
    if(editing)return;
    if(event.key==="1")setPreviewDevice("mobile");
    if(event.key==="2")setPreviewDevice("tablet");
@@ -459,7 +460,7 @@ export default function StudioPage(){
  function moveBlock(sectionId:TemplateSectionId,direction:-1|1){
   setSectionOrder(current=>{const index=current.indexOf(sectionId);const target=index+direction;if(index<0||target<0||target>=current.length)return current;const next=[...current];[next[index],next[target]]=[next[target],next[index]];return next;});
  }
- function reorderBlock(sourceId:TemplateSectionId,targetId:TemplateSectionId){
+ function reorderBlock(sourceId:TemplateSectionId,targetId:TemplateSectionId,position:"before"|"after"="before"){
   if(sourceId===targetId)return;
   setSectionOrder(current=>{
    const sourceIndex=current.indexOf(sourceId);
@@ -467,9 +468,27 @@ export default function StudioPage(){
    if(sourceIndex<0||targetIndex<0)return current;
    const next=[...current];
    const [moved]=next.splice(sourceIndex,1);
-   next.splice(targetIndex,0,moved);
+   let insertionIndex=next.indexOf(targetId)+(position==="after"?1:0);
+   insertionIndex=Math.max(1,Math.min(insertionIndex,next.length));
+   next.splice(insertionIndex,0,moved);
+   const sourceLabel=BLOCKS[sourceId].label;
+   const targetLabel=BLOCKS[targetId].label;
+   setReorderAnnouncement(`${sourceLabel} movido ${position==="before"?"antes":"después"} de ${targetLabel}`);
    return next;
   });
+ }
+ function handleBlockDragOver(event:DragEvent<HTMLElement>,targetId:TemplateSectionId){
+  event.preventDefault();
+  if(!draggedBlock||draggedBlock===targetId||targetId==="hero")return;
+  const rect=event.currentTarget.getBoundingClientRect();
+  const position=event.clientY<rect.top+rect.height/2?"before":"after";
+  setBlockDropTarget({id:targetId,position});
+  event.dataTransfer.dropEffect="move";
+ }
+ function moveBlockAccessible(sectionId:TemplateSectionId,direction:-1|1){
+  moveBlock(sectionId,direction);
+  const label=BLOCKS[sectionId].label;
+  setReorderAnnouncement(`${label} movido ${direction<0?"hacia arriba":"hacia abajo"}`);
  }
  function addBlock(sectionId:TemplateSectionId){
   if(sectionId==="rsvp"&&!modalityFeatures.publicRsvp)return;
@@ -607,7 +626,7 @@ export default function StudioPage(){
  return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
    <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small className={saveError?"studio-save-error":saving?"studio-save-saving":hasUnsavedChanges?"studio-save-pending":"studio-save-ok"}>{saved||(saveError?"Error al guardar":saving?"Guardando…":hasUnsavedChanges?"Cambios pendientes":"Borrador guardado")}</small></div></div>
-   <div className="studio-topbar-actions"><div className="studio-history-actions"><button className="client-secondary" onClick={undo} disabled={historyIndex<=0||saving} title="Deshacer (Ctrl+Z)">↶</button><button className="client-secondary" onClick={redo} disabled={historyIndex<0||historyIndex>=historyLength-1||saving} title="Rehacer (Ctrl+Shift+Z)">↷</button></div><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar ahora":"Borrador guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<><button className="studio-publish-button" disabled={publishingChanges||!hasUnpublishedChanges} onClick={()=>void publishChanges()}>{publishingChanges?"Publicando…":hasUnpublishedChanges?"Publicar cambios":"Publicado"}</button><Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link></>}</div>
+   <div className="studio-topbar-actions"><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar ahora":"Borrador guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<><button className="studio-publish-button" disabled={publishingChanges||!hasUnpublishedChanges} onClick={()=>void publishChanges()}>{publishingChanges?"Publicando…":hasUnpublishedChanges?"Publicar cambios":"Publicado"}</button><Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link></>}</div>
   </header>
 
   <div className={`studio-workspace ${previewFocus?"studio-workspace-focus":""}`}>
@@ -626,13 +645,17 @@ export default function StudioPage(){
 
       <div className="studio-block-list">{sectionOrder.filter(sectionId=>blockVisibility[sectionId]||BLOCKS[sectionId].locked).map((sectionId,index,visibleOrder)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article
         key={sectionId}
-        className={`studio-block-row ${enabled?"enabled":"disabled"} ${draggedBlock===sectionId?"dragging":""}`}
+        className={`studio-block-row ${enabled?"enabled":"disabled"} ${draggedBlock===sectionId?"dragging":""} ${blockDropTarget?.id===sectionId?`drop-${blockDropTarget.position}`:""}`}
         draggable={!meta.locked}
-        onDragStart={e=>{if(meta.locked){e.preventDefault();return;}setDraggedBlock(sectionId);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",sectionId)}}
-        onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect="move"}}
-        onDrop={e=>{e.preventDefault();const source=(draggedBlock||e.dataTransfer.getData("text/plain")) as TemplateSectionId;if(source)reorderBlock(source,sectionId);setDraggedBlock(null)}}
-        onDragEnd={()=>setDraggedBlock(null)}
-       ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar"}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlock(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlock(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div>
+        tabIndex={meta.locked?-1:0}
+        aria-grabbed={draggedBlock===sectionId}
+        onKeyDown={e=>{if(meta.locked||!e.altKey)return;if(e.key==="ArrowUp"){e.preventDefault();moveBlockAccessible(sectionId,-1)}if(e.key==="ArrowDown"){e.preventDefault();moveBlockAccessible(sectionId,1)}}}
+        onDragStart={e=>{if(meta.locked){e.preventDefault();return;}setDraggedBlock(sectionId);setBlockDropTarget(null);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",sectionId)}}
+        onDragOver={e=>handleBlockDragOver(e,sectionId)}
+        onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setBlockDropTarget(current=>current?.id===sectionId?null:current)}}
+        onDrop={e=>{e.preventDefault();const source=(draggedBlock||e.dataTransfer.getData("text/plain")) as TemplateSectionId;const position=blockDropTarget?.id===sectionId?blockDropTarget.position:"before";if(source)reorderBlock(source,sectionId,position);setDraggedBlock(null);setBlockDropTarget(null)}}
+        onDragEnd={()=>{setDraggedBlock(null);setBlockDropTarget(null)}}
+       ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar. También puedes usar Alt + flechas."}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlockAccessible(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlockAccessible(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div><div className="studio-reorder-announcer" aria-live="polite">{reorderAnnouncement}</div>
 
       <div className="studio-add-section">
        <button type="button" className="studio-add-section-button" onClick={()=>setShowAddSection(v=>!v)}><span>＋</span><div><strong>Biblioteca de bloques</strong><small>Agrega nuevas experiencias a tu invitación.</small></div><em>{showAddSection?"Cerrar":"Explorar"}</em></button>
@@ -649,7 +672,7 @@ export default function StudioPage(){
        </div>}
       </div>
 
-      <div className="studio-block-tip"><span>✦</span><div><strong>Block Builder v2.11.1</strong><p>Ya puedes reordenar por drag &amp; drop y recuperar secciones ocultas desde “Agregar sección”. El contenido se conserva aunque ocultes un bloque.</p></div></div>
+      <div className="studio-block-tip"><span>✦</span><div><strong>Studio 3.0 · Drag &amp; Drop</strong><p>La línea de inserción muestra exactamente dónde caerá cada bloque. En teclado usa Alt + ↑ o Alt + ↓; en celular utiliza los botones de orden.</p></div></div>
     </div>}
     {active==="portada"&&<div className="studio-fields">
       <label>Título principal<input value={title} onChange={e=>setTitle(e.target.value)}/></label>
