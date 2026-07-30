@@ -5597,3 +5597,41 @@ a { color: inherit; }
 .template-artwork-camp-revival::after{content:'AVIVA';position:absolute;right:-14px;bottom:-25px;font-size:82px;font-weight:950;letter-spacing:-.09em;color:rgba(255,255,255,.1);transform:rotate(-7deg)}
 .template-artwork-camp-fire .art-icon,.template-artwork-camp-mountain .art-icon,.template-artwork-camp-sunrise .art-icon,.template-artwork-camp-stars .art-icon,.template-artwork-camp-trail .art-icon,.template-artwork-camp-revival .art-icon{position:absolute;right:18px;top:18px;font-size:28px;z-index:2}
 .template-artwork-camp-fire>*:not(.art-shape),.template-artwork-camp-mountain>*:not(.art-shape),.template-artwork-camp-sunrise>*:not(.art-shape),.template-artwork-camp-stars>*:not(.art-shape),.template-artwork-camp-trail>*:not(.art-shape),.template-artwork-camp-revival>*:not(.art-shape){position:relative;z-index:3}
+
+/* InvitaPro 2.15.8.0 · Campamentos de Fe premium experience */
+.premium-public-invite[data-family="campamento"] .premium-hero{min-height:min(92vh,920px);isolation:isolate;overflow:hidden}
+.premium-public-invite[data-family="campamento"] .premium-hero-overlay{background:linear-gradient(180deg,rgba(4,14,15,.12),rgba(4,14,15,.42) 48%,rgba(4,14,15,.84))}
+.premium-public-invite[data-family="campamento"] .premium-hero-content{z-index:5;max-width:780px}
+.premium-public-invite[data-family="campamento"] .premium-kicker{letter-spacing:.2em;text-transform:uppercase;font-weight:800}
+.premium-public-invite[data-family="campamento"] .premium-hero h1{text-wrap:balance;text-shadow:0 10px 38px rgba(0,0,0,.42)}
+.camp-atmosphere{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.camp-atmosphere span{position:absolute;display:block}
+.camp-atmosphere-forest span:nth-child(1),.camp-atmosphere-trail span:nth-child(1){left:-5%;right:-5%;bottom:-3%;height:33%;background:linear-gradient(155deg,transparent 49%,rgba(8,42,30,.92) 50%),linear-gradient(205deg,transparent 49%,rgba(13,62,43,.92) 50%);clip-path:polygon(0 100%,0 40%,8% 62%,14% 28%,22% 67%,31% 18%,42% 70%,54% 24%,65% 70%,75% 14%,85% 68%,94% 35%,100% 62%,100% 100%)}
+.camp-atmosphere-forest span:nth-child(2){left:50%;bottom:8%;width:90px;height:90px;transform:translateX(-50%);background:radial-gradient(circle,#ffe5a0 0 8%,#ff9f43 18%,#df5a25 40%,transparent 64%);filter:drop-shadow(0 0 25px rgba(255,139,51,.9));animation:campFireGlow 1.7s ease-in-out infinite alternate}
+.camp-atmosphere-stars::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.6px),radial-gradient(circle,#b9c7ff 0 1.2px,transparent 1.8px);background-position:0 0,24px 18px;background-size:43px 43px,67px 67px;opacity:.7;animation:campStars 5s ease-in-out infinite alternate}
+.camp-atmosphere-fire span:nth-child(1){left:50%;bottom:5%;width:120px;height:120px;transform:translateX(-50%);background:radial-gradient(circle,#fff1b2 0 8%,#ffad45 20%,#e65426 43%,transparent 66%);filter:drop-shadow(0 0 34px rgba(255,126,44,.95));animation:campFireGlow 1.2s ease-in-out infinite alternate}
+.camp-atmosphere-mountain span:nth-child(1){left:-10%;right:35%;bottom:0;height:46%;background:rgba(72,103,104,.7);clip-path:polygon(0 100%,50% 0,100% 100%)}
+.camp-atmosphere-mountain span:nth-child(2){left:28%;right:-8%;bottom:0;height:58%;background:rgba(35,74,71,.76);clip-path:polygon(0 100%,58% 0,100% 100%)}
+.camp-atmosphere-sunrise span:nth-child(1){width:180px;height:180px;border-radius:50%;left:50%;bottom:18%;transform:translateX(-50%);background:rgba(255,233,160,.72);box-shadow:0 0 80px rgba(255,215,120,.8);animation:campSun 4s ease-in-out infinite alternate}
+.camp-atmosphere-revival::before{content:"";position:absolute;inset:-20%;background:repeating-linear-gradient(115deg,transparent 0 42px,rgba(255,255,255,.08) 44px 47px);animation:campStripes 12s linear infinite}
+.camp-verse-card{position:relative;max-width:780px;margin:38px auto 0;padding:38px 42px;border:1px solid color-mix(in srgb,var(--template-primary) 35%,transparent);border-radius:var(--template-radius);background:color-mix(in srgb,var(--template-surface) 86%,transparent);box-shadow:0 24px 70px rgba(0,0,0,.12);backdrop-filter:blur(10px)}
+.camp-verse-card>span{position:absolute;left:22px;top:4px;font:700 72px/1 Georgia,serif;color:var(--template-primary);opacity:.32}
+.camp-verse-card p{position:relative;margin:0;font:500 clamp(1.1rem,2.2vw,1.55rem)/1.65 Georgia,serif;font-style:italic}
+.camp-verse-card cite{display:block;margin-top:18px;font-style:normal;font-weight:800;color:var(--template-primary);letter-spacing:.04em}
+.camp-verse-card small{display:block;margin-top:8px;color:var(--template-muted)}
+.camp-equipment-block{max-width:1120px;margin:42px auto 0;padding:34px;border-radius:var(--template-radius);background:color-mix(in srgb,var(--template-primary) 8%,var(--template-surface));border:1px solid color-mix(in srgb,var(--template-primary) 18%,transparent)}
+.camp-equipment-block>div:first-child{text-align:center;margin-bottom:24px}.camp-equipment-block h3{margin:5px 0 0;font-size:clamp(1.55rem,3vw,2.25rem)}
+.camp-equipment-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.camp-equipment-grid article{display:grid;place-items:center;gap:8px;min-height:112px;padding:16px 8px;border-radius:16px;background:var(--template-surface);box-shadow:0 10px 28px rgba(0,0,0,.07);transition:transform .25s ease,box-shadow .25s ease}
+.camp-equipment-grid article:hover{transform:translateY(-5px);box-shadow:0 16px 35px rgba(0,0,0,.12)}
+.camp-equipment-grid span{font-size:30px}.camp-equipment-grid strong{font-size:.82rem;text-align:center}
+.premium-public-invite[data-family="campamento"] .premium-timeline article{transition:transform .25s ease,background .25s ease}
+.premium-public-invite[data-family="campamento"] .premium-timeline article:hover{transform:translateX(7px)}
+.premium-public-invite[data-family="campamento"] .premium-music-button{box-shadow:0 12px 36px color-mix(in srgb,var(--template-primary) 30%,transparent)}
+@keyframes campFireGlow{from{transform:translateX(-50%) scale(.92) rotate(-2deg);opacity:.82}to{transform:translateX(-50%) scale(1.08) rotate(2deg);opacity:1}}
+@keyframes campStars{from{opacity:.38;transform:scale(1)}to{opacity:.82;transform:scale(1.015)}}
+@keyframes campSun{from{opacity:.62;transform:translateX(-50%) scale(.94)}to{opacity:.9;transform:translateX(-50%) scale(1.05)}}
+@keyframes campStripes{to{transform:translate3d(120px,0,0)}}
+@media(max-width:850px){.camp-equipment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.camp-verse-card{padding:34px 24px}}
+@media(max-width:520px){.camp-equipment-block{padding:24px 16px}.camp-equipment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.camp-equipment-grid article{min-height:100px}.premium-public-invite[data-family="campamento"] .premium-hero{min-height:82vh}}
+@media(prefers-reduced-motion:reduce){.camp-atmosphere *,.camp-atmosphere::before{animation:none!important}}

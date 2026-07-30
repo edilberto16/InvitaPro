@@ -154,3 +154,26 @@
 .studio-template-modal-global .template-category-tabs .template-category-label{display:inline-block;white-space:nowrap}
 .studio-template-modal-global .template-category-tabs .template-category-count{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto;min-width:26px!important;height:26px!important;margin:0!important;padding:0 8px!important;border-radius:999px!important;background:#f0edf4!important;color:#655c73!important;font-size:12px!important;font-weight:900!important;line-height:1!important;letter-spacing:0!important}
 .studio-template-modal-global .template-category-tabs button:hover .template-category-count,.studio-template-modal-global .template-category-tabs button.active .template-category-count{background:rgba(255,255,255,.22)!important;color:#fff!important}
+
+/* InvitaPro v2.15.8.1 — modal de cambio de plantilla adaptable */
+.template-confirm-backdrop{padding:16px;overflow:hidden}
+.template-confirm-modal{max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden}
+.template-confirm-preview{flex:0 0 auto}
+.template-confirm-copy{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:12px;scrollbar-gutter:stable}
+.template-confirm-actions{flex:0 0 auto;background:#fff;position:relative;z-index:2}
+@media(max-height:820px){
+  .template-confirm-modal{padding:16px}
+  .template-confirm-preview{height:132px;padding:18px}
+  .template-confirm-preview>strong{font-size:32px}
+  .template-confirm-copy{padding-top:16px}
+  .template-confirm-copy h2{font-size:27px}
+  .template-preserve-grid{margin-top:12px}
+  .template-confirm-actions{padding-top:12px}
+}
+@media(max-width:620px){
+  .template-confirm-backdrop{padding:10px}
+  .template-confirm-modal{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);border-radius:20px;padding:14px}
+  .template-confirm-preview{height:118px;border-radius:15px;padding:16px}
+  .template-confirm-preview>strong{font-size:28px}
+  .template-confirm-copy{padding:14px 4px 8px}
+}
