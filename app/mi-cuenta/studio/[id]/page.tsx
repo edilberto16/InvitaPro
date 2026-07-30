@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useCallback,useEffect,useMemo,useRef,useState} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties} from "react";
 import {useParams,useSearchParams} from "next/navigation";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplateCollectionId,type TemplatePlanTier} from "@/lib/template-catalog";
@@ -158,6 +158,8 @@ export default function StudioPage(){
  const [showAddSection,setShowAddSection]=useState(false);
  const [blockCategory,setBlockCategory]=useState<BlockCategory>("todos");
  const [previewDevice,setPreviewDevice]=useState<"mobile"|"tablet"|"desktop">("mobile");
+ const [previewZoom,setPreviewZoom]=useState(90);
+ const [previewFocus,setPreviewFocus]=useState(false);
  const [previewRevision,setPreviewRevision]=useState(0);
  const [selectedPreviewSection,setSelectedPreviewSection]=useState<TemplateSectionId|null>(null);
  const [blockVariants,setBlockVariants]=useState<BlockVariantMap>({});
@@ -209,7 +211,19 @@ export default function StudioPage(){
   return()=>window.clearTimeout(timer);
  },[currentSignature,invite?.id]);
  useEffect(()=>{
-  const keyboard=(event:KeyboardEvent)=>{if(!(event.ctrlKey||event.metaKey))return;if(event.key.toLowerCase()!=="z")return;event.preventDefault();if(event.shiftKey)redo();else undo()};
+  const keyboard=(event:KeyboardEvent)=>{
+   const target=event.target as HTMLElement|null;
+   const editing=target?.tagName==="INPUT"||target?.tagName==="TEXTAREA"||target?.isContentEditable;
+   if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();if(event.shiftKey)redo();else undo();return;}
+   if(editing)return;
+   if(event.key==="1")setPreviewDevice("mobile");
+   if(event.key==="2")setPreviewDevice("tablet");
+   if(event.key==="3")setPreviewDevice("desktop");
+   if(event.key.toLowerCase()==="f")setPreviewFocus(current=>!current);
+   if(event.key==="Escape")setPreviewFocus(false);
+   if(event.key==="+")setPreviewZoom(current=>Math.min(120,current+10));
+   if(event.key==="-")setPreviewZoom(current=>Math.max(60,current-10));
+  };
   window.addEventListener("keydown",keyboard);return()=>window.removeEventListener("keydown",keyboard);
  },[historyIndex,historyLength]);
  useEffect(()=>{const sectionId=EDITOR_TO_BLOCK[active];if(sectionId)setSelectedPreviewSection(sectionId)},[active]);
@@ -224,7 +238,6 @@ export default function StudioPage(){
    variants:blockVariants,
    selectedSection:selectedPreviewSection,
    draft:{
-    templateKey:invite?.template_key||null,
     title,
     color,
     music,
@@ -233,7 +246,7 @@ export default function StudioPage(){
     designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
    }
   },window.location.origin);
- },[invite?.template_key,sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
+ },[sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
 
  useEffect(()=>{
   function handlePreviewMessage(event:MessageEvent){
@@ -409,7 +422,7 @@ export default function StudioPage(){
   setApplyingTemplate(false);
   if(error){setError(error.message);return;}
   setInvite({...invite,template_key:id,color_principal:t.color,design_json:{...current,plantilla:id,template_engine:id,template_collection:t.collection}});
-  setColor(t.color);setPreviewRevision(value=>value+1);setPendingTemplate(null);setShowTemplates(false);setTemplateNotice(`✓ ${t.name} aplicada`);
+  setColor(t.color);setPendingTemplate(null);setShowTemplates(false);setTemplateNotice(`✓ ${t.name} aplicada`);
   setSaved("Plantilla actualizada ✓");
   window.setTimeout(()=>setTemplateNotice(""),2800);
  }
@@ -597,7 +610,7 @@ export default function StudioPage(){
    <div className="studio-topbar-actions"><div className="studio-history-actions"><button className="client-secondary" onClick={undo} disabled={historyIndex<=0||saving} title="Deshacer (Ctrl+Z)">↶</button><button className="client-secondary" onClick={redo} disabled={historyIndex<0||historyIndex>=historyLength-1||saving} title="Rehacer (Ctrl+Shift+Z)">↷</button></div><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar ahora":"Borrador guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<><button className="studio-publish-button" disabled={publishingChanges||!hasUnpublishedChanges} onClick={()=>void publishChanges()}>{publishingChanges?"Publicando…":hasUnpublishedChanges?"Publicar cambios":"Publicado"}</button><Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link></>}</div>
   </header>
 
-  <div className="studio-workspace">
+  <div className={`studio-workspace ${previewFocus?"studio-workspace-focus":""}`}>
    <aside className="studio-sidebar">
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
     <div className="studio-modality-summary"><small>MODALIDAD</small><strong>{invitationModalityLabel(currentModality)}</strong><span>{modalityFeatures.personalizedPasses?"Pases, RSVP y check-in":modalityFeatures.publicRsvp?"Confirmación pública":"Enlace público sin confirmaciones"}</span></div>
@@ -665,10 +678,20 @@ export default function StudioPage(){
    </section>
 
    <aside className={`studio-preview studio-preview-${previewDevice}`}>
-    <div className="studio-preview-head"><div><strong>Vista previa real</strong><small>Haz clic para editar o arrastra para reordenar</small></div><div className="studio-preview-devices"><button className={previewDevice==="mobile"?"active":""} onClick={()=>setPreviewDevice("mobile")} title="Celular">▯</button><button className={previewDevice==="tablet"?"active":""} onClick={()=>setPreviewDevice("tablet")} title="Tableta">▭</button><button className={previewDevice==="desktop"?"active":""} onClick={()=>setPreviewDevice("desktop")} title="Escritorio">▰</button></div></div>
-    <div className="studio-live-preview-shell">
-     <iframe ref={previewRef} key={previewRevision} title="Vista previa real de la invitación" src={`/invitacion/${invite.slug}?preview=1&studio=1&v=${previewRevision}`}/>
+    <div className="studio-preview-head">
+     <div><strong>Vista previa real</strong><small>Haz clic para editar o arrastra para reordenar</small></div>
+     <div className="studio-preview-toolbar-main">
+      <div className="studio-preview-devices" aria-label="Tamaño de vista previa"><button className={previewDevice==="mobile"?"active":""} onClick={()=>setPreviewDevice("mobile")} title="Celular · tecla 1">▯</button><button className={previewDevice==="tablet"?"active":""} onClick={()=>setPreviewDevice("tablet")} title="Tableta · tecla 2">▭</button><button className={previewDevice==="desktop"?"active":""} onClick={()=>setPreviewDevice("desktop")} title="Escritorio · tecla 3">▰</button></div>
+      <div className="studio-preview-zoom"><button onClick={()=>setPreviewZoom(current=>Math.max(60,current-10))} disabled={previewZoom<=60} title="Alejar">−</button><span>{previewZoom}%</span><button onClick={()=>setPreviewZoom(current=>Math.min(120,current+10))} disabled={previewZoom>=120} title="Acercar">＋</button></div>
+      <button className={`studio-preview-focus-button ${previewFocus?"active":""}`} onClick={()=>setPreviewFocus(current=>!current)} title={previewFocus?"Salir del modo enfoque · Esc":"Modo enfoque · tecla F"}>{previewFocus?"↙":"↗"}</button>
+     </div>
     </div>
+    <div className="studio-preview-canvas" style={{"--studio-preview-zoom":previewZoom/100} as CSSProperties}>
+     <div className="studio-live-preview-shell">
+      <iframe ref={previewRef} key={previewRevision} title="Vista previa real de la invitación" src={`/invitacion/${invite.slug}?preview=1&studio=1&v=${previewRevision}`}/>
+     </div>
+    </div>
+    <div className="studio-preview-shortcuts"><span><kbd>1</kbd> Celular</span><span><kbd>2</kbd> Tableta</span><span><kbd>3</kbd> Escritorio</span><span><kbd>F</kbd> Enfoque</span><span><kbd>Esc</kbd> Salir</span></div>
     <div className="studio-preview-status"><span>●</span><p>Arrastra cualquier bloque excepto la portada. Los cambios se guardan automáticamente como borrador. En invitaciones publicadas usa “Publicar cambios” para actualizar el enlace público.</p></div>
    </aside>
   </div>
