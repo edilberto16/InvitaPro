@@ -18,7 +18,8 @@ type Invite={
 };
 
 const SECTIONS=[
- {id:"portada",label:"Portada",desc:"Título, mensaje y primera impresión",icon:"✦"},
+ {id:"portada",label:"Portada",desc:"Título, imagen y primera impresión",icon:"✦"},
+ {id:"introduccion",label:"Introducción",desc:"Mensaje de bienvenida para tus invitados",icon:"❦"},
  {id:"fecha",label:"Fecha y cuenta regresiva",desc:"Fecha, hora y expectativa",icon:"◷"},
  {id:"ubicacion",label:"Ubicación",desc:"Lugar, dirección y mapa",icon:"⌖"},
  {id:"galeria",label:"Galería",desc:"Fotografías y recuerdos",icon:"▧"},
@@ -58,11 +59,11 @@ const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;lock
  rsvp:{label:"Confirmación RSVP",desc:"Respuesta de asistencia de invitados",icon:"✓"},
 };
 
-const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",personas:"special_people",hashtag:"hashtag",deseos:"wishes",album:"album",rsvp:"rsvp"};
-const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",special_people:"personas",hashtag:"hashtag",wishes:"deseos",album:"album",rsvp:"rsvp"};
+const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={introduccion:"intro",fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",personas:"special_people",hashtag:"hashtag",deseos:"wishes",album:"album",rsvp:"rsvp"};
+const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={intro:"introduccion",countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",special_people:"personas",hashtag:"hashtag",wishes:"deseos",album:"album",rsvp:"rsvp"};
 
 const EDITOR_BLOCKS:Partial<Record<string,TemplateSectionId[]>>={
- portada:["hero"],fecha:["countdown"],ubicacion:["location"],galeria:["gallery"],programa:["program"],vestimenta:["details"],historia:["history"],hospedaje:["lodging"],regalos:["gifts"],video:["video"],faq:["faq"],personas:["special_people"],hashtag:["hashtag"],deseos:["wishes"],album:["album"],rsvp:["rsvp"]
+ portada:["hero"],introduccion:["intro"],fecha:["countdown"],ubicacion:["location"],galeria:["gallery"],programa:["program"],vestimenta:["details"],historia:["history"],hospedaje:["lodging"],regalos:["gifts"],video:["video"],faq:["faq"],personas:["special_people"],hashtag:["hashtag"],deseos:["wishes"],album:["album"],rsvp:["rsvp"]
 };
 
 type BlockVariantMap=Partial<Record<TemplateSectionId,string>>;
@@ -490,12 +491,18 @@ export default function StudioPage(){
   const label=BLOCKS[sectionId].label;
   setReorderAnnouncement(`${label} movido ${direction<0?"hacia arriba":"hacia abajo"}`);
  }
+ function openBlockEditor(sectionId:TemplateSectionId){
+  setSelectedPreviewSection(sectionId);
+  setActive(sectionId==="hero"?"portada":BLOCK_TO_EDITOR[sectionId]||"estructura");
+ }
  function addBlock(sectionId:TemplateSectionId){
   if(sectionId==="rsvp"&&!modalityFeatures.publicRsvp)return;
   setBlockVisibility(current=>({...current,[sectionId]:true}));
   const editorId=BLOCK_TO_EDITOR[sectionId];
   if(editorId)setVisibility(current=>({...current,[editorId]:true}));
+  setSelectedPreviewSection(sectionId);
   setShowAddSection(false);
+  setSaved(`${BLOCKS[sectionId].label} agregado`);
  }
  function toggleBlock(sectionId:TemplateSectionId){
   if(BLOCKS[sectionId].locked||(sectionId==="rsvp"&&!modalityFeatures.publicRsvp))return;
@@ -641,11 +648,22 @@ export default function StudioPage(){
     <div className="studio-editor-heading"><div><p className="eyebrow">InvitaPro Studio</p><h1>{active==="estructura"?"Estructura de la invitación":SECTIONS.find(s=>s.id===active)?.label}</h1><p>{active==="estructura"?"Organiza el recorrido de tus invitados y decide qué bloques se mostrarán.":SECTIONS.find(s=>s.id===active)?.desc}</p></div>{active!=="estructura"&&<label className="studio-visibility"><input type="checkbox" checked={visibility[active]??true} onChange={e=>setEditorVisibility(active,e.target.checked)}/><span>Mostrar sección</span></label>}</div>
 
     {active==="estructura"&&<div className="studio-block-builder">
-      <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>Arrastra los bloques para cambiar su orden. También puedes ocultarlos y volver a agregarlos cuando quieras.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
+      <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>Arrastra los bloques para cambiar su orden. Selecciona uno para abrir sus propiedades.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
+
+      {selectedPreviewSection&&<section className="studio-context-panel">
+       <div className="studio-context-panel-title"><span>{BLOCKS[selectedPreviewSection].icon}</span><div><small>PROPIEDADES DEL BLOQUE</small><strong>{BLOCKS[selectedPreviewSection].label}</strong><p>{BLOCKS[selectedPreviewSection].desc}</p></div></div>
+       <div className="studio-context-actions">
+        <button type="button" className="client-primary" onClick={()=>openBlockEditor(selectedPreviewSection)}>Editar contenido</button>
+        <button type="button" className="client-secondary" disabled={BLOCKS[selectedPreviewSection].locked} onClick={()=>toggleBlock(selectedPreviewSection)}>{blockVisibility[selectedPreviewSection]?"Ocultar bloque":"Mostrar bloque"}</button>
+        <button type="button" className="client-secondary" disabled={selectedPreviewSection==="hero"} onClick={()=>moveBlockAccessible(selectedPreviewSection,-1)}>↑ Subir</button>
+        <button type="button" className="client-secondary" disabled={selectedPreviewSection==="hero"} onClick={()=>moveBlockAccessible(selectedPreviewSection,1)}>↓ Bajar</button>
+       </div>
+       {BLOCK_VARIANTS[selectedPreviewSection]?.length?<div className="studio-context-variants"><small>ESTILO DEL BLOQUE</small><div>{BLOCK_VARIANTS[selectedPreviewSection]!.map(option=><button type="button" key={option.value} className={(blockVariants[selectedPreviewSection]||BLOCK_VARIANTS[selectedPreviewSection]![0].value)===option.value?"active":""} onClick={()=>setBlockVariants(current=>({...current,[selectedPreviewSection]:option.value}))}>{option.label}</button>)}</div></div>:null}
+      </section>}
 
       <div className="studio-block-list">{sectionOrder.filter(sectionId=>blockVisibility[sectionId]||BLOCKS[sectionId].locked).map((sectionId,index,visibleOrder)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article
         key={sectionId}
-        className={`studio-block-row ${enabled?"enabled":"disabled"} ${draggedBlock===sectionId?"dragging":""} ${blockDropTarget?.id===sectionId?`drop-${blockDropTarget.position}`:""}`}
+        className={`studio-block-row ${enabled?"enabled":"disabled"} ${selectedPreviewSection===sectionId?"selected":""} ${draggedBlock===sectionId?"dragging":""} ${blockDropTarget?.id===sectionId?`drop-${blockDropTarget.position}`:""}`}
         draggable={!meta.locked}
         tabIndex={meta.locked?-1:0}
         aria-grabbed={draggedBlock===sectionId}
@@ -654,6 +672,7 @@ export default function StudioPage(){
         onDragOver={e=>handleBlockDragOver(e,sectionId)}
         onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setBlockDropTarget(current=>current?.id===sectionId?null:current)}}
         onDrop={e=>{e.preventDefault();const source=(draggedBlock||e.dataTransfer.getData("text/plain")) as TemplateSectionId;const position=blockDropTarget?.id===sectionId?blockDropTarget.position:"before";if(source)reorderBlock(source,sectionId,position);setDraggedBlock(null);setBlockDropTarget(null)}}
+        onClick={()=>setSelectedPreviewSection(sectionId)}
         onDragEnd={()=>{setDraggedBlock(null);setBlockDropTarget(null)}}
        ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar. También puedes usar Alt + flechas."}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlockAccessible(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlockAccessible(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div><div className="studio-reorder-announcer" aria-live="polite">{reorderAnnouncement}</div>
 
@@ -676,9 +695,12 @@ export default function StudioPage(){
     </div>}
     {active==="portada"&&<div className="studio-fields">
       <label>Título principal<input value={title} onChange={e=>setTitle(e.target.value)}/></label>
-      <label>Introducción<input value={subtitle} onChange={e=>setSubtitle(e.target.value)}/></label>
-      <label className="full">Mensaje de bienvenida<textarea rows={5} value={message} onChange={e=>setMessage(e.target.value)}/></label>
+      <label>Frase de portada<input value={subtitle} onChange={e=>setSubtitle(e.target.value)} placeholder="Queremos compartir contigo este momento"/></label>
       <label>Color principal<div className="studio-color"><input type="color" value={color} onChange={e=>setColor(e.target.value)}/><input value={color} onChange={e=>setColor(e.target.value)}/></div></label><div className="studio-cover-field full"><div><strong>Imagen de portada</strong><small>Usa una fotografía vertical o panorámica de buena calidad.</small></div>{cover?<div className="studio-cover-preview"><img src={cover} alt="Portada"/><button type="button" onClick={()=>setCover("")}>Quitar</button></div>:null}<button type="button" className="client-secondary" onClick={()=>setMediaPicker("cover")}>{cover?"Cambiar portada":"Elegir de Biblioteca"}</button></div>
+    </div>}
+    {active==="introduccion"&&<div className="studio-fields">
+      <label className="full">Mensaje de bienvenida<textarea rows={7} value={message} onChange={e=>setMessage(e.target.value)} placeholder="Será un honor contar con tu presencia."/></label>
+      <div className="studio-note full">❦ Este contenido corresponde al bloque Introducción y se actualiza en tiempo real en la vista previa y en la invitación publicada.</div>
     </div>}
     {active==="fecha"&&<div className="studio-fields"><label>Fecha<input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label><label>Hora<input type="time" value={time} onChange={e=>setTime(e.target.value)}/></label><div className="studio-note full">◷ La cuenta regresiva usa esta fecha y hora automáticamente.</div></div>}
     {active==="ubicacion"&&<div className="studio-fields"><label>Lugar<input value={venue} onChange={e=>setVenue(e.target.value)} placeholder="Salón, jardín, iglesia…"/></label><label>Dirección<input value={address} onChange={e=>setAddress(e.target.value)} placeholder="Dirección completa"/></label><label className="full">Google Maps<input value={mapsUrl} onChange={e=>setMapsUrl(e.target.value)} placeholder="https://maps.google.com/..."/></label></div>}
@@ -702,7 +724,7 @@ export default function StudioPage(){
 
    <aside className={`studio-preview studio-preview-${previewDevice}`}>
     <div className="studio-preview-head">
-     <div><strong>Vista previa real</strong><small>Haz clic para editar o arrastra para reordenar</small></div>
+     <div className="studio-preview-title"><span className="studio-preview-live-dot" aria-hidden="true"/><strong>Vista previa</strong><em>EN VIVO</em></div>
      <div className="studio-preview-toolbar-main">
       <div className="studio-preview-devices" aria-label="Tamaño de vista previa"><button className={previewDevice==="mobile"?"active":""} onClick={()=>setPreviewDevice("mobile")} title="Celular · tecla 1">▯</button><button className={previewDevice==="tablet"?"active":""} onClick={()=>setPreviewDevice("tablet")} title="Tableta · tecla 2">▭</button><button className={previewDevice==="desktop"?"active":""} onClick={()=>setPreviewDevice("desktop")} title="Escritorio · tecla 3">▰</button></div>
       <div className="studio-preview-zoom"><button onClick={()=>setPreviewZoom(current=>Math.max(60,current-10))} disabled={previewZoom<=60} title="Alejar">−</button><span>{previewZoom}%</span><button onClick={()=>setPreviewZoom(current=>Math.min(120,current+10))} disabled={previewZoom>=120} title="Acercar">＋</button></div>
