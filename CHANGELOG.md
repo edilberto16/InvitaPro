@@ -372,3 +372,20 @@ git add .
 git commit -m "v2.19.0 - Studio 4.0 biblioteca visual"
 git push origin main
 ```
+
+## [2.22.0] - 2026-07-30
+
+### Añadido
+- Motor de estado central del Studio mediante `useStudioState`.
+- Tipos compartidos `StudioState` y `StudioSnapshot` en `lib/studio/studio-types.ts`.
+- Valores iniciales de contenido, visibilidad, orden y variantes centralizados fuera de la página principal.
+- Setters compatibles con actualizaciones directas y funcionales para facilitar la migración gradual del editor.
+
+### Cambiado
+- El Studio dejó de administrar más de treinta estados de contenido independientes dentro de `page.tsx`.
+- El estado editable ahora vive en una sola fuente de verdad preparada para historial, edición inline e inspector visual.
+- `studio_version` se actualizó a `2.22.0` sin modificar el formato existente de `design_json`.
+
+### Compatibilidad
+- No requiere migraciones de base de datos.
+- Mantiene los nombres de campos y el comportamiento actual de autoguardado, vista previa, deshacer y rehacer.

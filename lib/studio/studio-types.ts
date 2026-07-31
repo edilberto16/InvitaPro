@@ -1,0 +1,40 @@
+import type { TemplateSectionId } from "@/lib/template-engine";
+import type { StudioBlockVariantMap } from "@/lib/studio/block-registry";
+
+export type StudioState = {
+  title: string;
+  message: string;
+  subtitle: string;
+  color: string;
+  music: string;
+  whatsapp: string;
+  program: string;
+  dress: string;
+  historyTitle: string;
+  historyText: string;
+  lodging: string;
+  gift: string;
+  videoUrl: string;
+  faqText: string;
+  specialPeople: string;
+  hashtag: string;
+  socialText: string;
+  wishesTitle: string;
+  wishesText: string;
+  albumTitle: string;
+  albumText: string;
+  rsvpText: string;
+  cover: string;
+  gallery: string[];
+  date: string;
+  time: string;
+  venue: string;
+  address: string;
+  mapsUrl: string;
+  visibility: Record<string, boolean>;
+  sectionOrder: TemplateSectionId[];
+  blockVisibility: Record<TemplateSectionId, boolean>;
+  blockVariants: StudioBlockVariantMap;
+};
+
+export type StudioSnapshot = StudioState;

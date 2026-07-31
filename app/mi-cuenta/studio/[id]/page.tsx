@@ -2,6 +2,8 @@
 import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties,type DragEvent} from "react";
 import {useParams,useSearchParams} from "next/navigation";
+import {useStudioState} from "@/lib/studio/use-studio-state";
+import type {StudioSnapshot} from "@/lib/studio/studio-types";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplateCollectionId,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
@@ -10,7 +12,7 @@ import StudioSectionNavigation from "@/components/studio/studio-section-navigati
 import StudioBlockVariantSelector from "@/components/studio/studio-block-variant-selector";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
 import { invitationModalityLabel, modalityCapabilities, normalizeInvitationModality } from "@/lib/invitation-modality";
-import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
+import {normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
 import {STUDIO_BLOCK_CATEGORY as BLOCK_CATEGORY,STUDIO_BLOCK_REGISTRY as BLOCKS,STUDIO_BLOCK_TO_EDITOR as BLOCK_TO_EDITOR,STUDIO_BLOCK_VARIANTS as BLOCK_VARIANTS,STUDIO_EDITOR_BLOCKS as EDITOR_BLOCKS,STUDIO_EDITOR_TO_BLOCK as EDITOR_TO_BLOCK,STUDIO_EDITOR_SECTIONS,type StudioBlockCategory as BlockCategory,type StudioBlockVariantMap as BlockVariantMap} from "@/lib/studio/block-registry";
 
 type Invite={
@@ -24,9 +26,7 @@ const SECTIONS=STUDIO_EDITOR_SECTIONS;
 
 
 
-type StudioSnapshot={
- title:string;message:string;subtitle:string;color:string;music:string;whatsapp:string;program:string;dress:string;historyTitle:string;historyText:string;lodging:string;gift:string;videoUrl:string;faqText:string;specialPeople:string;hashtag:string;socialText:string;wishesTitle:string;wishesText:string;albumTitle:string;albumText:string;rsvpText:string;cover:string;gallery:string[];date:string;time:string;venue:string;address:string;mapsUrl:string;visibility:Record<string,boolean>;sectionOrder:TemplateSectionId[];blockVisibility:Record<TemplateSectionId,boolean>;blockVariants:BlockVariantMap;
-};
+
 
 function collectionForTipo(tipo:string){
  const t=tipo.toLowerCase();
@@ -61,41 +61,11 @@ export default function StudioPage(){
  const [requestingActivation,setRequestingActivation]=useState(false);
  const [activationIssues,setActivationIssues]=useState<string[]>([]);
  const [commercialPlans,setCommercialPlans]=useState<CommercialPlan[]>(DEFAULT_COMMERCIAL_PLANS);
- const [title,setTitle]=useState("");
- const [message,setMessage]=useState("");
- const [subtitle,setSubtitle]=useState("");
- const [color,setColor]=useState("#72264f");
- const [music,setMusic]=useState("");
- const [whatsapp,setWhatsapp]=useState("");
- const [program,setProgram]=useState("");
- const [dress,setDress]=useState("Formal");
- const [historyTitle,setHistoryTitle]=useState("Nuestra historia");
- const [historyText,setHistoryText]=useState("");
- const [lodging,setLodging]=useState("");
- const [gift,setGift]=useState("");
- const [videoUrl,setVideoUrl]=useState("");
- const [faqText,setFaqText]=useState("");
- const [specialPeople,setSpecialPeople]=useState("");
- const [hashtag,setHashtag]=useState("");
- const [socialText,setSocialText]=useState("Comparte tus mejores momentos con nosotros");
- const [wishesTitle,setWishesTitle]=useState("Déjanos un mensaje");
- const [wishesText,setWishesText]=useState("Tus palabras también serán parte de este día.");
- const [albumTitle,setAlbumTitle]=useState("Comparte tus recuerdos");
- const [albumText,setAlbumText]=useState("Sube las fotografías que captures durante nuestra celebración.");
- const [rsvpText,setRsvpText]=useState("Confirma tu asistencia");
- const [cover,setCover]=useState("");
- const [gallery,setGallery]=useState<string[]>([]);
- const [date,setDate]=useState("");
- const [time,setTime]=useState("");
- const [venue,setVenue]=useState("");
- const [address,setAddress]=useState("");
- const [mapsUrl,setMapsUrl]=useState("");
+ const {
+  state:{title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants},
+  setTitle,setMessage,setSubtitle,setColor,setMusic,setWhatsapp,setProgram,setDress,setHistoryTitle,setHistoryText,setLodging,setGift,setVideoUrl,setFaqText,setSpecialPeople,setHashtag,setSocialText,setWishesTitle,setWishesText,setAlbumTitle,setAlbumText,setRsvpText,setCover,setGallery,setDate,setTime,setVenue,setAddress,setMapsUrl,setVisibility,setSectionOrder,setBlockVisibility,setBlockVariants,
+ }=useStudioState();
  const [mediaPicker,setMediaPicker]=useState<null|"cover"|"gallery"|"music">(null);
- const [visibility,setVisibility]=useState<Record<string,boolean>>({
-  portada:true,fecha:true,ubicacion:true,galeria:true,musica:true,programa:true,vestimenta:true,historia:true,hospedaje:true,regalos:true,video:true,faq:true,personas:true,hashtag:true,deseos:true,album:true,rsvp:true
- });
- const [sectionOrder,setSectionOrder]=useState<TemplateSectionId[]>([...DEFAULT_TEMPLATE_SECTION_ORDER]);
- const [blockVisibility,setBlockVisibility]=useState<Record<TemplateSectionId,boolean>>({hero:true,intro:true,countdown:true,details:true,program:true,gallery:true,history:false,lodging:false,gifts:false,video:false,faq:false,special_people:false,hashtag:false,wishes:false,album:false,location:true,rsvp:true});
  const [draggedBlock,setDraggedBlock]=useState<TemplateSectionId|null>(null);
  const [blockDropTarget,setBlockDropTarget]=useState<{id:TemplateSectionId;position:"before"|"after"}|null>(null);
  const [reorderAnnouncement,setReorderAnnouncement]=useState("");
@@ -107,7 +77,6 @@ export default function StudioPage(){
  const [previewFocus,setPreviewFocus]=useState(false);
  const [previewRevision,setPreviewRevision]=useState(0);
  const [selectedPreviewSection,setSelectedPreviewSection]=useState<TemplateSectionId|null>(null);
- const [blockVariants,setBlockVariants]=useState<BlockVariantMap>({});
  const previewRef=useRef<HTMLIFrameElement|null>(null);
  const [historyIndex,setHistoryIndex]=useState(-1);
  const [historyLength,setHistoryLength]=useState(0);
@@ -302,7 +271,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.21.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.22.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
