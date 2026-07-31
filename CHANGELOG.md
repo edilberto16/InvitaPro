@@ -2,6 +2,37 @@
 
 Todos los cambios relevantes de InvitaPro se documentan en este archivo. A partir de la versión 2.20.0 no se crearán archivos `CAMBIOS-vX.Y.Z.md` separados.
 
+## [2.21.0] — 2026-07-30
+
+### Agregado
+
+- Componente reutilizable `StudioSectionNavigation` para la navegación lateral del editor.
+- Componente reutilizable `StudioBlockVariantSelector` para seleccionar estilos de bloques tanto en Estructura como en el editor contextual.
+- Registro centralizado de secciones editoriales mediante `STUDIO_EDITOR_SECTIONS`.
+
+### Cambiado
+
+- El archivo principal del Studio deja de renderizar manualmente la navegación y los selectores de variantes.
+- Se eliminó la duplicación de metadatos de las secciones desde `page.tsx`.
+- El motor del Studio avanza hacia una arquitectura de componentes desacoplados y reutilizables.
+- `design_json.studio_version` y la versión del proyecto se actualizaron a `2.21.0`.
+
+### Compatibilidad
+
+- No modifica la estructura existente de `design_json`.
+- No requiere migraciones de base de datos.
+- Conserva el comportamiento actual de selección, visibilidad y variantes.
+
+### Validación recomendada
+
+1. Ejecutar `pnpm run build`.
+2. Abrir Studio y navegar por todas las secciones del menú lateral.
+3. Abrir Estructura, seleccionar bloques y cambiar sus variantes.
+4. Confirmar que el selector de variantes también funciona dentro del editor de cada sección.
+5. Guardar y recargar la invitación.
+
+---
+
 ## [2.20.0.1] — 2026-07-30
 
 ### Corregido

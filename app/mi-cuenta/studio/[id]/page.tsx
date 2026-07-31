@@ -6,10 +6,12 @@ import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplateCollectionId,type TemplatePlanTier} from "@/lib/template-catalog";
 import TemplatePreviewArtwork from "@/components/templates/template-preview-artwork";
 import MediaLibraryPicker from "@/components/media/media-library-picker";
+import StudioSectionNavigation from "@/components/studio/studio-section-navigation";
+import StudioBlockVariantSelector from "@/components/studio/studio-block-variant-selector";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
 import { invitationModalityLabel, modalityCapabilities, normalizeInvitationModality } from "@/lib/invitation-modality";
 import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
-import {STUDIO_BLOCK_CATEGORY as BLOCK_CATEGORY,STUDIO_BLOCK_REGISTRY as BLOCKS,STUDIO_BLOCK_TO_EDITOR as BLOCK_TO_EDITOR,STUDIO_BLOCK_VARIANTS as BLOCK_VARIANTS,STUDIO_EDITOR_BLOCKS as EDITOR_BLOCKS,STUDIO_EDITOR_TO_BLOCK as EDITOR_TO_BLOCK,type StudioBlockCategory as BlockCategory,type StudioBlockVariantMap as BlockVariantMap} from "@/lib/studio/block-registry";
+import {STUDIO_BLOCK_CATEGORY as BLOCK_CATEGORY,STUDIO_BLOCK_REGISTRY as BLOCKS,STUDIO_BLOCK_TO_EDITOR as BLOCK_TO_EDITOR,STUDIO_BLOCK_VARIANTS as BLOCK_VARIANTS,STUDIO_EDITOR_BLOCKS as EDITOR_BLOCKS,STUDIO_EDITOR_TO_BLOCK as EDITOR_TO_BLOCK,STUDIO_EDITOR_SECTIONS,type StudioBlockCategory as BlockCategory,type StudioBlockVariantMap as BlockVariantMap} from "@/lib/studio/block-registry";
 
 type Invite={
  id:string;evento_id:string;titulo:string;slug:string;estado:string;modalidad:string;
@@ -18,26 +20,7 @@ type Invite={
  eventos:{id:string;nombre:string;tipo:string;fecha:string;hora:string|null;lugar:string|null;direccion:string|null;maps_url:string|null}|null;
 };
 
-const SECTIONS=[
- {id:"portada",label:"Portada",desc:"Título, imagen y primera impresión",icon:"✦"},
- {id:"introduccion",label:"Introducción",desc:"Mensaje de bienvenida para tus invitados",icon:"❦"},
- {id:"fecha",label:"Fecha y cuenta regresiva",desc:"Fecha, hora y expectativa",icon:"◷"},
- {id:"ubicacion",label:"Ubicación",desc:"Lugar, dirección y mapa",icon:"⌖"},
- {id:"galeria",label:"Galería",desc:"Fotografías y recuerdos",icon:"▧"},
- {id:"musica",label:"Música",desc:"Canción de la celebración",icon:"♫"},
- {id:"programa",label:"Itinerario",desc:"Horarios y actividades",icon:"☷"},
- {id:"vestimenta",label:"Dress code",desc:"Código de vestimenta",icon:"◇"},
- {id:"historia",label:"Nuestra historia",desc:"Cuenta cómo comenzó todo",icon:"♡"},
- {id:"hospedaje",label:"Hospedaje",desc:"Hoteles y recomendaciones",icon:"⌂"},
- {id:"regalos",label:"Mesa de regalos",desc:"Opciones y recomendaciones",icon:"♢"},
- {id:"video",label:"Video",desc:"Mensaje o recuerdo especial",icon:"▶"},
- {id:"faq",label:"Preguntas frecuentes",desc:"Resuelve dudas de tus invitados",icon:"?"},
- {id:"personas",label:"Personas especiales",desc:"Padrinos, damas, corte y familia",icon:"♙"},
- {id:"hashtag",label:"Hashtag y redes",desc:"Conecta el evento con redes sociales",icon:"#"},
- {id:"deseos",label:"Buzón de deseos",desc:"Mensajes especiales de tus invitados",icon:"💌"},
- {id:"album",label:"Álbum colaborativo QR",desc:"Tus invitados suben recuerdos",icon:"▧"},
- {id:"rsvp",label:"Confirmación RSVP",desc:"Asistencia de invitados",icon:"✓"},
-] as const;
+const SECTIONS=STUDIO_EDITOR_SECTIONS;
 
 
 
@@ -319,7 +302,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.19.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.21.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -613,11 +596,11 @@ export default function StudioPage(){
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
     <div className="studio-modality-summary"><small>MODALIDAD</small><strong>{invitationModalityLabel(currentModality)}</strong><span>{modalityFeatures.personalizedPasses?"Pases, RSVP y check-in":modalityFeatures.publicRsvp?"Confirmación pública":"Enlace público sin confirmaciones"}</span></div>
     <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?templatePlanLabel(template):"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
-    <nav className="studio-section-list"><button className={active==="estructura"?"active studio-structure-entry":"studio-structure-entry"} onClick={()=>setActive("estructura")}><span>☰</span><div><strong>Estructura</strong><small>Ordena y muestra tus bloques</small></div><em className="on">{sectionOrder.filter(id=>blockVisibility[id]).length}/{sectionOrder.length}</em></button>{activeEditorSections.map(s=>{const isVisible=editorSectionVisible(s.id);return <button key={s.id} className={active===s.id?"active":""} onClick={()=>setActive(s.id)}><span>{s.icon}</span><div><strong>{s.label}</strong><small>{s.desc}</small></div><em className={isVisible?"on":"off"}>{isVisible?"Visible":"Oculto"}</em></button>})}</nav>
+    <StudioSectionNavigation active={active} sections={activeEditorSections} activeBlocks={sectionOrder.filter(id=>blockVisibility[id]).length} totalBlocks={sectionOrder.length} isVisible={editorSectionVisible} onSelect={setActive}/>
    </aside>
 
    <section className="studio-editor">
-    <div className="studio-editor-heading"><div><p className="eyebrow">InvitaPro Studio</p><h1>{active==="estructura"?"Estructura de la invitación":SECTIONS.find(s=>s.id===active)?.label}</h1><p>{active==="estructura"?"Organiza el recorrido de tus invitados y decide qué bloques se mostrarán.":SECTIONS.find(s=>s.id===active)?.desc}</p></div>{active!=="estructura"&&<label className="studio-visibility"><input type="checkbox" checked={visibility[active]??true} onChange={e=>setEditorVisibility(active,e.target.checked)}/><span>Mostrar sección</span></label>}</div>
+    <div className="studio-editor-heading"><div><p className="eyebrow">InvitaPro Studio</p><h1>{active==="estructura"?"Estructura de la invitación":SECTIONS.find(s=>s.id===active)?.label}</h1><p>{active==="estructura"?"Organiza el recorrido de tus invitados y decide qué bloques se mostrarán.":SECTIONS.find(s=>s.id===active)?.description}</p></div>{active!=="estructura"&&<label className="studio-visibility"><input type="checkbox" checked={visibility[active]??true} onChange={e=>setEditorVisibility(active,e.target.checked)}/><span>Mostrar sección</span></label>}</div>
 
     {active==="estructura"&&<div className="studio-block-builder">
       <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>Arrastra los bloques para cambiar su orden. Selecciona uno para abrir sus propiedades.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
@@ -630,7 +613,7 @@ export default function StudioPage(){
         <button type="button" className="client-secondary" disabled={selectedPreviewSection==="hero"} onClick={()=>moveBlockAccessible(selectedPreviewSection,-1)}>↑ Subir</button>
         <button type="button" className="client-secondary" disabled={selectedPreviewSection==="hero"} onClick={()=>moveBlockAccessible(selectedPreviewSection,1)}>↓ Bajar</button>
        </div>
-       {BLOCK_VARIANTS[selectedPreviewSection]?.length?<div className="studio-context-variants"><small>ESTILO DEL BLOQUE</small><div>{BLOCK_VARIANTS[selectedPreviewSection]!.map(option=><button type="button" key={option.value} className={(blockVariants[selectedPreviewSection]||BLOCK_VARIANTS[selectedPreviewSection]![0].value)===option.value?"active":""} onClick={()=>setBlockVariants(current=>({...current,[selectedPreviewSection]:option.value}))}>{option.label}</button>)}</div></div>:null}
+       {BLOCK_VARIANTS[selectedPreviewSection]?.length?<StudioBlockVariantSelector compact options={BLOCK_VARIANTS[selectedPreviewSection]!} value={blockVariants[selectedPreviewSection]||BLOCK_VARIANTS[selectedPreviewSection]![0].value} onChange={variant=>setBlockVariants(current=>({...current,[selectedPreviewSection]:variant}))}/>:null}
       </section>}
 
       <div className="studio-block-list">{sectionOrder.filter(sectionId=>blockVisibility[sectionId]||BLOCKS[sectionId].locked).map((sectionId,index,visibleOrder)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article
@@ -696,7 +679,7 @@ export default function StudioPage(){
     {active==="deseos"&&<div className="studio-fields"><label className="full">Título del buzón<input value={wishesTitle} onChange={e=>setWishesTitle(e.target.value)} placeholder="Déjanos un mensaje"/></label><label className="full">Introducción<textarea rows={4} value={wishesText} onChange={e=>setWishesText(e.target.value)} placeholder="Tus palabras también serán parte de este día."/></label><div className="studio-note full">💌 Los mensajes se guardan de forma independiente en Supabase y no se publican automáticamente en la invitación.</div></div>}
     {active==="album"&&<div className="studio-fields"><label className="full">Título del álbum<input value={albumTitle} onChange={e=>setAlbumTitle(e.target.value)} placeholder="Comparte tus recuerdos"/></label><label className="full">Texto para tus invitados<textarea rows={4} value={albumText} onChange={e=>setAlbumText(e.target.value)} placeholder="Sube las fotografías que captures durante nuestra celebración."/></label><div className="studio-note full">▧ Las fotografías de invitados se almacenan en un bucket privado separado de la Biblioteca del cliente.</div></div>}
     {active==="rsvp"&&<div className="studio-fields"><label className="full">Texto para confirmar asistencia<input value={rsvpText} onChange={e=>setRsvpText(e.target.value)}/></label><label className="full">WhatsApp de contacto<input value={whatsapp} onChange={e=>setWhatsapp(e.target.value)} placeholder="529981234567"/></label></div>}
-    {EDITOR_TO_BLOCK[active]&&BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]?.length?<div className="studio-variant-panel"><div><strong>Diseño de la sección</strong><small>Elige cómo se presenta este bloque.</small></div><div className="studio-variant-options">{BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]!.map(option=><button key={option.value} className={(blockVariants[EDITOR_TO_BLOCK[active]! ]||BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]! ]![0].value)===option.value?"active":""} onClick={()=>setBlockVariants(current=>({...current,[EDITOR_TO_BLOCK[active]!]:option.value}))}>{option.label}</button>)}</div></div>:null}
+    {EDITOR_TO_BLOCK[active]&&BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]?.length?<StudioBlockVariantSelector options={BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]!} value={blockVariants[EDITOR_TO_BLOCK[active]!]||BLOCK_VARIANTS[EDITOR_TO_BLOCK[active]!]![0].value} onChange={variant=>setBlockVariants(current=>({...current,[EDITOR_TO_BLOCK[active]!]:variant}))}/>:null}
     {error&&<p className="form-error">{error}</p>}
    </section>
 

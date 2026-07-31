@@ -77,6 +77,35 @@ export const STUDIO_BLOCK_CATEGORY = Object.fromEntries(
   definitions.map((definition) => [definition.id, definition.category]),
 ) as Record<TemplateSectionId, Exclude<StudioBlockCategory, "todos">>;
 
+
+export type StudioEditorSectionDefinition = {
+  id: string;
+  label: string;
+  description: string;
+  icon: string;
+};
+
+export const STUDIO_EDITOR_SECTIONS: StudioEditorSectionDefinition[] = [
+  { id: "portada", label: "Portada", description: "Título, imagen y primera impresión", icon: "✦" },
+  { id: "introduccion", label: "Introducción", description: "Mensaje de bienvenida para tus invitados", icon: "❦" },
+  { id: "fecha", label: "Fecha y cuenta regresiva", description: "Fecha, hora y expectativa", icon: "◷" },
+  { id: "ubicacion", label: "Ubicación", description: "Lugar, dirección y mapa", icon: "⌖" },
+  { id: "galeria", label: "Galería", description: "Fotografías y recuerdos", icon: "▧" },
+  { id: "musica", label: "Música", description: "Canción de la celebración", icon: "♫" },
+  { id: "programa", label: "Itinerario", description: "Horarios y actividades", icon: "☷" },
+  { id: "vestimenta", label: "Dress code", description: "Código de vestimenta", icon: "◇" },
+  { id: "historia", label: "Nuestra historia", description: "Cuenta cómo comenzó todo", icon: "♡" },
+  { id: "hospedaje", label: "Hospedaje", description: "Hoteles y recomendaciones", icon: "⌂" },
+  { id: "regalos", label: "Mesa de regalos", description: "Opciones y recomendaciones", icon: "♢" },
+  { id: "video", label: "Video", description: "Mensaje o recuerdo especial", icon: "▶" },
+  { id: "faq", label: "Preguntas frecuentes", description: "Resuelve dudas de tus invitados", icon: "?" },
+  { id: "personas", label: "Personas especiales", description: "Padrinos, damas, corte y familia", icon: "♙" },
+  { id: "hashtag", label: "Hashtag y redes", description: "Conecta el evento con redes sociales", icon: "#" },
+  { id: "deseos", label: "Buzón de deseos", description: "Mensajes especiales de tus invitados", icon: "💌" },
+  { id: "album", label: "Álbum colaborativo QR", description: "Tus invitados suben recuerdos", icon: "▧" },
+  { id: "rsvp", label: "Confirmación RSVP", description: "Asistencia de invitados", icon: "✓" },
+];
+
 export type StudioBlockVariantMap = Partial<Record<TemplateSectionId, string>>;
 
 export function getStudioBlock(sectionId: TemplateSectionId) {
