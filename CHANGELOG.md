@@ -389,3 +389,22 @@ git push origin main
 ### Compatibilidad
 - No requiere migraciones de base de datos.
 - Mantiene los nombres de campos y el comportamiento actual de autoguardado, vista previa, deshacer y rehacer.
+
+## [2.23.0] - 2026-07-30
+
+### Añadido
+- Motor de historial reutilizable en `lib/studio/use-studio-history.ts`.
+- Controles visibles para deshacer y rehacer en la barra superior del Studio.
+- Atajos `Ctrl/Cmd + Z`, `Ctrl/Cmd + Y` y `Ctrl/Cmd + Shift + Z`.
+- Indicador de posición dentro del historial de cambios.
+- Límite configurable de 50 estados y agrupación de cambios mediante debounce.
+
+### Cambiado
+- La lógica de historial dejó de vivir dentro de `page.tsx`.
+- La restauración de snapshots ahora actualiza el estado central completo en una sola operación.
+- Los cambios nuevos eliminan correctamente la rama futura después de deshacer.
+- `studio_version` se actualizó a `2.23.0`.
+
+### Compatibilidad
+- No requiere migraciones de base de datos.
+- Mantiene el formato actual de `design_json` y el autoguardado existente.

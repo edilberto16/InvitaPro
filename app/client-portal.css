@@ -468,3 +468,10 @@
  .studio-block-library-tabs{display:flex;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
  .studio-block-library-tabs button{flex:0 0 auto}
 }
+
+/* Studio v2.23.0 · History Engine */
+.studio-history-actions{display:flex;align-items:center;gap:6px;padding-right:4px}
+.studio-history-actions button{min-width:38px;padding-inline:10px;font-size:18px;line-height:1}
+.studio-history-actions button:disabled{opacity:.38;cursor:not-allowed}
+.studio-history-actions span{min-width:36px;color:var(--client-muted,#81777d);font-size:11px;text-align:center;font-variant-numeric:tabular-nums}
+@media(max-width:900px){.studio-history-actions span{display:none}}
