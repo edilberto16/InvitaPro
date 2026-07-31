@@ -9,6 +9,7 @@ import MediaLibraryPicker from "@/components/media/media-library-picker";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
 import { invitationModalityLabel, modalityCapabilities, normalizeInvitationModality } from "@/lib/invitation-modality";
 import {DEFAULT_TEMPLATE_SECTION_ORDER,normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
+import {STUDIO_BLOCK_CATEGORY as BLOCK_CATEGORY,STUDIO_BLOCK_REGISTRY as BLOCKS,STUDIO_BLOCK_TO_EDITOR as BLOCK_TO_EDITOR,STUDIO_BLOCK_VARIANTS as BLOCK_VARIANTS,STUDIO_EDITOR_BLOCKS as EDITOR_BLOCKS,STUDIO_EDITOR_TO_BLOCK as EDITOR_TO_BLOCK,type StudioBlockCategory as BlockCategory,type StudioBlockVariantMap as BlockVariantMap} from "@/lib/studio/block-registry";
 
 type Invite={
  id:string;evento_id:string;titulo:string;slug:string;estado:string;modalidad:string;
@@ -39,52 +40,9 @@ const SECTIONS=[
 ] as const;
 
 
-const BLOCKS:Record<TemplateSectionId,{label:string;desc:string;icon:string;locked?:boolean}>={
- hero:{label:"Portada",desc:"Primera impresión de tu invitación",icon:"✦",locked:true},
- intro:{label:"Introducción",desc:"Mensaje de bienvenida",icon:"❦"},
- countdown:{label:"Cuenta regresiva",desc:"Días, horas y minutos para el evento",icon:"◷"},
- details:{label:"Detalles del evento",desc:"Fecha, lugar y código de vestimenta",icon:"◇"},
- program:{label:"Itinerario",desc:"Horarios y actividades",icon:"☷"},
- gallery:{label:"Galería",desc:"Fotografías y recuerdos",icon:"▧"},
- history:{label:"Nuestra historia",desc:"Una sección narrativa para contar su historia",icon:"♡"},
- lodging:{label:"Hospedaje",desc:"Hoteles, tarifas y recomendaciones para invitados",icon:"⌂"},
- gifts:{label:"Mesa de regalos",desc:"Regalos, transferencias o lluvia de sobres",icon:"♢"},
- video:{label:"Video",desc:"Video especial, bienvenida o recuerdo",icon:"▶"},
- faq:{label:"Preguntas frecuentes",desc:"Respuestas rápidas para tus invitados",icon:"?"},
- special_people:{label:"Personas especiales",desc:"Padrinos, damas, corte, familia o equipo",icon:"♙"},
- hashtag:{label:"Hashtag y redes",desc:"Hashtag oficial e indicaciones para compartir",icon:"#"},
- wishes:{label:"Buzón de deseos",desc:"Recibe mensajes especiales de tus invitados",icon:"💌"},
- album:{label:"Álbum colaborativo QR",desc:"Los invitados pueden subir fotografías del evento",icon:"▧"},
- location:{label:"Ubicación",desc:"Dirección, mapa y cómo llegar",icon:"⌖"},
- rsvp:{label:"Confirmación RSVP",desc:"Respuesta de asistencia de invitados",icon:"✓"},
-};
-
-const EDITOR_TO_BLOCK:Partial<Record<string,TemplateSectionId>>={introduccion:"intro",fecha:"countdown",ubicacion:"location",galeria:"gallery",programa:"program",vestimenta:"details",historia:"history",hospedaje:"lodging",regalos:"gifts",video:"video",faq:"faq",personas:"special_people",hashtag:"hashtag",deseos:"wishes",album:"album",rsvp:"rsvp"};
-const BLOCK_TO_EDITOR:Partial<Record<TemplateSectionId,string>>={intro:"introduccion",countdown:"fecha",location:"ubicacion",gallery:"galeria",program:"programa",details:"vestimenta",history:"historia",lodging:"hospedaje",gifts:"regalos",video:"video",faq:"faq",special_people:"personas",hashtag:"hashtag",wishes:"deseos",album:"album",rsvp:"rsvp"};
-
-const EDITOR_BLOCKS:Partial<Record<string,TemplateSectionId[]>>={
- portada:["hero"],introduccion:["intro"],fecha:["countdown"],ubicacion:["location"],galeria:["gallery"],programa:["program"],vestimenta:["details"],historia:["history"],hospedaje:["lodging"],regalos:["gifts"],video:["video"],faq:["faq"],personas:["special_people"],hashtag:["hashtag"],deseos:["wishes"],album:["album"],rsvp:["rsvp"]
-};
-
-type BlockVariantMap=Partial<Record<TemplateSectionId,string>>;
-const BLOCK_VARIANTS:Partial<Record<TemplateSectionId,{value:string;label:string}[]>>={
- gallery:[{value:"grid",label:"Cuadrícula"},{value:"editorial",label:"Editorial"},{value:"carousel",label:"Carrusel"}],
- program:[{value:"timeline",label:"Línea de tiempo"},{value:"cards",label:"Tarjetas"},{value:"compact",label:"Compacto"}],
- history:[{value:"classic",label:"Clásica"},{value:"quote",label:"Editorial"},{value:"split",label:"Dividida"}],
- location:[{value:"card",label:"Tarjeta"},{value:"full",label:"Destacada"},{value:"minimal",label:"Minimal"}],
- rsvp:[{value:"card",label:"Tarjeta"},{value:"featured",label:"Destacada"},{value:"minimal",label:"Minimal"}],
-};
-
 
 type StudioSnapshot={
  title:string;message:string;subtitle:string;color:string;music:string;whatsapp:string;program:string;dress:string;historyTitle:string;historyText:string;lodging:string;gift:string;videoUrl:string;faqText:string;specialPeople:string;hashtag:string;socialText:string;wishesTitle:string;wishesText:string;albumTitle:string;albumText:string;rsvpText:string;cover:string;gallery:string[];date:string;time:string;venue:string;address:string;mapsUrl:string;visibility:Record<string,boolean>;sectionOrder:TemplateSectionId[];blockVisibility:Record<TemplateSectionId,boolean>;blockVariants:BlockVariantMap;
-};
-
-type BlockCategory="todos"|"evento"|"multimedia"|"invitados"|"premium";
-const BLOCK_CATEGORY:Record<TemplateSectionId,BlockCategory>={
- hero:"evento",intro:"evento",countdown:"evento",details:"evento",program:"evento",gallery:"multimedia",
- history:"evento",lodging:"evento",gifts:"evento",video:"multimedia",faq:"invitados",special_people:"evento",
- hashtag:"multimedia",wishes:"invitados",album:"premium",location:"evento",rsvp:"invitados"
 };
 
 function collectionForTipo(tipo:string){
@@ -634,7 +592,7 @@ export default function StudioPage(){
   if(blockCategory!=="todos"&&BLOCK_CATEGORY[sectionId]!==blockCategory)return false;
   if(!normalizedBlockSearch)return true;
   const meta=BLOCKS[sectionId];
-  return `${meta.label} ${meta.desc} ${BLOCK_CATEGORY[sectionId]}`.toLocaleLowerCase("es").includes(normalizedBlockSearch);
+  return `${meta.label} ${meta.description} ${BLOCK_CATEGORY[sectionId]}`.toLocaleLowerCase("es").includes(normalizedBlockSearch);
  });
  const availableCategoryCount=(category:BlockCategory)=>sectionOrder.filter(sectionId=>!blockVisibility[sectionId]&&!BLOCKS[sectionId].locked&&(category==="todos"||BLOCK_CATEGORY[sectionId]===category)).length;
 
@@ -665,7 +623,7 @@ export default function StudioPage(){
       <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>Arrastra los bloques para cambiar su orden. Selecciona uno para abrir sus propiedades.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
 
       {selectedPreviewSection&&<section className="studio-context-panel">
-       <div className="studio-context-panel-title"><span>{BLOCKS[selectedPreviewSection].icon}</span><div><small>PROPIEDADES DEL BLOQUE</small><strong>{BLOCKS[selectedPreviewSection].label}</strong><p>{BLOCKS[selectedPreviewSection].desc}</p></div></div>
+       <div className="studio-context-panel-title"><span>{BLOCKS[selectedPreviewSection].icon}</span><div><small>PROPIEDADES DEL BLOQUE</small><strong>{BLOCKS[selectedPreviewSection].label}</strong><p>{BLOCKS[selectedPreviewSection].description}</p></div></div>
        <div className="studio-context-actions">
         <button type="button" className="client-primary" onClick={()=>openBlockEditor(selectedPreviewSection)}>Editar contenido</button>
         <button type="button" className="client-secondary" disabled={BLOCKS[selectedPreviewSection].locked} onClick={()=>toggleBlock(selectedPreviewSection)}>{blockVisibility[selectedPreviewSection]?"Ocultar bloque":"Mostrar bloque"}</button>
@@ -688,7 +646,7 @@ export default function StudioPage(){
         onDrop={e=>{e.preventDefault();const source=(draggedBlock||e.dataTransfer.getData("text/plain")) as TemplateSectionId;const position=blockDropTarget?.id===sectionId?blockDropTarget.position:"before";if(source)reorderBlock(source,sectionId,position);setDraggedBlock(null);setBlockDropTarget(null)}}
         onClick={()=>setSelectedPreviewSection(sectionId)}
         onDragEnd={()=>{setDraggedBlock(null);setBlockDropTarget(null)}}
-       ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar. También puedes usar Alt + flechas."}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.desc}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlockAccessible(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlockAccessible(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div><div className="studio-reorder-announcer" aria-live="polite">{reorderAnnouncement}</div>
+       ><span className={`studio-block-handle ${meta.locked?"locked":""}`} title={meta.locked?"La portada permanece al inicio":"Arrastra para reordenar. También puedes usar Alt + flechas."}>{meta.locked?"◆":"⋮⋮"}</span><span className="studio-block-icon">{meta.icon}</span><div className="studio-block-copy"><strong>{meta.label}</strong><small>{meta.description}</small></div><div className="studio-block-order"><button type="button" disabled={index===0||meta.locked} onClick={()=>moveBlockAccessible(sectionId,-1)} aria-label={`Subir ${meta.label}`}>↑</button><button type="button" disabled={index===visibleOrder.length-1||meta.locked} onClick={()=>moveBlockAccessible(sectionId,1)} aria-label={`Bajar ${meta.label}`}>↓</button></div><button type="button" className={`studio-block-toggle ${enabled?"active":""}`} disabled={meta.locked} onClick={()=>toggleBlock(sectionId)}>{meta.locked?"Siempre visible":enabled?"Visible":"Oculta"}</button></article>})}</div><div className="studio-reorder-announcer" aria-live="polite">{reorderAnnouncement}</div>
 
       <div className="studio-add-section">
        <button type="button" className="studio-add-section-button" onClick={()=>setShowAddSection(v=>!v)}><span>＋</span><div><strong>Biblioteca de bloques</strong><small>Agrega nuevas experiencias a tu invitación.</small></div><em>{showAddSection?"Cerrar":"Explorar"}</em></button>
@@ -706,7 +664,7 @@ export default function StudioPage(){
         <div className="studio-block-library-grid">
         {availableBlockIds.length===0
          ? <div className="studio-add-empty"><strong>{normalizedBlockSearch?"No encontramos ese bloque":"No hay bloques disponibles aquí"}</strong><span>{normalizedBlockSearch?"Prueba con otra palabra o cambia de categoría.":"Prueba otra categoría o desactiva una sección para volver a agregarla."}</span>{normalizedBlockSearch&&<button type="button" className="client-secondary" onClick={()=>{setBlockSearch("");setBlockCategory("todos")}}>Ver todos los bloques</button>}</div>
-         : availableBlockIds.map(sectionId=>{const meta=BLOCKS[sectionId];const premium=BLOCK_CATEGORY[sectionId]==="premium";return <button key={sectionId} type="button" className="studio-block-library-card" onClick={()=>addBlock(sectionId)}><span className="studio-block-library-icon">{meta.icon}</span><div><span className="studio-block-library-badge">{premium?"PREMIUM":BLOCK_CATEGORY[sectionId].toUpperCase()}</span><strong>{meta.label}</strong><small>{meta.desc}</small></div><em>＋ Agregar</em></button>})}
+         : availableBlockIds.map(sectionId=>{const meta=BLOCKS[sectionId];const premium=BLOCK_CATEGORY[sectionId]==="premium";return <button key={sectionId} type="button" className="studio-block-library-card" onClick={()=>addBlock(sectionId)}><span className="studio-block-library-icon">{meta.icon}</span><div><span className="studio-block-library-badge">{premium?"PREMIUM":BLOCK_CATEGORY[sectionId].toUpperCase()}</span><strong>{meta.label}</strong><small>{meta.description}</small></div><em>＋ Agregar</em></button>})}
         </div>
        </div>}
       </div>
