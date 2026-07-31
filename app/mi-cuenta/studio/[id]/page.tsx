@@ -160,6 +160,7 @@ export default function StudioPage(){
  const [reorderAnnouncement,setReorderAnnouncement]=useState("");
  const [showAddSection,setShowAddSection]=useState(false);
  const [blockCategory,setBlockCategory]=useState<BlockCategory>("todos");
+ const [blockSearch,setBlockSearch]=useState("");
  const [previewDevice,setPreviewDevice]=useState<"mobile"|"tablet"|"desktop">("mobile");
  const [previewZoom,setPreviewZoom]=useState(90);
  const [previewFocus,setPreviewFocus]=useState(false);
@@ -240,6 +241,7 @@ export default function StudioPage(){
    variants:blockVariants,
    selectedSection:selectedPreviewSection,
    draft:{
+    templateKey:invite?.template_key||null,
     title,
     color,
     music,
@@ -248,7 +250,7 @@ export default function StudioPage(){
     designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
    }
   },window.location.origin);
- },[sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
+ },[invite?.template_key,sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
 
  useEffect(()=>{
   function handlePreviewMessage(event:MessageEvent){
@@ -359,7 +361,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.15.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.19.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -424,7 +426,9 @@ export default function StudioPage(){
   setApplyingTemplate(false);
   if(error){setError(error.message);return;}
   setInvite({...invite,template_key:id,color_principal:t.color,design_json:{...current,plantilla:id,template_engine:id,template_collection:t.collection}});
-  setColor(t.color);setPendingTemplate(null);setShowTemplates(false);setTemplateNotice(`✓ ${t.name} aplicada`);
+  setColor(t.color);
+  setPreviewRevision(value=>value+1);
+  setPendingTemplate(null);setShowTemplates(false);setTemplateNotice(`✓ ${t.name} aplicada`);
   setSaved("Plantilla actualizada ✓");
   window.setTimeout(()=>setTemplateNotice(""),2800);
  }
@@ -624,6 +628,16 @@ export default function StudioPage(){
   const blocks=EDITOR_BLOCKS[section.id];
   return !blocks||blocks.some(blockId=>blockVisibility[blockId]);
  });
+ const normalizedBlockSearch=blockSearch.trim().toLocaleLowerCase("es");
+ const availableBlockIds=sectionOrder.filter(sectionId=>{
+  if(blockVisibility[sectionId]||BLOCKS[sectionId].locked)return false;
+  if(blockCategory!=="todos"&&BLOCK_CATEGORY[sectionId]!==blockCategory)return false;
+  if(!normalizedBlockSearch)return true;
+  const meta=BLOCKS[sectionId];
+  return `${meta.label} ${meta.desc} ${BLOCK_CATEGORY[sectionId]}`.toLocaleLowerCase("es").includes(normalizedBlockSearch);
+ });
+ const availableCategoryCount=(category:BlockCategory)=>sectionOrder.filter(sectionId=>!blockVisibility[sectionId]&&!BLOCKS[sectionId].locked&&(category==="todos"||BLOCK_CATEGORY[sectionId]===category)).length;
+
  const editorSectionVisible=(sectionId:string)=>{
   const blocks=EDITOR_BLOCKS[sectionId];
   if(blocks?.length)return blocks.some(blockId=>blockVisibility[blockId])&&(visibility[sectionId]??true);
@@ -680,18 +694,24 @@ export default function StudioPage(){
        <button type="button" className="studio-add-section-button" onClick={()=>setShowAddSection(v=>!v)}><span>＋</span><div><strong>Biblioteca de bloques</strong><small>Agrega nuevas experiencias a tu invitación.</small></div><em>{showAddSection?"Cerrar":"Explorar"}</em></button>
        {showAddSection&&<div className="studio-block-library">
         <div className="studio-block-library-head"><div><strong>Agregar una sección</strong><small>Elige un bloque y personalízalo después desde el menú del Studio.</small></div><span>{sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked).length} disponibles</span></div>
-        <div className="studio-block-library-tabs">
-         {([["todos","Todas"],["evento","Evento"],["multimedia","Multimedia"],["invitados","Invitados"],["premium","Premium"]] as const).map(([id,label])=><button key={id} type="button" className={blockCategory===id?"active":""} onClick={()=>setBlockCategory(id)}>{label}</button>)}
+        <div className="studio-block-library-search">
+         <span aria-hidden="true">⌕</span>
+         <input value={blockSearch} onChange={event=>setBlockSearch(event.target.value)} placeholder="Buscar mapa, galería, RSVP…" aria-label="Buscar bloques"/>
+         {blockSearch&&<button type="button" onClick={()=>setBlockSearch("")} aria-label="Limpiar búsqueda">×</button>}
         </div>
+        <div className="studio-block-library-tabs">
+         {([["todos","Todas"],["evento","Evento"],["multimedia","Multimedia"],["invitados","Invitados"],["premium","Premium"]] as const).map(([id,label])=><button key={id} type="button" className={blockCategory===id?"active":""} onClick={()=>setBlockCategory(id)}><span>{label}</span><em>{availableCategoryCount(id)}</em></button>)}
+        </div>
+        <div className="studio-block-library-results"><strong>{availableBlockIds.length} {availableBlockIds.length===1?"bloque encontrado":"bloques encontrados"}</strong><span>{normalizedBlockSearch?`Resultados para “${blockSearch.trim()}”`:"Selecciona un bloque para agregarlo al final de tu invitación."}</span></div>
         <div className="studio-block-library-grid">
-        {sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked&&(blockCategory==="todos"||BLOCK_CATEGORY[id]===blockCategory)).length===0
-         ? <div className="studio-add-empty"><strong>No hay bloques disponibles aquí</strong><span>Prueba otra categoría o desactiva una sección para volver a agregarla.</span></div>
-         : sectionOrder.filter(id=>!blockVisibility[id]&&!BLOCKS[id].locked&&(blockCategory==="todos"||BLOCK_CATEGORY[id]===blockCategory)).map(sectionId=>{const meta=BLOCKS[sectionId];const premium=BLOCK_CATEGORY[sectionId]==="premium";return <button key={sectionId} type="button" className="studio-block-library-card" onClick={()=>addBlock(sectionId)}><span className="studio-block-library-icon">{meta.icon}</span><div><span className="studio-block-library-badge">{premium?"PREMIUM":BLOCK_CATEGORY[sectionId].toUpperCase()}</span><strong>{meta.label}</strong><small>{meta.desc}</small></div><em>＋ Agregar</em></button>})}
+        {availableBlockIds.length===0
+         ? <div className="studio-add-empty"><strong>{normalizedBlockSearch?"No encontramos ese bloque":"No hay bloques disponibles aquí"}</strong><span>{normalizedBlockSearch?"Prueba con otra palabra o cambia de categoría.":"Prueba otra categoría o desactiva una sección para volver a agregarla."}</span>{normalizedBlockSearch&&<button type="button" className="client-secondary" onClick={()=>{setBlockSearch("");setBlockCategory("todos")}}>Ver todos los bloques</button>}</div>
+         : availableBlockIds.map(sectionId=>{const meta=BLOCKS[sectionId];const premium=BLOCK_CATEGORY[sectionId]==="premium";return <button key={sectionId} type="button" className="studio-block-library-card" onClick={()=>addBlock(sectionId)}><span className="studio-block-library-icon">{meta.icon}</span><div><span className="studio-block-library-badge">{premium?"PREMIUM":BLOCK_CATEGORY[sectionId].toUpperCase()}</span><strong>{meta.label}</strong><small>{meta.desc}</small></div><em>＋ Agregar</em></button>})}
         </div>
        </div>}
       </div>
 
-      <div className="studio-block-tip"><span>✦</span><div><strong>Studio 3.0 · Drag &amp; Drop</strong><p>La línea de inserción muestra exactamente dónde caerá cada bloque. En teclado usa Alt + ↑ o Alt + ↓; en celular utiliza los botones de orden.</p></div></div>
+      <div className="studio-block-tip"><span>✦</span><div><strong>Studio 4.0 · Constructor visual</strong><p>Busca, agrega, selecciona y reorganiza bloques desde un mismo lugar. Usa Alt + ↑ o Alt + ↓ para ordenar con teclado.</p></div></div>
     </div>}
     {active==="portada"&&<div className="studio-fields">
       <label>Título principal<input value={title} onChange={e=>setTitle(e.target.value)}/></label>
