@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## [2.31.1] - 2026-08-01
+
+### Corregido
+- El RSVP público ahora acepta invitaciones históricas cuya modalidad está guardada como `autoservicio`.
+- La función `registrar_confirmacion` normaliza la modalidad antes de validar.
+- Se separaron los mensajes de error para invitación inexistente, no publicada, modalidad sin RSVP, expiración y evento faltante.
+- La comparación de códigos de pases ahora ignora mayúsculas y espacios accidentales.
+- Se normalizaron cantidades nulas de adultos y niños para evitar errores en la función.
+
+### Base de datos
+- Añadida la migración `20260801_v2_31_1_rsvp_publico_hotfix.sql`.
+- Esta migración debe ejecutarse en Supabase antes de volver a probar el formulario RSVP.
+- `schema-v1.sql` quedó actualizado para instalaciones nuevas.
+
+### Compatibilidad
+- No modifica tablas ni elimina datos.
+- No afecta el Buzón de deseos, invitaciones con pases ni invitaciones existentes.
+- Se mantiene un único `CHANGELOG.md`.
+
 ## [2.30.0] - 2026-08-01
 
 ### Añadido
@@ -583,3 +602,12 @@ git push origin main
 - No requiere migración de Supabase.
 - Las invitaciones sin `theme_id` continúan usando un tema compatible derivado de su plantilla.
 - Se conserva el formato actual de `design_json`.
+## 2.31.0 — CRM de invitados
+
+- Se agregó una ficha lateral completa para cada invitado.
+- La ficha muestra contacto, pases, mesa, código, RSVP y check-in.
+- Se agregó una línea de tiempo basada en el estado y los registros de llegada disponibles.
+- Se incorporaron notas internas guardadas en `invitados.notas`.
+- Se añadió acceso directo a WhatsApp desde la ficha.
+- No requiere migración de Supabase.
+

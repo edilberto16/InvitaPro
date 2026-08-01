@@ -223,3 +223,7 @@ Proyecto privado. Todos los derechos reservados © InvitaPro.
 ## Theme Gallery
 
 El Studio incluye una galería visual de temas con búsqueda, colecciones, favoritos y previsualización instantánea.
+
+## CRM de invitados
+
+Cada invitado dispone de una ficha con contacto, pases, RSVP, check-in, notas internas y acceso a WhatsApp.

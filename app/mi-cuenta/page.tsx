@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ShareInvitationModal from "../../components/share-invitation-modal";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
+import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
@@ -54,6 +55,7 @@ type Guest = {
   checkin_ninos: number;
   checkin_at: string | null;
   ultimo_checkin_at: string | null;
+  notas: string | null;
 };
 
 function initials(value: string) {
@@ -82,6 +84,8 @@ export default function MiCuenta() {
   const [deletingGuests, setDeletingGuests] = useState(false);
   const [activityRows, setActivityRows] = useState<ActivityRow[]>([]);
   const [albumCount, setAlbumCount] = useState(0);
+  const [crmGuest, setCrmGuest] = useState<Guest | null>(null);
+  const [savingGuestNotes, setSavingGuestNotes] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -186,7 +190,7 @@ export default function MiCuenta() {
     const { data: guestRows, error: guestError } = await supabase
       .from("invitados")
       .select(
-        "id,invitacion_id,nombre,telefono,correo,estado,adultos_permitidos,ninos_permitidos,mesa,codigo,checkin_adultos,checkin_ninos,checkin_at,ultimo_checkin_at"
+        "id,invitacion_id,nombre,telefono,correo,estado,adultos_permitidos,ninos_permitidos,mesa,codigo,checkin_adultos,checkin_ninos,checkin_at,ultimo_checkin_at,notas"
       )
       .in(
         "invitacion_id",
@@ -330,6 +334,29 @@ export default function MiCuenta() {
     setGuestsToDelete([]);
     setSelectedGuestIds((current) => current.filter((id) => !ids.includes(id)));
     await load();
+  }
+
+  async function saveGuestNotes(guestId: string, notes: string) {
+    if (!invite) return;
+    setSavingGuestNotes(true);
+    setError("");
+
+    const { error: notesError } = await supabase
+      .from("invitados")
+      .update({ notas: notes })
+      .eq("id", guestId)
+      .eq("invitacion_id", invite.id);
+
+    setSavingGuestNotes(false);
+    if (notesError) {
+      setError(notesError.message);
+      return;
+    }
+
+    setGuests((current) =>
+      current.map((guest) => (guest.id === guestId ? { ...guest, notas: notes } : guest))
+    );
+    setCrmGuest((current) => (current?.id === guestId ? { ...current, notas: notes } : current));
   }
 
   function exportGuestReport() {
@@ -552,6 +579,13 @@ export default function MiCuenta() {
                         <button
                           type="button"
                           className="client-secondary"
+                          onClick={() => setCrmGuest(guest)}
+                        >
+                          Ver ficha
+                        </button>
+                        <button
+                          type="button"
+                          className="client-secondary"
                           onClick={() => setSharingGuest(guest)}
                         >
                           WhatsApp
@@ -604,6 +638,21 @@ export default function MiCuenta() {
             </div>
           </section>
         </div>
+      )}
+
+      {invite && crmGuest && (
+        <GuestCrmDrawer
+          guest={crmGuest}
+          open={Boolean(crmGuest)}
+          invitationTitle={invite.titulo}
+          personalized={personalized}
+          saving={savingGuestNotes}
+          onClose={() => setCrmGuest(null)}
+          onShare={() => {
+            setSharingGuest(crmGuest);
+          }}
+          onSaveNotes={(notes) => saveGuestNotes(crmGuest.id, notes)}
+        />
       )}
 
       {invite && (
