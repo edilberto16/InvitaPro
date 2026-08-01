@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## [2.30.0] - 2026-08-01
+
+### Añadido
+- Dashboard del Evento como vista principal de Mi InvitaPro.
+- Resumen reutilizable de invitados, RSVP, check-in y fotografías.
+- Panel de progreso, tareas recomendadas, acciones rápidas y actividad reciente.
+- Nuevo componente `components/client/event-dashboard.tsx`.
+- Lectura de actividad del evento y conteo del álbum mediante las políticas RLS existentes.
+
+### Cambiado
+- La cuenta del cliente prioriza la gestión del evento y mantiene el Studio como herramienta de diseño.
+- Se conserva la administración de invitados, CSV, WhatsApp, check-in y álbum debajo del nuevo resumen.
+- Versión actualizada a `2.30.0`.
+
+### Compatibilidad
+- No requiere migraciones de Supabase.
+- No modifica el panel administrativo, las rutas públicas ni `design_json`.
+
 ## [2.29.0] - 2026-08-01
 
 ### Añadido

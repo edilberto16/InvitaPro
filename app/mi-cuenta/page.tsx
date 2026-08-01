@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ShareInvitationModal from "../../components/share-invitation-modal";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
+import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
 import {
@@ -29,6 +30,13 @@ type Invite = {
   modalidad: string;
   template_key?: string | null;
   design_json?: Record<string, unknown>;
+};
+
+type ActivityRow = {
+  id: string;
+  accion: string;
+  detalles: Record<string, unknown> | null;
+  created_at: string;
 };
 
 type Guest = {
@@ -72,6 +80,8 @@ export default function MiCuenta() {
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const [guestsToDelete, setGuestsToDelete] = useState<Guest[]>([]);
   const [deletingGuests, setDeletingGuests] = useState(false);
+  const [activityRows, setActivityRows] = useState<ActivityRow[]>([]);
+  const [albumCount, setAlbumCount] = useState(0);
 
   async function load() {
     setLoading(true);
@@ -146,9 +156,32 @@ export default function MiCuenta() {
 
     if (!currentInvites.length) {
       setGuests([]);
+      setActivityRows([]);
+      setAlbumCount(0);
       setLoading(false);
       return;
     }
+
+    const activeEventId = currentEvents[0]?.id;
+    const activeInvite = currentInvites.find((item) => item.evento_id === activeEventId);
+    const [activityResult, albumResult] = await Promise.all([
+      activeEventId
+        ? supabase
+            .from("actividad")
+            .select("id,accion,detalles,created_at")
+            .eq("evento_id", activeEventId)
+            .order("created_at", { ascending: false })
+            .limit(8)
+        : Promise.resolve({ data: [], error: null }),
+      activeInvite
+        ? supabase
+            .from("album_colaborativo_fotos")
+            .select("id", { count: "exact", head: true })
+            .eq("invitacion_id", activeInvite.id)
+        : Promise.resolve({ count: 0, error: null }),
+    ]);
+    setActivityRows(((activityResult.data || []) as ActivityRow[]));
+    setAlbumCount(albumResult.count || 0);
 
     const { data: guestRows, error: guestError } = await supabase
       .from("invitados")
@@ -181,6 +214,7 @@ export default function MiCuenta() {
   const related = guests.filter((item) => item.invitacion_id === invite?.id);
   const confirmed = related.filter((item) => item.estado === "confirmado").length;
   const pending = related.filter((item) => item.estado === "pendiente").length;
+  const rejected = related.filter((item) => ["no_asistira", "rechazado"].includes(item.estado)).length;
   const filteredGuests = related.filter((item) =>
     [item.nombre, item.telefono, item.correo, item.codigo]
       .filter(Boolean)
@@ -202,6 +236,52 @@ export default function MiCuenta() {
   const attendancePercent = expectedPeople
     ? Math.round((arrivedPeople / expectedPeople) * 100)
     : 0;
+
+
+  const dashboardActivities: DashboardActivity[] = activityRows.map((item) => {
+    const details = item.detalles || {};
+    const person = typeof details.nombre === "string" ? details.nombre : "Un invitado";
+    const labels: Record<string, { title: string; detail: string; tone: DashboardActivity["tone"] }> = {
+      rsvp_confirmado: { title: `${person} confirmó asistencia`, detail: "Nueva respuesta RSVP", tone: "success" },
+      rsvp_rechazado: { title: `${person} no asistirá`, detail: "Respuesta RSVP actualizada", tone: "warning" },
+      checkin: { title: `${person} ingresó al evento`, detail: "Check-in registrado", tone: "success" },
+      checkin_revertido: { title: `Se revirtió un check-in`, detail: person, tone: "warning" },
+    };
+    const fallback = { title: item.accion.replaceAll("_", " "), detail: person, tone: "neutral" as const };
+    const copy = labels[item.accion] || fallback;
+    return {
+      id: item.id,
+      ...copy,
+      time: new Date(item.created_at).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
+    };
+  });
+
+  const dashboardTasks: DashboardTask[] = invite ? [
+    {
+      id: "publish",
+      title: invite.estado === "publicada" ? "Invitación publicada" : "Publicar invitación",
+      detail: invite.estado === "publicada" ? "Tu enlace ya está disponible para los invitados." : "Termina el diseño y publica cuando esté listo.",
+      href: `/mi-cuenta/studio/${invite.id}`,
+      action: invite.estado === "publicada" ? "Editar" : "Continuar",
+      done: invite.estado === "publicada",
+    },
+    ...(modalityFeatures.publicRsvp ? [{
+      id: "responses",
+      title: pending ? `${pending} invitado${pending === 1 ? "" : "s"} por responder` : "RSVP al día",
+      detail: pending ? "Comparte o reenvía la invitación a los pendientes." : "No tienes respuestas pendientes.",
+      href: personalized ? "#invitados" : "#invitados",
+      action: pending ? "Revisar" : "Ver",
+      done: pending === 0 && related.length > 0,
+    }] : []),
+    {
+      id: "album",
+      title: albumCount ? `${albumCount} foto${albumCount === 1 ? "" : "s"} en el álbum` : "Activar el álbum",
+      detail: albumCount ? "Revisa y modera los recuerdos compartidos." : "Comparte el QR para comenzar a recibir fotografías.",
+      href: "/mi-cuenta/album",
+      action: albumCount ? "Revisar" : "Abrir",
+      done: albumCount > 0,
+    },
+  ] : [];
 
   function toggleGuestSelection(guestId: string) {
     setSelectedGuestIds((current) =>
@@ -359,161 +439,31 @@ export default function MiCuenta() {
         </section>
       ) : (
         <>
-          <section id="evento" className="client-event-card">
-            <div>
-              <span className="client-pill">{next.tipo}</span>
-              <h2>{next.nombre}</h2>
-              <p>
-                {next.fecha} · {next.lugar || "Ubicación por definir"}
-              </p>
-              <div className="client-actions">
-                {invite && next.estado !== "finalizado" && (
-                  <a className="client-primary" href={`/mi-cuenta/studio/${invite.id}`}>
-                    {invite.estado === "publicada" ? "Editar invitación" : "Continuar editando"}
-                  </a>
-                )}
-                {invite?.estado === "publicada" && (
-                  <a className="client-secondary" href={`/invitacion/${invite.slug}`} target="_blank">
-                    Ver invitación
-                  </a>
-                )}
-                {invite && (
-                  <a className="client-secondary" href="/mi-cuenta/album">
-                    Álbum
-                  </a>
-                )}
-                {invite?.estado === "pendiente_activacion" && (
-                  <span className="client-pending-activation">⏳ Activación solicitada</span>
-                )}
-                {next.estado !== "finalizado" ? (
-                  <button
-                    type="button"
-                    className="client-secondary client-share-trigger"
-                    onClick={() => setSharingPublic(true)}
-                    disabled={!invite || invite.estado !== "publicada"}
-                  >
-                    Compartir
-                  </button>
-                ) : (
-                  <span className="client-finished-pill">✓ Evento finalizado</span>
-                )}
-              </div>
-            </div>
-            <div className="client-event-side">
-              <small>Estado</small>
-              <strong>{invite?.estado || next.estado}</strong>
-              <span>{invite?.modalidad ? invitationModalityLabel(invite.modalidad) : ""}</span>
-            </div>
-          </section>
-
-          {modalityFeatures.publicRsvp ? (
-            <section id="invitados" className="client-stats">
-              <article>
-                <span>{personalized ? "Invitados" : "Respuestas"}</span>
-                <strong>{related.length}</strong>
-                <small>{personalized ? "Registros con pase" : "Registros RSVP"}</small>
-              </article>
-              <article>
-                <span>Confirmados</span>
-                <strong>{confirmed}</strong>
-                <small>RSVP recibidos</small>
-              </article>
-              <article>
-                <span>Pendientes</span>
-                <strong>{pending}</strong>
-                <small>Por responder</small>
-              </article>
-            </section>
-          ) : (
-            <section className="client-modality-notice">
-              <div>
-                <p className="eyebrow">Modalidad activa</p>
-                <h2>Solo enlace</h2>
-                <p>Esta invitación se comparte con un enlace público y no recibe confirmaciones ni utiliza pases individuales.</p>
-              </div>
-              <span>Sin RSVP</span>
-            </section>
+          {invite && (
+            <EventDashboard
+              eventName={next.nombre}
+              eventType={next.tipo}
+              date={next.fecha}
+              venue={next.lugar || "Ubicación por definir"}
+              invitationStatus={invite.estado || next.estado}
+              modalityLabel={invitationModalityLabel(modality)}
+              invitationId={invite.id}
+              invitationSlug={invite.slug}
+              published={invite.estado === "publicada"}
+              publicRsvp={modalityFeatures.publicRsvp}
+              personalized={personalized}
+              guestCount={related.length}
+              confirmedCount={confirmed}
+              pendingCount={pending}
+              rejectedCount={rejected}
+              expectedPeople={expectedPeople}
+              arrivedPeople={arrivedPeople}
+              albumCount={albumCount}
+              activities={dashboardActivities}
+              tasks={dashboardTasks}
+              onShare={() => setSharingPublic(true)}
+            />
           )}
-
-          {personalized && (
-            <section className="client-checkin-summary">
-              <div>
-                <p className="eyebrow">Check-in</p>
-                <h2>Asistencia del evento</h2>
-                <p>Consulta cuántas personas han ingresado y descarga el reporte para recepción.</p>
-              </div>
-              <div className="client-checkin-metrics">
-                <article><span>Esperados</span><strong>{expectedPeople}</strong></article>
-                <article><span>Han llegado</span><strong>{arrivedPeople}</strong></article>
-                <article><span>Asistencia</span><strong>{attendancePercent}%</strong></article>
-              </div>
-              <div className="client-checkin-progress"><span style={{ width: `${attendancePercent}%` }} /></div>
-              <div className="client-checkin-actions">
-                <button type="button" className="client-secondary" onClick={exportGuestReport} disabled={!related.length}>Exportar CSV</button>
-                <button type="button" className="client-secondary" onClick={() => window.print()} disabled={!related.length}>Imprimir lista</button>
-              </div>
-            </section>
-          )}
-
-          <section className="client-grid">
-            <article>
-              <p className="eyebrow">Modalidad</p>
-              <h3>{invitationModalityLabel(modality)}</h3>
-              {modalityFeatures.publicRsvp ? (
-                <>
-                  <p>Consulta el avance de las respuestas de tus invitados.</p>
-                  <div className="client-progress">
-                    <span
-                      style={{
-                        width: `${related.length ? Math.round((confirmed / related.length) * 100) : 0}%`,
-                      }}
-                    />
-                  </div>
-                  <small>
-                    {related.length ? Math.round((confirmed / related.length) * 100) : 0}% de registros confirmados
-                  </small>
-                </>
-              ) : (
-                <p>Comparte el enlace general. Esta modalidad no muestra RSVP, pases individuales ni check-in.</p>
-              )}
-            </article>
-
-            <article id="compartir">
-              <p className="eyebrow">Compartir</p>
-              <h3>Tu invitación</h3>
-              {invite?.estado === "publicada" ? (
-                <>
-                  <p>
-                    {personalized
-                      ? "Comparte el enlace general o envía el pase individual de cada invitado."
-                      : modalityFeatures.publicRsvp
-                        ? "Comparte el enlace público para recibir confirmaciones RSVP."
-                        : "Comparte el mismo enlace público por WhatsApp, correo o redes sociales."}
-                  </p>
-                  <div className="client-link">/invitacion/{invite.slug}</div>
-                  <div className="client-share-actions">
-                    <button className="client-primary" onClick={() => setSharingPublic(true)}>
-                      Compartir por WhatsApp
-                    </button>
-                    <button
-                      className="client-secondary"
-                      onClick={() =>
-                        navigator.clipboard.writeText(`${location.origin}/invitacion/${invite.slug}`)
-                      }
-                    >
-                      Copiar enlace
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p>
-                  {invite?.estado === "pendiente_activacion"
-                    ? "Tu solicitud de activación fue recibida. En cuanto sea aprobada, aquí aparecerá el enlace definitivo para compartir."
-                    : "Tu invitación todavía no está publicada. Cuando esté lista, aquí aparecerá el enlace para compartir."}
-                </p>
-              )}
-            </article>
-          </section>
 
           {invite && personalized && (
             <section className="client-guests-panel">
