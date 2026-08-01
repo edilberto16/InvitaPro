@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import ShareInvitationModal from "../../components/share-invitation-modal";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
 import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
+import ConfirmationsCenter, { type ConfirmationRecord } from "../../components/guests/confirmations-center";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
@@ -73,6 +74,7 @@ export default function MiCuenta() {
   const [events, setEvents] = useState<Event[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [confirmations, setConfirmations] = useState<ConfirmationRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sharingPublic, setSharingPublic] = useState(false);
@@ -137,6 +139,7 @@ export default function MiCuenta() {
     if (!currentEvents.length) {
       setInvites([]);
       setGuests([]);
+      setConfirmations([]);
       setLoading(false);
       return;
     }
@@ -160,6 +163,7 @@ export default function MiCuenta() {
 
     if (!currentInvites.length) {
       setGuests([]);
+      setConfirmations([]);
       setActivityRows([]);
       setAlbumCount(0);
       setLoading(false);
@@ -187,19 +191,33 @@ export default function MiCuenta() {
     setActivityRows(((activityResult.data || []) as ActivityRow[]));
     setAlbumCount(albumResult.count || 0);
 
-    const { data: guestRows, error: guestError } = await supabase
-      .from("invitados")
-      .select(
-        "id,invitacion_id,nombre,telefono,correo,estado,adultos_permitidos,ninos_permitidos,mesa,codigo,checkin_adultos,checkin_ninos,checkin_at,ultimo_checkin_at,notas"
-      )
-      .in(
-        "invitacion_id",
-        currentInvites.map((item) => item.id)
-      )
-      .order("nombre", { ascending: true });
+    const [guestResult, confirmationResult] = await Promise.all([
+      supabase
+        .from("invitados")
+        .select(
+          "id,invitacion_id,nombre,telefono,correo,estado,adultos_permitidos,ninos_permitidos,mesa,codigo,checkin_adultos,checkin_ninos,checkin_at,ultimo_checkin_at,notas"
+        )
+        .in(
+          "invitacion_id",
+          currentInvites.map((item) => item.id)
+        )
+        .order("nombre", { ascending: true }),
+      supabase
+        .from("confirmaciones")
+        .select(
+          "id,invitacion_id,invitado_id,nombre,asistira,adultos,ninos,mensaje,telefono,created_at,updated_at,invitados(id,nombre,codigo,correo,mesa,telefono)"
+        )
+        .in(
+          "invitacion_id",
+          currentInvites.map((item) => item.id)
+        )
+        .order("updated_at", { ascending: false }),
+    ]);
 
-    if (guestError) setError(guestError.message);
-    setGuests((guestRows || []) as Guest[]);
+    if (guestResult.error) setError(guestResult.error.message);
+    if (confirmationResult.error) setError(confirmationResult.error.message);
+    setGuests((guestResult.data || []) as Guest[]);
+    setConfirmations((confirmationResult.data || []) as unknown as ConfirmationRecord[]);
     setSelectedGuestIds([]);
     setLoading(false);
   }
@@ -216,9 +234,12 @@ export default function MiCuenta() {
   const next = events[0];
   const invite = invites.find((item) => item.evento_id === next?.id);
   const related = guests.filter((item) => item.invitacion_id === invite?.id);
-  const confirmed = related.filter((item) => item.estado === "confirmado").length;
-  const pending = related.filter((item) => item.estado === "pendiente").length;
-  const rejected = related.filter((item) => ["no_asistira", "rechazado"].includes(item.estado)).length;
+  const relatedConfirmations = confirmations.filter((item) => item.invitacion_id === invite?.id);
+  const personalizedConfirmed = related.filter((item) => item.estado === "confirmado").length;
+  const personalizedPending = related.filter((item) => item.estado === "pendiente").length;
+  const personalizedRejected = related.filter((item) => ["no_asistira", "rechazado"].includes(item.estado)).length;
+  const publicConfirmed = relatedConfirmations.filter((item) => item.asistira).length;
+  const publicRejected = relatedConfirmations.filter((item) => !item.asistira).length;
   const filteredGuests = related.filter((item) =>
     [item.nombre, item.telefono, item.correo, item.codigo]
       .filter(Boolean)
@@ -229,6 +250,13 @@ export default function MiCuenta() {
   const modality = normalizeInvitationModality(invite?.modalidad);
   const modalityFeatures = modalityCapabilities(modality);
   const personalized = modalityFeatures.personalizedPasses;
+  const confirmed = personalized ? personalizedConfirmed : publicConfirmed;
+  const pending = personalized ? personalizedPending : 0;
+  const rejected = personalized ? personalizedRejected : publicRejected;
+  const responseCount = relatedConfirmations.length;
+  const confirmedPeople = relatedConfirmations
+    .filter((item) => item.asistira)
+    .reduce((total, item) => total + (item.adultos || 0) + (item.ninos || 0), 0);
   const expectedPeople = related.reduce(
     (total, item) => total + (item.adultos_permitidos || 0) + (item.ninos_permitidos || 0),
     0
@@ -240,6 +268,26 @@ export default function MiCuenta() {
   const attendancePercent = expectedPeople
     ? Math.round((arrivedPeople / expectedPeople) * 100)
     : 0;
+
+  useEffect(() => {
+    if (!invite?.id) return;
+    const channel = supabase
+      .channel(`client-confirmations-${invite.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "confirmaciones",
+          filter: `invitacion_id=eq.${invite.id}`,
+        },
+        () => void load()
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [invite?.id, supabase]);
 
 
   const dashboardActivities: DashboardActivity[] = activityRows.map((item) => {
@@ -271,11 +319,19 @@ export default function MiCuenta() {
     },
     ...(modalityFeatures.publicRsvp ? [{
       id: "responses",
-      title: pending ? `${pending} invitado${pending === 1 ? "" : "s"} por responder` : "RSVP al día",
-      detail: pending ? "Comparte o reenvía la invitación a los pendientes." : "No tienes respuestas pendientes.",
-      href: personalized ? "#invitados" : "#invitados",
-      action: pending ? "Revisar" : "Ver",
-      done: pending === 0 && related.length > 0,
+      title: personalized
+        ? pending
+          ? `${pending} invitado${pending === 1 ? "" : "s"} por responder`
+          : "RSVP al día"
+        : `${responseCount} respuesta${responseCount === 1 ? "" : "s"} recibida${responseCount === 1 ? "" : "s"}`,
+      detail: personalized
+        ? pending
+          ? "Comparte o reenvía la invitación a los pendientes."
+          : "No tienes respuestas pendientes."
+        : "Consulta confirmados, asistentes y comentarios en tiempo real.",
+      href: "#confirmaciones",
+      action: "Ver",
+      done: personalized ? pending === 0 && related.length > 0 : responseCount > 0,
     }] : []),
     {
       id: "album",
@@ -413,7 +469,7 @@ export default function MiCuenta() {
         </a>
         <nav>
           <a href="#evento">Mi evento</a>
-          {modalityFeatures.publicRsvp && <a href="#invitados">{personalized ? "Invitados" : "Confirmaciones"}</a>}
+          {modalityFeatures.publicRsvp && <a href="#confirmaciones">Confirmaciones</a>}
           <a href="/mi-cuenta/biblioteca">Biblioteca</a>
           <a href="#compartir">Compartir</a>
           <button onClick={salir}>Salir</button>
@@ -479,16 +535,29 @@ export default function MiCuenta() {
               published={invite.estado === "publicada"}
               publicRsvp={modalityFeatures.publicRsvp}
               personalized={personalized}
-              guestCount={related.length}
+              guestCount={personalized ? related.length : responseCount}
               confirmedCount={confirmed}
               pendingCount={pending}
               rejectedCount={rejected}
-              expectedPeople={expectedPeople}
+              expectedPeople={personalized ? expectedPeople : confirmedPeople}
               arrivedPeople={arrivedPeople}
               albumCount={albumCount}
               activities={dashboardActivities}
               tasks={dashboardTasks}
               onShare={() => setSharingPublic(true)}
+            />
+          )}
+
+          {invite && modalityFeatures.publicRsvp && (
+            <ConfirmationsCenter
+              invitationTitle={invite.titulo}
+              invitationSlug={invite.slug}
+              confirmations={relatedConfirmations}
+              personalized={personalized}
+              onOpenGuest={(guestId) => {
+                const guest = related.find((item) => item.id === guestId);
+                if (guest) setCrmGuest(guest);
+              }}
             />
           )}
 

@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [2.32.0] - 2026-08-01
+
+### Añadido
+- Centro de Confirmaciones para el portal del cliente.
+- Lista en tiempo real de respuestas RSVP, comentarios, asistentes y rechazos.
+- Filtros por estado, comentarios y búsqueda por nombre, teléfono, código o mesa.
+- Exportación CSV de confirmaciones.
+- Acceso a WhatsApp y ficha CRM cuando existe un pase personalizado.
+- Nuevo componente `components/guests/confirmations-center.tsx`.
+
+### Corregido
+- El Dashboard ahora usa `confirmaciones` como fuente real para RSVP público, en lugar de depender de la tabla `invitados`.
+- Los contadores de respuestas, confirmados y personas ya reflejan los registros públicos.
+- El enlace superior `Confirmaciones` ahora lleva al módulo correcto.
+- La pantalla se actualiza mediante Supabase Realtime cuando entra una nueva respuesta.
+- Se cambió `align-items: end` por `flex-end` para eliminar la advertencia de Autoprefixer.
+
+### Compatibilidad
+- Funciona con RSVP público y pases personalizados.
+- No requiere migración de Supabase.
+- No modifica el panel administrativo ni la invitación pública.
+- Se mantiene un único `CHANGELOG.md`.
+
 ## [2.31.1] - 2026-08-01
 
 ### Corregido

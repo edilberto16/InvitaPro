@@ -227,3 +227,8 @@ El Studio incluye una galería visual de temas con búsqueda, colecciones, favor
 ## CRM de invitados
 
 Cada invitado dispone de una ficha con contacto, pases, RSVP, check-in, notas internas y acceso a WhatsApp.
+
+
+## Centro de Confirmaciones
+
+El portal del cliente incluye un módulo de RSVP con respuestas en tiempo real, filtros, comentarios, asistentes, exportación CSV y acceso al CRM de invitados.
