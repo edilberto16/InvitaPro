@@ -498,3 +498,14 @@
 .studio-canvas-selection-buttons button:disabled{opacity:.35;cursor:not-allowed}
 .studio-canvas-selection-buttons .studio-canvas-visibility-button{min-width:62px}
 @media(max-width:900px){.studio-canvas-selection-actions{align-items:flex-start}.studio-canvas-selection-buttons{flex-wrap:wrap;justify-content:flex-end}.studio-canvas-navigator-label{max-width:105px;overflow:hidden;text-overflow:ellipsis}}
+
+/* Studio 2.25.0 — drag & drop del navegador visual */
+.studio-canvas-navigator-track>button{touch-action:pan-y;user-select:none}
+.studio-canvas-navigator-track>button.dragging{opacity:.45;transform:scale(.96);cursor:grabbing}
+.studio-canvas-navigator-track>button.drop-before::before,
+.studio-canvas-navigator-track>button.drop-after::after{content:"";position:absolute;top:4px;bottom:4px;width:3px;border-radius:999px;background:#72264f;box-shadow:0 0 0 3px rgba(114,38,79,.12);z-index:3}
+.studio-canvas-navigator-track>button.drop-before::before{left:-5px}
+.studio-canvas-navigator-track>button.drop-after::after{right:-5px}
+.studio-canvas-navigator-grip{font-size:11px;letter-spacing:-3px;color:#a38c98;cursor:grab;margin-left:1px}
+.studio-canvas-drag-help{margin:0;color:#8d7582;font-size:10px;line-height:1.4;text-align:center}
+@media(max-width:700px){.studio-canvas-drag-help{font-size:9px}.studio-canvas-navigator-track>button{padding:8px 10px}}

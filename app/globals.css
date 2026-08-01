@@ -5635,3 +5635,21 @@ a { color: inherit; }
 @media(max-width:850px){.camp-equipment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.camp-verse-card{padding:34px 24px}}
 @media(max-width:520px){.camp-equipment-block{padding:24px 16px}.camp-equipment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.camp-equipment-grid article{min-height:100px}.premium-public-invite[data-family="campamento"] .premium-hero{min-height:82vh}}
 @media(prefers-reduced-motion:reduce){.camp-atmosphere *,.camp-atmosphere::before{animation:none!important}}
+
+/* Studio 2.25.0 — destino visual al reordenar dentro de la vista previa */
+.studio-preview-mode .invitation-section-slot.studio-drop-before::before,
+.studio-preview-mode .invitation-section-slot.studio-drop-after::after{content:"";position:absolute;left:12px;right:12px;height:4px;border-radius:999px;background:#72264f;box-shadow:0 0 0 4px rgba(114,38,79,.16);z-index:80;pointer-events:none}
+.studio-preview-mode .invitation-section-slot.studio-drop-before::before{top:-2px}
+.studio-preview-mode .invitation-section-slot.studio-drop-after::after{bottom:-2px}
+.studio-preview-mode .invitation-section-slot.studio-section-dragging{opacity:.48;filter:saturate(.6);transform:scale(.985)}
+.studio-preview-mode .studio-preview-drag-handle{cursor:grab;touch-action:none}
+.studio-preview-mode .studio-preview-drag-handle:active{cursor:grabbing}
+
+
+/* Studio inline editing v2.26.0 */
+.studio-preview-mode .studio-inline-editable[data-inline-field]{position:relative;display:inline;cursor:text;border-radius:.35rem;outline:1px dashed transparent;outline-offset:.18rem;transition:background-color .18s ease,outline-color .18s ease,box-shadow .18s ease}
+.studio-preview-mode .studio-inline-editable[data-inline-field]:hover{background:rgba(255,255,255,.14);outline-color:rgba(255,255,255,.55)}
+.studio-preview-mode .premium-intro-block .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-details-section .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-story-section .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-gifts-section .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-location-section .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-rsvp-section .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-wishes-section .studio-inline-editable[data-inline-field]:hover,.studio-preview-mode .premium-album-section .studio-inline-editable[data-inline-field]:hover{background:color-mix(in srgb,var(--invite-accent,#72264f) 10%,transparent);outline-color:color-mix(in srgb,var(--invite-accent,#72264f) 50%,transparent)}
+.studio-preview-mode .studio-inline-editable.is-editing{display:inline-block;min-width:2.5rem;max-width:100%;padding:.08em .18em;background:#fff!important;color:#241b20!important;outline:2px solid var(--invite-accent,#72264f)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--invite-accent,#72264f) 18%,transparent);cursor:text;white-space:pre-wrap;z-index:30}
+.studio-preview-mode .studio-inline-editable.is-multiline{white-space:pre-line}
+.studio-preview-mode .studio-inline-editable.studio-inline-block{display:block;width:100%;min-height:1.5em}

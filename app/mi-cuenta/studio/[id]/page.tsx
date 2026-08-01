@@ -148,8 +148,15 @@ export default function StudioPage(){
  useEffect(()=>{
   function handlePreviewMessage(event:MessageEvent){
    if(event.origin!==window.location.origin)return;
-   const payload=event.data as {type?:string;sectionId?:TemplateSectionId;sourceId?:TemplateSectionId;targetId?:TemplateSectionId;order?:TemplateSectionId[];direction?:"up"|"down";variant?:string};
+   const payload=event.data as {type?:string;sectionId?:TemplateSectionId;sourceId?:TemplateSectionId;targetId?:TemplateSectionId;order?:TemplateSectionId[];direction?:"up"|"down";variant?:string;field?:string;value?:string};
    if(payload?.type==="invitapro:preview-ready"){sendPreviewState();return;}
+   if(payload?.type==="invitapro:inline-edit"&&payload.field&&typeof payload.value==="string"){
+    const value=payload.value;
+    const setters:Record<string,(next:string)=>void>={title:setTitle,subtitle:setSubtitle,message:setMessage,dress:setDress,historyTitle:setHistoryTitle,historyText:setHistoryText,gift:setGift,hashtag:setHashtag,socialText:setSocialText,wishesTitle:setWishesTitle,wishesText:setWishesText,albumTitle:setAlbumTitle,albumText:setAlbumText,venue:setVenue,address:setAddress,rsvpText:setRsvpText};
+    const setter=setters[payload.field];
+    if(setter){setter(value);setSaved("Texto actualizado · autoguardando");}
+    return;
+   }
    if(payload?.type==="invitapro:select-section"&&payload.sectionId){
     setSelectedPreviewSection(payload.sectionId);
     const editorId=BLOCK_TO_EDITOR[payload.sectionId]||"estructura";
@@ -254,7 +261,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.24.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.26.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -651,6 +658,7 @@ export default function StudioPage(){
      onSelect={openBlockEditor}
      onToggle={toggleBlock}
      onMove={moveBlockAccessible}
+     onReorder={reorderBlock}
     />
     <div className="studio-preview-canvas" style={{"--studio-preview-zoom":previewZoom/100} as CSSProperties}>
      <div className="studio-live-preview-shell">

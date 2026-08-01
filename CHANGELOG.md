@@ -1,6 +1,40 @@
 # CHANGELOG
 
+## [2.26.0] — 2026-08-01
+
+### Añadido
+- Edición inline mediante doble clic sobre textos compatibles dentro de la vista previa del Studio.
+- Confirmación con `Enter`, cancelación con `Esc` y soporte de `Shift + Enter` en textos multilínea.
+- Sincronización inmediata con el State Engine, History Engine y autoguardado.
+- Indicadores visuales de texto editable y estado activo de edición.
+
+### Campos compatibles
+- Nombre del evento, introducción, código de vestimenta, historia, regalos, hashtag, buzón de deseos, álbum, ubicación y mensaje RSVP.
+
+### Compatibilidad
+- La edición inline solo se habilita en modo Studio.
+- No modifica la invitación pública, el panel administrativo ni la estructura de `design_json`.
+- No requiere migraciones.
+
 Todos los cambios relevantes de InvitaPro se documentan en este archivo. A partir de la versión 2.20.0 no se crearán archivos `CAMBIOS-vX.Y.Z.md` separados.
+
+## [2.25.0] — 2026-08-01
+
+### Añadido
+- Reordenamiento directo mediante arrastre en la vista previa real del Studio.
+- Indicadores visuales para insertar un bloque antes o después del destino.
+- Drag & Drop en el navegador horizontal del canvas.
+- Soporte táctil mediante Pointer Events en el navegador de bloques.
+- Mensaje accesible y persistencia automática del nuevo `section_order`.
+
+### Cambiado
+- La portada permanece fija y no puede arrastrarse.
+- El reordenamiento se integra con el State Engine, History Engine y autoguardado existentes.
+- `design_json.studio_version` y la versión del proyecto se actualizaron a `2.25.0`.
+
+### Compatibilidad
+- No requiere migraciones de base de datos.
+- No modifica el portal del cliente, el panel administrativo ni la invitación pública fuera del modo Studio.
 
 ## [2.24.0.1] — 2026-07-31
 

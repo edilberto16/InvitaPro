@@ -210,3 +210,12 @@ El proyecto utiliza versionado semántico cuando corresponde:
 ## Licencia
 
 Proyecto privado. Todos los derechos reservados © InvitaPro.
+
+
+## Estado del Studio
+
+- ✅ Visual Canvas
+- ✅ Drag & Drop real dentro del canvas
+- 🚧 Edición inline
+- 🚧 Inspector Pro
+- 🚧 Theme Engine
