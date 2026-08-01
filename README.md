@@ -6,7 +6,7 @@
 
 Studio visual · Plantillas · RSVP · Invitados · Álbum · Check-in · WhatsApp
 
-![Version](https://img.shields.io/badge/version-v2.20.0-72264f)
+![Version](https://img.shields.io/badge/version-v2.28.0.2-72264f)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![React](https://img.shields.io/badge/React-19-149eca)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
@@ -194,7 +194,7 @@ El proyecto utiliza versionado semántico cuando corresponde:
 - [ ] Componentes de bloque desacoplados.
 - [ ] Drag & Drop avanzado.
 - [ ] Edición inline.
-- [ ] Inspector visual profesional.
+- [x] Inspector visual profesional.
 - [ ] Temas globales por plantilla.
 - [ ] Notificaciones push de RSVP.
 - [ ] Check-in QR en tiempo real.
@@ -217,5 +217,5 @@ Proyecto privado. Todos los derechos reservados © InvitaPro.
 - ✅ Visual Canvas
 - ✅ Drag & Drop real dentro del canvas
 - 🚧 Edición inline
-- 🚧 Inspector Pro
-- 🚧 Theme Engine
+- ✅ Inspector Pro
+- ✅ Theme Engine Core

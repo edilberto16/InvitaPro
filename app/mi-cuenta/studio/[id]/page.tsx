@@ -3,7 +3,7 @@ import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties,type DragEvent} from "react";
 import {useParams,useSearchParams} from "next/navigation";
 import {useStudioState} from "@/lib/studio/use-studio-state";
-import type {StudioSnapshot} from "@/lib/studio/studio-types";
+import type {StudioSnapshot,StudioSectionSettings} from "@/lib/studio/studio-types";
 import {useStudioHistory} from "@/lib/studio/use-studio-history";
 import {createClient} from "@/lib/supabase/client";
 import {TEMPLATE_CATALOG,TEMPLATE_COLLECTIONS,canUseTemplate,getTemplateById,getTemplateFamilyVariants,getTemplateRequiredPlan,matchesTemplateSearch,normalizeTemplatePlan,templatePlanLabel,type TemplateCollectionId,type TemplatePlanTier} from "@/lib/template-catalog";
@@ -12,9 +12,13 @@ import MediaLibraryPicker from "@/components/media/media-library-picker";
 import StudioSectionNavigation from "@/components/studio/studio-section-navigation";
 import StudioBlockVariantSelector from "@/components/studio/studio-block-variant-selector";
 import StudioCanvasNavigator from "@/components/studio/studio-canvas-navigator";
+import StudioInspector from "@/components/studio/inspector/studio-inspector";
+import StudioThemeSelector from "@/components/studio/themes/studio-theme-selector";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
 import { invitationModalityLabel, modalityCapabilities, normalizeInvitationModality } from "@/lib/invitation-modality";
 import {normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
+import { defaultThemeIdForTemplate } from "@/lib/themes/theme-engine";
+import { getThemeById } from "@/lib/themes/theme-registry";
 import {STUDIO_BLOCK_CATEGORY as BLOCK_CATEGORY,STUDIO_BLOCK_REGISTRY as BLOCKS,STUDIO_BLOCK_TO_EDITOR as BLOCK_TO_EDITOR,STUDIO_BLOCK_VARIANTS as BLOCK_VARIANTS,STUDIO_EDITOR_BLOCKS as EDITOR_BLOCKS,STUDIO_EDITOR_TO_BLOCK as EDITOR_TO_BLOCK,STUDIO_EDITOR_SECTIONS,type StudioBlockCategory as BlockCategory,type StudioBlockVariantMap as BlockVariantMap} from "@/lib/studio/block-registry";
 
 type Invite={
@@ -52,6 +56,7 @@ export default function StudioPage(){
  const [error,setError]=useState("");
  const [active,setActive]=useState("portada");
  const [showTemplates,setShowTemplates]=useState(false);
+ const [showThemes,setShowThemes]=useState(false);
  const [templateFilter,setTemplateFilter]=useState<"recommended"|"todas"|TemplateCollectionId>("recommended");
  const [templateSearch,setTemplateSearch]=useState("");
  const [pendingTemplate,setPendingTemplate]=useState<string|null>(null);
@@ -64,8 +69,8 @@ export default function StudioPage(){
  const [activationIssues,setActivationIssues]=useState<string[]>([]);
  const [commercialPlans,setCommercialPlans]=useState<CommercialPlan[]>(DEFAULT_COMMERCIAL_PLANS);
  const {
-  state:{title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants},
-  setState:setStudioState,setTitle,setMessage,setSubtitle,setColor,setMusic,setWhatsapp,setProgram,setDress,setHistoryTitle,setHistoryText,setLodging,setGift,setVideoUrl,setFaqText,setSpecialPeople,setHashtag,setSocialText,setWishesTitle,setWishesText,setAlbumTitle,setAlbumText,setRsvpText,setCover,setGallery,setDate,setTime,setVenue,setAddress,setMapsUrl,setVisibility,setSectionOrder,setBlockVisibility,setBlockVariants,
+  state:{title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants,sectionSettings,themeId,themeOverrides},
+  setState:setStudioState,setTitle,setMessage,setSubtitle,setColor,setMusic,setWhatsapp,setProgram,setDress,setHistoryTitle,setHistoryText,setLodging,setGift,setVideoUrl,setFaqText,setSpecialPeople,setHashtag,setSocialText,setWishesTitle,setWishesText,setAlbumTitle,setAlbumText,setRsvpText,setCover,setGallery,setDate,setTime,setVenue,setAddress,setMapsUrl,setVisibility,setSectionOrder,setBlockVisibility,setBlockVariants,setSectionSettings,setThemeId,setThemeOverrides,
  }=useStudioState();
  const [mediaPicker,setMediaPicker]=useState<null|"cover"|"gallery"|"music">(null);
  const [draggedBlock,setDraggedBlock]=useState<TemplateSectionId|null>(null);
@@ -85,14 +90,14 @@ export default function StudioPage(){
  const currentSignatureRef=useRef("");
  const savingRef=useRef(false);
 
- const currentSnapshot=useMemo<StudioSnapshot>(()=>({title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants}),[title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants]);
+ const currentSnapshot=useMemo<StudioSnapshot>(()=>({title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants,sectionSettings,themeId,themeOverrides}),[title,message,subtitle,color,music,whatsapp,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,date,time,venue,address,mapsUrl,visibility,sectionOrder,blockVisibility,blockVariants,sectionSettings,themeId,themeOverrides]);
  const currentSignature=useMemo(()=>JSON.stringify(currentSnapshot),[currentSnapshot]);
  currentSignatureRef.current=currentSignature;
  const hasUnsavedChanges=initializedRef.current&&currentSignature!==savedSignatureRef.current;
  const publishedSignature=typeof invite?.design_json?.published_signature==="string"?invite.design_json.published_signature:"";
  const hasUnpublishedChanges=invite?.estado==="publicada"&&currentSignature!==publishedSignature;
 
- const {canUndo,canRedo,historyIndex,historyLength,isApplyingHistoryRef,resetHistory,undo:undoHistory,redo:redoHistory}=useStudioHistory({snapshot:currentSnapshot,setStudioState});
+ const {historyIndex,historyLength,isApplyingHistoryRef,resetHistory,undo:undoHistory,redo:redoHistory}=useStudioHistory({snapshot:currentSnapshot,setStudioState});
  function undo(){if(undoHistory())setSaved("Cambio deshecho");}
  function redo(){if(redoHistory())setSaved("Cambio rehecho");}
 
@@ -140,10 +145,10 @@ export default function StudioPage(){
     music,
     whatsapp,
     event:{fecha:date,hora:time||null,lugar:venue,direccion:address,maps_url:mapsUrl},
-    designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
+    designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,section_settings:sectionSettings,theme_id:themeId,theme_overrides:themeOverrides,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
    }
   },window.location.origin);
- },[invite?.template_key,sectionOrder,blockVisibility,blockVariants,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
+ },[invite?.template_key,sectionOrder,blockVisibility,blockVariants,sectionSettings,themeId,themeOverrides,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
 
  useEffect(()=>{
   function handlePreviewMessage(event:MessageEvent){
@@ -224,6 +229,9 @@ export default function StudioPage(){
   setVisibility(v=>({...v,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})}));
   setSectionOrder(normalizeTemplateSectionOrder(d.section_order));
   setBlockVariants(typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{});
+  setSectionSettings(typeof d.section_settings==="object"&&d.section_settings?d.section_settings as Record<TemplateSectionId,StudioSectionSettings>:{});
+  setThemeId(typeof d.theme_id==="string"?d.theme_id:defaultThemeIdForTemplate(i.template_key));
+  setThemeOverrides(typeof d.theme_overrides==="object"&&d.theme_overrides?d.theme_overrides as Record<string,string>:{});
   setBlockVisibility({
    hero:true,
    intro:d.mostrar_intro!==false,
@@ -244,7 +252,7 @@ export default function StudioPage(){
    rsvp:d.mostrar_rsvp!==false,
   });
   window.setTimeout(()=>{
-   const snapshot:StudioSnapshot={title:i.titulo,message:typeof d.mensaje==="string"?d.mensaje:"",subtitle:typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento",color:i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f",music:i.musica_url||"",whatsapp:i.whatsapp||"",program:typeof d.programa==="string"?d.programa:"",dress:typeof d.vestimenta==="string"?d.vestimenta:"Formal",historyTitle:typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia",historyText:typeof d.historia_texto==="string"?d.historia_texto:"",lodging:typeof d.hospedaje==="string"?d.hospedaje:"",gift:typeof d.regalos==="string"?d.regalos:"",videoUrl:typeof d.video_url==="string"?d.video_url:"",faqText:typeof d.faq==="string"?d.faq:"",specialPeople:typeof d.personas_especiales==="string"?d.personas_especiales:"",hashtag:typeof d.hashtag==="string"?d.hashtag:"",socialText:typeof d.hashtag_texto==="string"?d.hashtag_texto:"Comparte tus mejores momentos con nosotros",wishesTitle:typeof d.deseos_titulo==="string"?d.deseos_titulo:"Déjanos un mensaje",wishesText:typeof d.deseos_texto==="string"?d.deseos_texto:"Tus palabras también serán parte de este día.",albumTitle:typeof d.album_titulo==="string"?d.album_titulo:"Comparte tus recuerdos",albumText:typeof d.album_texto==="string"?d.album_texto:"Sube las fotografías que captures durante nuestra celebración.",rsvpText:typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia",cover:typeof d.portada_url==="string"?d.portada_url:"",gallery:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[],date:i.eventos?.fecha||"",time:i.eventos?.hora?.slice(0,5)||"",venue:i.eventos?.lugar||"",address:i.eventos?.direccion||"",mapsUrl:i.eventos?.maps_url||"",visibility:{...visibility,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})},sectionOrder:normalizeTemplateSectionOrder(d.section_order),blockVisibility:{hero:true,intro:d.mostrar_intro!==false,countdown:d.mostrar_contador!==false,details:d.mostrar_detalles!==false,program:d.mostrar_programa!==false,gallery:d.mostrar_galeria!==false,history:d.mostrar_historia===true,lodging:d.mostrar_hospedaje===true,gifts:d.mostrar_regalos===true,video:d.mostrar_video===true,faq:d.mostrar_faq===true,special_people:d.mostrar_personas_especiales===true,hashtag:d.mostrar_hashtag===true,wishes:d.mostrar_deseos===true,album:d.mostrar_album===true,location:d.mostrar_mapa!==false,rsvp:normalizeInvitationModality(i.modalidad)!=="simple"&&d.mostrar_rsvp!==false},blockVariants:typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{}};
+   const snapshot:StudioSnapshot={title:i.titulo,message:typeof d.mensaje==="string"?d.mensaje:"",subtitle:typeof d.subtitulo==="string"?d.subtitulo:"Queremos compartir contigo este momento",color:i.color_principal||getTemplateById(i.template_key||"")?.color||"#72264f",music:i.musica_url||"",whatsapp:i.whatsapp||"",program:typeof d.programa==="string"?d.programa:"",dress:typeof d.vestimenta==="string"?d.vestimenta:"Formal",historyTitle:typeof d.historia_titulo==="string"?d.historia_titulo:"Nuestra historia",historyText:typeof d.historia_texto==="string"?d.historia_texto:"",lodging:typeof d.hospedaje==="string"?d.hospedaje:"",gift:typeof d.regalos==="string"?d.regalos:"",videoUrl:typeof d.video_url==="string"?d.video_url:"",faqText:typeof d.faq==="string"?d.faq:"",specialPeople:typeof d.personas_especiales==="string"?d.personas_especiales:"",hashtag:typeof d.hashtag==="string"?d.hashtag:"",socialText:typeof d.hashtag_texto==="string"?d.hashtag_texto:"Comparte tus mejores momentos con nosotros",wishesTitle:typeof d.deseos_titulo==="string"?d.deseos_titulo:"Déjanos un mensaje",wishesText:typeof d.deseos_texto==="string"?d.deseos_texto:"Tus palabras también serán parte de este día.",albumTitle:typeof d.album_titulo==="string"?d.album_titulo:"Comparte tus recuerdos",albumText:typeof d.album_texto==="string"?d.album_texto:"Sube las fotografías que captures durante nuestra celebración.",rsvpText:typeof d.rsvp_text==="string"?d.rsvp_text:"Confirma tu asistencia",cover:typeof d.portada_url==="string"?d.portada_url:"",gallery:Array.isArray(d.galeria_urls)?d.galeria_urls.filter((x):x is string=>typeof x==="string"):[],date:i.eventos?.fecha||"",time:i.eventos?.hora?.slice(0,5)||"",venue:i.eventos?.lugar||"",address:i.eventos?.direccion||"",mapsUrl:i.eventos?.maps_url||"",visibility:{...visibility,...(typeof d.section_visibility==="object"&&d.section_visibility?d.section_visibility as Record<string,boolean>:{})},sectionOrder:normalizeTemplateSectionOrder(d.section_order),blockVisibility:{hero:true,intro:d.mostrar_intro!==false,countdown:d.mostrar_contador!==false,details:d.mostrar_detalles!==false,program:d.mostrar_programa!==false,gallery:d.mostrar_galeria!==false,history:d.mostrar_historia===true,lodging:d.mostrar_hospedaje===true,gifts:d.mostrar_regalos===true,video:d.mostrar_video===true,faq:d.mostrar_faq===true,special_people:d.mostrar_personas_especiales===true,hashtag:d.mostrar_hashtag===true,wishes:d.mostrar_deseos===true,album:d.mostrar_album===true,location:d.mostrar_mapa!==false,rsvp:normalizeInvitationModality(i.modalidad)!=="simple"&&d.mostrar_rsvp!==false},blockVariants:typeof d.block_variants==="object"&&d.block_variants?d.block_variants as BlockVariantMap:{},sectionSettings:typeof d.section_settings==="object"&&d.section_settings?d.section_settings as Record<TemplateSectionId,StudioSectionSettings>:{},themeId:typeof d.theme_id==="string"?d.theme_id:defaultThemeIdForTemplate(i.template_key),themeOverrides:typeof d.theme_overrides==="object"&&d.theme_overrides?d.theme_overrides as Record<string,string>:{}};
    const signature=JSON.stringify(snapshot);resetHistory(snapshot);savedSignatureRef.current=signature;initializedRef.current=true;
   },0);
   setLoading(false);
@@ -261,7 +269,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.26.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,section_settings:sectionSettings,theme_id:themeId,theme_overrides:themeOverrides,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.28.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -318,15 +326,20 @@ export default function StudioPage(){
   const t=getTemplateById(id); if(!t)return;
   setApplyingTemplate(true);setError("");
   const current=invite.design_json||{};
+  const nextThemeId=defaultThemeIdForTemplate(id);
+  const nextTheme=getThemeById(nextThemeId);
+  const nextDesign={...current,plantilla:id,template_engine:id,template_collection:t.collection,theme_id:nextThemeId,theme_overrides:{}};
   const {error}=await supabase.from("invitaciones").update({
     template_key:id,
-    color_principal:t.color,
-    design_json:{...current,plantilla:id,template_engine:id,template_collection:t.collection}
+    color_principal:nextTheme.palette.primary,
+    design_json:nextDesign
   }).eq("id",invite.id);
   setApplyingTemplate(false);
   if(error){setError(error.message);return;}
-  setInvite({...invite,template_key:id,color_principal:t.color,design_json:{...current,plantilla:id,template_engine:id,template_collection:t.collection}});
-  setColor(t.color);
+  setThemeId(nextThemeId);
+  setThemeOverrides({});
+  setColor(nextTheme.palette.primary);
+  setInvite({...invite,template_key:id,color_principal:nextTheme.palette.primary,design_json:nextDesign});
   setPreviewRevision(value=>value+1);
   setPendingTemplate(null);setShowTemplates(false);setTemplateNotice(`✓ ${t.name} aplicada`);
   setSaved("Plantilla actualizada ✓");
@@ -420,13 +433,23 @@ export default function StudioPage(){
   const blockId=EDITOR_TO_BLOCK[sectionId];
   if(blockId)setBlockVisibility(current=>({...current,[blockId]:next}));
  }
+  function applyTheme(themeIdValue:string){
+  const theme=getThemeById(themeIdValue);
+  setThemeId(theme.id);
+  setThemeOverrides({});
+  setColor(theme.palette.primary);
+  setShowThemes(false);
+  setTemplateNotice(`${theme.name} ya es tu tema actual`);
+  window.setTimeout(()=>setTemplateNotice(""),3200);
+ }
+
  async function requestActivation(){
   if(!invite)return;
   setRequestingActivation(true);setError("");setActivationIssues([]);
 
   const selected=planByKey(commercialPlans,selectedPlan);
   const issues:string[]=[];
-  const currentTemplate=getTemplateById(invite.template_key||"");
+ const currentTemplate=getTemplateById(invite.template_key||"");
 
   if(!title.trim())issues.push("Agrega el nombre del evento.");
   if(!date)issues.push("Define la fecha del evento.");
@@ -547,7 +570,7 @@ export default function StudioPage(){
  return <main className="studio-page">{templateNotice&&<div className="studio-template-toast">{templateNotice}</div>}
   <header className="studio-topbar">
    <div className="studio-topbar-left"><Link href="/mi-cuenta" className="self-brand"><span>IP</span><strong>InvitaPro</strong></Link><span className="studio-divider"/><div><strong>{invite.titulo}</strong><small className={saveError?"studio-save-error":saving?"studio-save-saving":hasUnsavedChanges?"studio-save-pending":"studio-save-ok"}>{saved||(saveError?"Error al guardar":saving?"Guardando…":hasUnsavedChanges?"Cambios pendientes":"Borrador guardado")}</small></div></div>
-   <div className="studio-topbar-actions"><div className="studio-history-actions" aria-label="Historial de cambios"><button type="button" className="client-secondary" onClick={undo} disabled={!canUndo} title="Deshacer · Ctrl+Z">↶</button><button type="button" className="client-secondary" onClick={redo} disabled={!canRedo} title="Rehacer · Ctrl+Y">↷</button><span>{historyIndex+1}/{historyLength}</span></div><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Cambiar plantilla</button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link><button className="client-primary" onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar ahora":"Borrador guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<><button className="studio-publish-button" disabled={publishingChanges||!hasUnpublishedChanges} onClick={()=>void publishChanges()}>{publishingChanges?"Publicando…":hasUnpublishedChanges?"Publicar cambios":"Publicado"}</button><Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link></>}</div>
+   <div className="studio-topbar-actions"><div className="studio-topbar-tools"><Link className="client-secondary" href="/mi-cuenta/biblioteca">Biblioteca</Link><button className="client-secondary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}}>Plantillas</button><button className="client-secondary studio-theme-trigger" onClick={()=>setShowThemes(true)} title={`Tema actual: ${getThemeById(themeId).name}`}><i style={{background:getThemeById(themeId).palette.primary}}/><span>{getThemeById(themeId).name}</span></button><Link className="client-secondary" target="_blank" href={`/invitacion/${invite.slug}?preview=1`}>Vista previa</Link></div><div className="studio-topbar-publish"><button className={`studio-save-status ${hasUnsavedChanges?"pending":"saved"}`} onClick={()=>void save()} disabled={saving||!hasUnsavedChanges}>{saving?"Guardando…":hasUnsavedChanges?"Guardar ahora":"Borrador guardado"}</button>{invite.estado==="borrador"&&<button className="studio-publish-button" onClick={()=>{setActivationIssues([]);setShowPublish(true)}}>Publicar invitación</button>}{invite.estado==="pendiente_activacion"&&<span className="studio-activation-badge">⏳ Pendiente de activación</span>}{invite.estado==="publicada"&&<><button className="studio-publish-button" disabled={publishingChanges||!hasUnpublishedChanges} onClick={()=>void publishChanges()}>{publishingChanges?"Publicando…":hasUnpublishedChanges?"Publicar cambios":"Publicado"}</button><Link className="studio-live-button" target="_blank" href={`/invitacion/${invite.slug}`}>✓ Ver publicada</Link></>}</div></div>
   </header>
 
   <div className={`studio-workspace ${previewFocus?"studio-workspace-focus":""}`}>
@@ -555,6 +578,7 @@ export default function StudioPage(){
     <div className="studio-progress"><div><span>Tu invitación</span><strong>{Math.min(progress,100)}%</strong></div><i><b style={{width:`${Math.min(progress,100)}%`}}/></i><small>Completa las secciones antes de publicar.</small></div>
     <div className="studio-modality-summary"><small>MODALIDAD</small><strong>{invitationModalityLabel(currentModality)}</strong><span>{modalityFeatures.personalizedPasses?"Pases, RSVP y check-in":modalityFeatures.publicRsvp?"Confirmación pública":"Enlace público sin confirmaciones"}</span></div>
     <div className="studio-template-summary" onClick={()=>{setTemplateFilter("recommended");setShowTemplates(true)}} role="button" tabIndex={0}><div style={{background:`linear-gradient(145deg,${template?.color||color},#251b22)`}}><span>{template?templatePlanLabel(template):"Plantilla"}</span><strong>{template?.name||invite.template_key||"Sin plantilla"}</strong></div><button>Cambiar diseño</button></div>
+    <button type="button" className="studio-theme-summary" onClick={()=>setShowThemes(true)}><span><small>TEMA ACTUAL</small><strong>{getThemeById(themeId).name}</strong></span><i style={{background:getThemeById(themeId).palette.primary}}/><em>Cambiar</em></button>
     <StudioSectionNavigation active={active} sections={activeEditorSections} activeBlocks={sectionOrder.filter(id=>blockVisibility[id]).length} totalBlocks={sectionOrder.length} isVisible={editorSectionVisible} onSelect={setActive}/>
    </aside>
 
@@ -564,16 +588,21 @@ export default function StudioPage(){
     {active==="estructura"&&<div className="studio-block-builder">
       <div className="studio-block-builder-head"><div><strong>Bloques de tu invitación</strong><small>Arrastra los bloques para cambiar su orden. Selecciona uno para abrir sus propiedades.</small></div><span>{sectionOrder.filter(id=>blockVisibility[id]).length} activos</span></div>
 
-      {selectedPreviewSection&&<section className="studio-context-panel">
-       <div className="studio-context-panel-title"><span>{BLOCKS[selectedPreviewSection].icon}</span><div><small>PROPIEDADES DEL BLOQUE</small><strong>{BLOCKS[selectedPreviewSection].label}</strong><p>{BLOCKS[selectedPreviewSection].description}</p></div></div>
-       <div className="studio-context-actions">
-        <button type="button" className="client-primary" onClick={()=>openBlockEditor(selectedPreviewSection)}>Editar contenido</button>
-        <button type="button" className="client-secondary" disabled={BLOCKS[selectedPreviewSection].locked} onClick={()=>toggleBlock(selectedPreviewSection)}>{blockVisibility[selectedPreviewSection]?"Ocultar bloque":"Mostrar bloque"}</button>
-        <button type="button" className="client-secondary" disabled={selectedPreviewSection==="hero"} onClick={()=>moveBlockAccessible(selectedPreviewSection,-1)}>↑ Subir</button>
-        <button type="button" className="client-secondary" disabled={selectedPreviewSection==="hero"} onClick={()=>moveBlockAccessible(selectedPreviewSection,1)}>↓ Bajar</button>
-       </div>
-       {BLOCK_VARIANTS[selectedPreviewSection]?.length?<StudioBlockVariantSelector compact options={BLOCK_VARIANTS[selectedPreviewSection]!} value={blockVariants[selectedPreviewSection]||BLOCK_VARIANTS[selectedPreviewSection]![0].value} onChange={variant=>setBlockVariants(current=>({...current,[selectedPreviewSection]:variant}))}/>:null}
-      </section>}
+      {selectedPreviewSection&&<StudioInspector
+       sectionId={selectedPreviewSection}
+       definition={BLOCKS[selectedPreviewSection]}
+       visible={blockVisibility[selectedPreviewSection]}
+       variant={blockVariants[selectedPreviewSection]}
+       variants={BLOCK_VARIANTS[selectedPreviewSection]}
+       settings={sectionSettings[selectedPreviewSection]||{}}
+       accentColor={color}
+       onEdit={()=>openBlockEditor(selectedPreviewSection)}
+       onToggle={()=>toggleBlock(selectedPreviewSection)}
+       onMove={direction=>moveBlockAccessible(selectedPreviewSection,direction)}
+       onVariantChange={variant=>setBlockVariants(current=>({...current,[selectedPreviewSection]:variant}))}
+       onSettingsChange={settings=>setSectionSettings(current=>({...current,[selectedPreviewSection]:settings}))}
+       onAccentColorChange={setColor}
+      />}
 
       <div className="studio-block-list">{sectionOrder.filter(sectionId=>blockVisibility[sectionId]||BLOCKS[sectionId].locked).map((sectionId,index,visibleOrder)=>{const meta=BLOCKS[sectionId];const enabled=blockVisibility[sectionId];return <article
         key={sectionId}
@@ -670,6 +699,7 @@ export default function StudioPage(){
    </aside>
   </div>
 
+  {showThemes&&<StudioThemeSelector value={themeId} onChange={applyTheme} onClose={()=>setShowThemes(false)}/>}
   {showPublish&&<div className="modal-backdrop activation-backdrop" onMouseDown={()=>!requestingActivation&&setShowPublish(false)}><section className="activation-modal" onMouseDown={e=>e.stopPropagation()}>
    <header><div><p className="eyebrow">Lista para el siguiente paso</p><h2>Publicar tu invitación</h2><p>Revisa lo esencial y elige cómo quieres activar tu invitación.</p></div><button onClick={()=>setShowPublish(false)}>×</button></header>
    <div className="activation-readiness"><h3>Validación antes de publicar</h3><div className="activation-checks"><span className={title.trim()?"ok":"missing"}>{title.trim()?"✓":"!"} Nombre del evento</span><span className={date?"ok":"missing"}>{date?"✓":"!"} Fecha</span><span className={invite.template_key?"ok":"missing"}>{invite.template_key?"✓":"!"} Plantilla</span><span className={venue.trim()?"ok":"optional"}>{venue.trim()?"✓":"○"} Ubicación</span><span className={message.trim()?"ok":"optional"}>{message.trim()?"✓":"○"} Mensaje</span><span className={cover?"ok":"optional"}>{cover?"✓":"○"} Portada personalizada</span></div><small>Los elementos marcados con ! son obligatorios. Los demás pueden completarse antes de la activación.</small></div>

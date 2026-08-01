@@ -5653,3 +5653,14 @@ a { color: inherit; }
 .studio-preview-mode .studio-inline-editable.is-editing{display:inline-block;min-width:2.5rem;max-width:100%;padding:.08em .18em;background:#fff!important;color:#241b20!important;outline:2px solid var(--invite-accent,#72264f)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--invite-accent,#72264f) 18%,transparent);cursor:text;white-space:pre-wrap;z-index:30}
 .studio-preview-mode .studio-inline-editable.is-multiline{white-space:pre-line}
 .studio-preview-mode .studio-inline-editable.studio-inline-block{display:block;width:100%;min-height:1.5em}
+
+
+/* v2.27.0 — Section inspector presentation */
+.invitation-section-slot.section-spacing-compact>section{padding-top:clamp(32px,5vw,64px)!important;padding-bottom:clamp(32px,5vw,64px)!important}
+.invitation-section-slot.section-spacing-airy>section{padding-top:clamp(90px,12vw,160px)!important;padding-bottom:clamp(90px,12vw,160px)!important}
+.invitation-section-slot.section-surface-soft>section{background:color-mix(in srgb,var(--invite-accent,#72264f) 7%,white)}
+.invitation-section-slot.section-surface-card{padding:22px;background:transparent}.invitation-section-slot.section-surface-card>section{max-width:min(1080px,calc(100% - 28px));margin-inline:auto;border-radius:28px;box-shadow:0 22px 60px rgba(35,20,29,.12);overflow:hidden}
+.invitation-section-slot.section-surface-transparent>section{background:transparent!important}
+.invitation-section-slot.section-animation-none{animation:none!important;transition:none!important}.invitation-section-slot.section-animation-fade.is-revealed{animation:sectionInspectorFade .7s ease both}.invitation-section-slot.section-animation-slide-up.is-revealed{animation:sectionInspectorSlide .75s cubic-bezier(.22,.8,.25,1) both}.invitation-section-slot.section-animation-zoom.is-revealed{animation:sectionInspectorZoom .7s ease both}
+@keyframes sectionInspectorFade{from{opacity:0}to{opacity:1}}@keyframes sectionInspectorSlide{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}@keyframes sectionInspectorZoom{from{opacity:0;transform:scale(.965)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.invitation-section-slot[class*=section-animation-]{animation:none!important}}

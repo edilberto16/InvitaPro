@@ -1,5 +1,15 @@
 import type { TemplateSectionId } from "@/lib/template-engine";
 import type { StudioBlockVariantMap } from "@/lib/studio/block-registry";
+import type { ThemeOverrides } from "@/lib/themes/theme-types";
+
+export type StudioSectionSettings = {
+  alignment?: "left" | "center" | "right";
+  animation?: "inherit" | "none" | "fade" | "slide-up" | "zoom";
+  spacing?: "compact" | "normal" | "airy";
+  surface?: "inherit" | "transparent" | "soft" | "card";
+};
+
+export type StudioSectionSettingsMap = Partial<Record<TemplateSectionId, StudioSectionSettings>>;
 
 export type StudioState = {
   title: string;
@@ -35,6 +45,9 @@ export type StudioState = {
   sectionOrder: TemplateSectionId[];
   blockVisibility: Record<TemplateSectionId, boolean>;
   blockVariants: StudioBlockVariantMap;
+  sectionSettings: StudioSectionSettingsMap;
+  themeId: string;
+  themeOverrides: ThemeOverrides;
 };
 
 export type StudioSnapshot = StudioState;

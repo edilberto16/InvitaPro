@@ -1,5 +1,46 @@
 # CHANGELOG
 
+## [2.28.0.2] - 2026-08-01
+
+### Cambiado
+- Se retiraron los botones visibles de Deshacer y Rehacer de la barra superior del Studio.
+- El History Engine y sus atajos de teclado continúan disponibles.
+- La barra superior ahora separa herramientas de diseño y acciones de publicación.
+- El selector de tema muestra el nombre y color del tema activo.
+- El estado de guardado se presenta como un indicador más discreto.
+- Se mejoró el comportamiento responsive de la toolbar.
+
+### Compatibilidad
+- No requiere migraciones.
+- No modifica `design_json`, invitaciones públicas, cliente ni administrador.
+
+## [2.28.0.1] - 2026-08-01
+
+### Corregido
+
+- Se movió `applyTheme()` fuera de `requestActivation()` para que el selector de temas pueda acceder a la función.
+- Se corrigió el error de TypeScript `Cannot find name 'applyTheme'`.
+- No requiere migración de Supabase.
+
+
+## [2.27.0] — 2026-08-01
+
+### Añadido
+- Inspector Pro contextual para el bloque seleccionado dentro del Studio.
+- Controles reutilizables para variante, alineación, espaciado, superficie, animación y color de acento.
+- Nuevo componente `components/studio/inspector/studio-inspector.tsx`.
+- Configuración visual por bloque persistida en `design_json.section_settings`.
+
+### Integración
+- Los cambios se sincronizan con State Engine, History Engine, autoguardado y vista previa real.
+- La invitación publicada interpreta alineación, espaciado, superficie y animación sin romper configuraciones anteriores.
+- Los valores ausentes conservan el comportamiento de la plantilla actual.
+
+### Compatibilidad
+- No requiere migraciones de Supabase.
+- Mantiene las rutas, permisos y estructura histórica de las invitaciones.
+- Se continúa utilizando un único `CHANGELOG.md`.
+
 ## [2.26.0] — 2026-08-01
 
 ### Añadido
@@ -487,3 +528,24 @@ git push origin main
 ### Compatibilidad
 - No requiere migraciones de base de datos.
 - Mantiene el formato actual de `design_json` y el autoguardado existente.
+
+
+## [2.28.0] - 2026-08-01
+
+### Añadido
+- Theme Engine central en `lib/themes/` con tipos, registro y resolución de temas.
+- Selector visual de temas dentro del Studio.
+- Temas iniciales para Wedding, XV años, Infantil, Empresarial y Campamentos.
+- Variables CSS globales para tipografías, espaciado, sombras y superficies.
+- Persistencia de `theme_id` y `theme_overrides` dentro de `design_json`.
+
+### Cambiado
+- La invitación pública ahora resuelve su identidad visual desde el Theme Engine.
+- Cambiar plantilla asigna automáticamente un tema compatible sin modificar el contenido.
+- El Studio sincroniza tema, color principal, historial, autoguardado y vista previa.
+- `lib/theme-studio.ts` se conserva como capa de compatibilidad para código existente.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- Las invitaciones sin `theme_id` continúan usando un tema compatible derivado de su plantilla.
+- Se conserva el formato actual de `design_json`.

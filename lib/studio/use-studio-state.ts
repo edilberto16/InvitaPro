@@ -79,6 +79,9 @@ export function createInitialStudioState(): StudioState {
     sectionOrder: [...DEFAULT_TEMPLATE_SECTION_ORDER],
     blockVisibility: { ...DEFAULT_BLOCK_VISIBILITY },
     blockVariants: {},
+    sectionSettings: {},
+    themeId: "elegant-classic",
+    themeOverrides: {},
   };
 }
 
@@ -134,6 +137,9 @@ export function useStudioState() {
       setSectionOrder: setField("sectionOrder"),
       setBlockVisibility: setField("blockVisibility"),
       setBlockVariants: setField("blockVariants"),
+      setSectionSettings: setField("sectionSettings"),
+      setThemeId: setField("themeId"),
+      setThemeOverrides: setField("themeOverrides"),
     } satisfies StudioSetters;
   }, []);
 
