@@ -57,6 +57,7 @@ export default function StudioPage(){
  const [active,setActive]=useState("portada");
  const [showTemplates,setShowTemplates]=useState(false);
  const [showThemes,setShowThemes]=useState(false);
+ const [themePreviewId,setThemePreviewId]=useState<string|null>(null);
  const [templateFilter,setTemplateFilter]=useState<"recommended"|"todas"|TemplateCollectionId>("recommended");
  const [templateSearch,setTemplateSearch]=useState("");
  const [pendingTemplate,setPendingTemplate]=useState<string|null>(null);
@@ -145,10 +146,10 @@ export default function StudioPage(){
     music,
     whatsapp,
     event:{fecha:date,hora:time||null,lugar:venue,direccion:address,maps_url:mapsUrl},
-    designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,section_settings:sectionSettings,theme_id:themeId,theme_overrides:themeOverrides,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
+    designJson:{mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,section_settings:sectionSettings,theme_id:themePreviewId||themeId,theme_overrides:themeOverrides,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details}
    }
   },window.location.origin);
- },[invite?.template_key,sectionOrder,blockVisibility,blockVariants,sectionSettings,themeId,themeOverrides,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
+ },[invite?.template_key,sectionOrder,blockVisibility,blockVariants,sectionSettings,themeId,themePreviewId,themeOverrides,selectedPreviewSection,title,color,music,whatsapp,date,time,venue,address,mapsUrl,message,subtitle,program,dress,historyTitle,historyText,lodging,gift,videoUrl,faqText,specialPeople,hashtag,socialText,wishesTitle,wishesText,albumTitle,albumText,rsvpText,cover,gallery,visibility]);
 
  useEffect(()=>{
   function handlePreviewMessage(event:MessageEvent){
@@ -269,7 +270,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,section_settings:sectionSettings,theme_id:themeId,theme_overrides:themeOverrides,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.28.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,section_settings:sectionSettings,theme_id:themeId,theme_overrides:themeOverrides,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.29.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -433,11 +434,15 @@ export default function StudioPage(){
   const blockId=EDITOR_TO_BLOCK[sectionId];
   if(blockId)setBlockVisibility(current=>({...current,[blockId]:next}));
  }
-  function applyTheme(themeIdValue:string){
+ function previewTheme(themeIdValue:string|null){
+  setThemePreviewId(themeIdValue);
+ }
+ function applyTheme(themeIdValue:string){
   const theme=getThemeById(themeIdValue);
   setThemeId(theme.id);
   setThemeOverrides({});
   setColor(theme.palette.primary);
+  setThemePreviewId(null);
   setShowThemes(false);
   setTemplateNotice(`${theme.name} ya es tu tema actual`);
   window.setTimeout(()=>setTemplateNotice(""),3200);
@@ -699,7 +704,7 @@ export default function StudioPage(){
    </aside>
   </div>
 
-  {showThemes&&<StudioThemeSelector value={themeId} onChange={applyTheme} onClose={()=>setShowThemes(false)}/>}
+  {showThemes&&<StudioThemeSelector value={themeId} onPreview={previewTheme} onChange={applyTheme} onClose={()=>{setThemePreviewId(null);setShowThemes(false)}}/>}
   {showPublish&&<div className="modal-backdrop activation-backdrop" onMouseDown={()=>!requestingActivation&&setShowPublish(false)}><section className="activation-modal" onMouseDown={e=>e.stopPropagation()}>
    <header><div><p className="eyebrow">Lista para el siguiente paso</p><h2>Publicar tu invitación</h2><p>Revisa lo esencial y elige cómo quieres activar tu invitación.</p></div><button onClick={()=>setShowPublish(false)}>×</button></header>
    <div className="activation-readiness"><h3>Validación antes de publicar</h3><div className="activation-checks"><span className={title.trim()?"ok":"missing"}>{title.trim()?"✓":"!"} Nombre del evento</span><span className={date?"ok":"missing"}>{date?"✓":"!"} Fecha</span><span className={invite.template_key?"ok":"missing"}>{invite.template_key?"✓":"!"} Plantilla</span><span className={venue.trim()?"ok":"optional"}>{venue.trim()?"✓":"○"} Ubicación</span><span className={message.trim()?"ok":"optional"}>{message.trim()?"✓":"○"} Mensaje</span><span className={cover?"ok":"optional"}>{cover?"✓":"○"} Portada personalizada</span></div><small>Los elementos marcados con ! son obligatorios. Los demás pueden completarse antes de la activación.</small></div>

@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [2.29.0] - 2026-08-01
+
+### Añadido
+- Theme Gallery con buscador por nombre, colección y descripción.
+- Filtros dinámicos por colección y vista de favoritos.
+- Favoritos persistentes en el navegador mediante `localStorage`.
+- Previsualización temporal al pasar el cursor o seleccionar un tema.
+- Botón explícito para aplicar el tema y cancelación que restaura el tema original.
+- Tarjetas visuales con paleta, tipografía, superficie y sombra del tema.
+- Diseño responsive de pantalla completa para celular.
+
+### Compatibilidad
+- Mantiene `design_json.theme_id` y `design_json.theme_overrides`.
+- No requiere migraciones de Supabase.
+- No cambia el contenido de la invitación al explorar temas.
+
 ## [2.28.0.2] - 2026-08-01
 
 ### Cambiado

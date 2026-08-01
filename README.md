@@ -6,7 +6,7 @@
 
 Studio visual · Plantillas · RSVP · Invitados · Álbum · Check-in · WhatsApp
 
-![Version](https://img.shields.io/badge/version-v2.28.0.2-72264f)
+![Version](https://img.shields.io/badge/version-v2.29.0-72264f)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![React](https://img.shields.io/badge/React-19-149eca)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
@@ -219,3 +219,7 @@ Proyecto privado. Todos los derechos reservados © InvitaPro.
 - 🚧 Edición inline
 - ✅ Inspector Pro
 - ✅ Theme Engine Core
+
+## Theme Gallery
+
+El Studio incluye una galería visual de temas con búsqueda, colecciones, favoritos y previsualización instantánea.
