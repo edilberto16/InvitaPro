@@ -475,3 +475,26 @@
 .studio-history-actions button:disabled{opacity:.38;cursor:not-allowed}
 .studio-history-actions span{min-width:36px;color:var(--client-muted,#81777d);font-size:11px;text-align:center;font-variant-numeric:tabular-nums}
 @media(max-width:900px){.studio-history-actions span{display:none}}
+
+/* Studio v2.24.0 · Visual Canvas navigator */
+.studio-canvas-navigator{border-bottom:1px solid rgba(78,54,68,.12);background:rgba(255,255,255,.94);padding:10px 12px;display:grid;gap:9px}
+.studio-canvas-navigator-track{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 5px;scrollbar-width:thin}
+.studio-canvas-navigator-track>button{position:relative;display:flex;align-items:center;gap:6px;min-width:max-content;border:1px solid rgba(78,54,68,.12);background:#fff;border-radius:10px;padding:7px 9px;color:#4b3c45;cursor:pointer;transition:.18s ease;font:inherit}
+.studio-canvas-navigator-track>button:hover{border-color:rgba(114,38,79,.38);transform:translateY(-1px)}
+.studio-canvas-navigator-track>button.selected{border-color:#72264f;box-shadow:0 0 0 2px rgba(114,38,79,.1);background:#fff8fb}
+.studio-canvas-navigator-track>button.hidden{opacity:.55;background:#f5f2f4}
+.studio-canvas-navigator-track>button i{position:absolute;left:8px;right:8px;bottom:-4px;height:3px;border-radius:999px;background:#72264f}
+.studio-canvas-navigator-index{display:grid;place-items:center;width:18px;height:18px;border-radius:999px;background:#f1e8ed;font-size:10px;font-weight:800}
+.studio-canvas-navigator-icon{font-size:14px;color:#72264f}
+.studio-canvas-navigator-label{font-size:11px;font-weight:750;white-space:nowrap}
+.studio-canvas-navigator-track em{font-size:9px;font-style:normal;text-transform:uppercase;letter-spacing:.04em;background:#e8e3e6;border-radius:999px;padding:2px 5px}
+.studio-canvas-selection-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:11px;background:#f7f2f5;padding:8px 10px}
+.studio-canvas-selection-actions>div:first-child{display:grid;gap:1px;min-width:0}
+.studio-canvas-selection-actions small{font-size:9px;letter-spacing:.09em;color:#8d7582;font-weight:800}
+.studio-canvas-selection-actions strong{font-size:12px;color:#3e3038;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.studio-canvas-selection-buttons{display:flex;gap:5px;align-items:center}
+.studio-canvas-selection-buttons button{border:1px solid rgba(78,54,68,.14);background:#fff;border-radius:8px;min-width:30px;height:29px;padding:0 8px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;color:#543d49}
+.studio-canvas-selection-buttons button:hover:not(:disabled){border-color:#72264f;color:#72264f}
+.studio-canvas-selection-buttons button:disabled{opacity:.35;cursor:not-allowed}
+.studio-canvas-selection-buttons .studio-canvas-visibility-button{min-width:62px}
+@media(max-width:900px){.studio-canvas-selection-actions{align-items:flex-start}.studio-canvas-selection-buttons{flex-wrap:wrap;justify-content:flex-end}.studio-canvas-navigator-label{max-width:105px;overflow:hidden;text-overflow:ellipsis}}

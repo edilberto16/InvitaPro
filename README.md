@@ -188,10 +188,14 @@ El proyecto utiliza versionado semántico cuando corresponde:
 - [x] Biblioteca visual de bloques.
 - [x] Sincronización Studio–vista previa.
 - [x] Registro central de bloques.
+- [x] Estado central del Studio.
+- [x] Historial con deshacer y rehacer.
+- [x] Navegador y selección visual del canvas.
 - [ ] Componentes de bloque desacoplados.
+- [ ] Drag & Drop avanzado.
 - [ ] Edición inline.
+- [ ] Inspector visual profesional.
 - [ ] Temas globales por plantilla.
-- [ ] Historial visual de cambios.
 - [ ] Notificaciones push de RSVP.
 - [ ] Check-in QR en tiempo real.
 - [ ] Marketplace de plantillas y bloques.

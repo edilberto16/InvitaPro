@@ -11,6 +11,7 @@ import TemplatePreviewArtwork from "@/components/templates/template-preview-artw
 import MediaLibraryPicker from "@/components/media/media-library-picker";
 import StudioSectionNavigation from "@/components/studio/studio-section-navigation";
 import StudioBlockVariantSelector from "@/components/studio/studio-block-variant-selector";
+import StudioCanvasNavigator from "@/components/studio/studio-canvas-navigator";
 import {CommercialPlan,DEFAULT_COMMERCIAL_PLANS,moneyMXN,planByKey,resolveInvitationCommercialPlanKey} from "@/lib/commercial-plans";
 import { invitationModalityLabel, modalityCapabilities, normalizeInvitationModality } from "@/lib/invitation-modality";
 import {normalizeTemplateSectionOrder,type TemplateSectionId} from "@/lib/template-engine";
@@ -253,7 +254,7 @@ export default function StudioPage(){
     color_principal:color,
     musica_url:music.trim()||null,
     whatsapp:whatsapp.trim()||null,
-    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.23.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
+    design_json:{...current,mensaje:message,subtitulo:subtitle,programa:program,vestimenta:dress,historia_titulo:historyTitle,historia_texto:historyText,hospedaje:lodging,regalos:gift,video_url:videoUrl,faq:faqText,personas_especiales:specialPeople,hashtag,hashtag_texto:socialText,deseos_titulo:wishesTitle,deseos_texto:wishesText,album_titulo:albumTitle,album_texto:albumText,rsvp_text:rsvpText,portada_url:cover,galeria_urls:gallery,section_visibility:visibility,section_order:sectionOrder,block_variants:blockVariants,mostrar_intro:blockVisibility.intro,mostrar_galeria:blockVisibility.gallery,mostrar_historia:blockVisibility.history,mostrar_hospedaje:blockVisibility.lodging,mostrar_regalos:blockVisibility.gifts,mostrar_video:blockVisibility.video,mostrar_faq:blockVisibility.faq,mostrar_personas_especiales:blockVisibility.special_people,mostrar_hashtag:blockVisibility.hashtag,mostrar_deseos:blockVisibility.wishes,mostrar_album:blockVisibility.album,mostrar_programa:blockVisibility.program,mostrar_mapa:blockVisibility.location,mostrar_rsvp:blockVisibility.rsvp,mostrar_contador:blockVisibility.countdown,mostrar_detalles:blockVisibility.details,studio_version:"2.24.0",plantilla:invite.template_key||current.plantilla,draft_saved_at:new Date().toISOString()}
    },
    event:{fecha:date,hora:time||null,lugar:venue.trim()||null,direccion:address.trim()||null,maps_url:mapsUrl.trim()||null}
   };
@@ -643,6 +644,14 @@ export default function StudioPage(){
       <button className={`studio-preview-focus-button ${previewFocus?"active":""}`} onClick={()=>setPreviewFocus(current=>!current)} title={previewFocus?"Salir del modo enfoque · Esc":"Modo enfoque · tecla F"}>{previewFocus?"↙":"↗"}</button>
      </div>
     </div>
+    <StudioCanvasNavigator
+     order={sectionOrder}
+     visibility={blockVisibility}
+     selectedSection={selectedPreviewSection}
+     onSelect={openBlockEditor}
+     onToggle={toggleBlock}
+     onMove={moveBlockAccessible}
+    />
     <div className="studio-preview-canvas" style={{"--studio-preview-zoom":previewZoom/100} as CSSProperties}>
      <div className="studio-live-preview-shell">
       <iframe ref={previewRef} key={previewRevision} title="Vista previa real de la invitación" src={`/invitacion/${invite.slug}?preview=1&studio=1&v=${previewRevision}`}/>

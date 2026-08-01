@@ -2,6 +2,51 @@
 
 Todos los cambios relevantes de InvitaPro se documentan en este archivo. A partir de la versión 2.20.0 no se crearán archivos `CAMBIOS-vX.Y.Z.md` separados.
 
+## [2.24.0.1] — 2026-07-31
+
+### Corregido
+
+- Se corrigió el alcance de la variable que identifica bloques bloqueados dentro de `StudioCanvasNavigator`.
+- El botón Mostrar/Ocultar ahora usa el bloque seleccionado para determinar si la acción debe quedar deshabilitada.
+- Se resolvió el error de TypeScript `Cannot find name 'locked'` durante `pnpm run build`.
+
+### Compatibilidad
+
+- No requiere migraciones.
+- No modifica `design_json` ni el comportamiento de cliente o administrador.
+
+---
+
+## [2.24.0] — 2026-07-31
+
+### Agregado
+
+- Navegador visual horizontal para recorrer todos los bloques del canvas sin perder el contexto de la vista previa.
+- Indicador claro del bloque activo, posición dentro de la invitación y estado visible/oculto.
+- Acciones rápidas para mover, ocultar o volver a mostrar el bloque seleccionado.
+- Componente reutilizable `StudioCanvasNavigator` separado del archivo principal del Studio.
+
+### Cambiado
+
+- La selección desde el navegador abre automáticamente el editor contextual correspondiente y sincroniza el bloque activo en la vista previa.
+- `design_json.studio_version` y la versión del proyecto se actualizaron a `2.24.0`.
+
+### Compatibilidad
+
+- No modifica la estructura de `design_json`.
+- No requiere migraciones de base de datos.
+- No altera el panel administrativo, el portal del cliente ni la invitación pública fuera del modo Studio.
+
+### Validación recomendada
+
+1. Ejecutar `pnpm run build`.
+2. Abrir una invitación en Studio y recorrer los bloques desde el navegador superior del canvas.
+3. Confirmar que el bloque seleccionado se centra en la vista previa y abre su editor.
+4. Probar mover, ocultar y mostrar bloques, incluyendo los límites de la portada.
+5. Guardar, recargar y confirmar que orden y visibilidad se conservan.
+
+---
+
 ## [2.21.0] — 2026-07-30
 
 ### Agregado
