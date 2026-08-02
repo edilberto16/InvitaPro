@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [2.33.0.1] - 2026-08-01
+
+### Corregido
+- La opción **Invitados** ahora aparece en la navegación principal para cualquier invitación activa, incluyendo RSVP público y pases personalizados.
+- El enlace lleva directamente al nuevo Centro de Gestión de Invitados mediante `#invitados`.
+- El módulo `GuestManagementCenter` ya no queda oculto en invitaciones configuradas como RSVP público.
+- Se ajustaron los textos del módulo para que funcionen correctamente en ambas modalidades.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- No modifica el panel administrativo, el Studio ni la invitación pública.
+- Se mantiene un único `CHANGELOG.md`.
+
 ## [2.32.0] - 2026-08-01
 
 ### Añadido
@@ -632,5 +645,15 @@ git push origin main
 - Se agregó una línea de tiempo basada en el estado y los registros de llegada disponibles.
 - Se incorporaron notas internas guardadas en `invitados.notas`.
 - Se añadió acceso directo a WhatsApp desde la ficha.
+- No requiere migración de Supabase.
+
+## 2.33.0 — Gestión de invitados
+
+- Se agregó un centro dedicado de invitados para pases personalizados.
+- Se añadieron métricas de total, confirmados, pendientes, rechazos y check-in.
+- Se incorporaron segmentos inteligentes: pendientes, confirmados, sin teléfono, con mesa y check-in.
+- Se agregó búsqueda por nombre, teléfono, correo, código y mesa.
+- Se centralizaron importación CSV, exportación, WhatsApp, ficha CRM y eliminación masiva.
+- La importación CSV ahora detecta teléfonos, correos y códigos duplicados dentro del archivo y contra invitados existentes.
 - No requiere migración de Supabase.
 

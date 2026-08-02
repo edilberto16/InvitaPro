@@ -18,9 +18,12 @@ type CsvRow = {
   error?: string;
 };
 
+type ExistingGuest = { telefono: string | null; correo: string | null; codigo: string };
+
 type Props = {
   open: boolean;
   invitations: Invitacion[];
+  existingGuests?: ExistingGuest[];
   onClose: () => void;
   onImported: () => Promise<void> | void;
 };
@@ -83,7 +86,7 @@ function parseCsv(text:string):CsvRow[]{
   });
 }
 
-export default function GuestCsvImportModal({open,invitations,onClose,onImported}:Props){
+export default function GuestCsvImportModal({open,invitations,existingGuests=[],onClose,onImported}:Props){
   const supabase=useMemo(()=>createClient(),[]);
   const[invitacionId,setInvitacionId]=useState(invitations[0]?.id??'');
   const[fileName,setFileName]=useState('');
@@ -106,8 +109,27 @@ export default function GuestCsvImportModal({open,invitations,onClose,onImported
     if(file.size>2_000_000)return setError('El archivo es demasiado grande. El límite es 2 MB.');
     const parsed=parseCsv(await file.text());
     if(!parsed.length)return setError('No encontramos registros. Verifica que el archivo incluya encabezados y al menos un invitado.');
+    const seenPhones=new Set<string>();
+    const seenEmails=new Set<string>();
+    const seenCodes=new Set<string>();
+    const existingPhones=new Set(existingGuests.map(item=>(item.telefono||'').replace(/\D/g,'')).filter(Boolean));
+    const existingEmails=new Set(existingGuests.map(item=>(item.correo||'').trim().toLowerCase()).filter(Boolean));
+    const existingCodes=new Set(existingGuests.map(item=>(item.codigo||'').trim().toUpperCase()).filter(Boolean));
+    const validated=parsed.map(row=>{
+      const issues=row.error?[row.error]:[];
+      const phone=row.telefono.replace(/\D/g,'');
+      const email=row.correo.trim().toLowerCase();
+      const code=row.codigo.trim().toUpperCase();
+      if(phone&&(seenPhones.has(phone)||existingPhones.has(phone)))issues.push('Teléfono duplicado');
+      if(email&&(seenEmails.has(email)||existingEmails.has(email)))issues.push('Correo duplicado');
+      if(code&&(seenCodes.has(code)||existingCodes.has(code)))issues.push('Código duplicado');
+      if(phone)seenPhones.add(phone);
+      if(email)seenEmails.add(email);
+      if(code)seenCodes.add(code);
+      return {...row,error:issues.join(' · ')||undefined};
+    });
     setFileName(file.name);
-    setRows(parsed);
+    setRows(validated);
   }
 
   function downloadTemplate(){

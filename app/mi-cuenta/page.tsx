@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import ShareInvitationModal from "../../components/share-invitation-modal";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
 import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
+import GuestManagementCenter, { type ManagedGuest } from "../../components/guests/guest-management-center";
 import ConfirmationsCenter, { type ConfirmationRecord } from "../../components/guests/confirmations-center";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
@@ -41,32 +42,8 @@ type ActivityRow = {
   created_at: string;
 };
 
-type Guest = {
-  id: string;
-  invitacion_id: string;
-  nombre: string;
-  telefono: string | null;
-  correo: string | null;
-  estado: string;
-  adultos_permitidos: number;
-  ninos_permitidos: number;
-  mesa: string | null;
-  codigo: string;
-  checkin_adultos: number;
-  checkin_ninos: number;
-  checkin_at: string | null;
-  ultimo_checkin_at: string | null;
-  notas: string | null;
-};
+type Guest = ManagedGuest;
 
-function initials(value: string) {
-  return value
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "IP";
-}
 
 export default function MiCuenta() {
   const supabase = useMemo(() => createClient(), []);
@@ -80,8 +57,6 @@ export default function MiCuenta() {
   const [sharingPublic, setSharingPublic] = useState(false);
   const [sharingGuest, setSharingGuest] = useState<Guest | null>(null);
   const [csvImport, setCsvImport] = useState(false);
-  const [guestSearch, setGuestSearch] = useState("");
-  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
   const [guestsToDelete, setGuestsToDelete] = useState<Guest[]>([]);
   const [deletingGuests, setDeletingGuests] = useState(false);
   const [activityRows, setActivityRows] = useState<ActivityRow[]>([]);
@@ -218,7 +193,6 @@ export default function MiCuenta() {
     if (confirmationResult.error) setError(confirmationResult.error.message);
     setGuests((guestResult.data || []) as Guest[]);
     setConfirmations((confirmationResult.data || []) as unknown as ConfirmationRecord[]);
-    setSelectedGuestIds([]);
     setLoading(false);
   }
 
@@ -240,13 +214,6 @@ export default function MiCuenta() {
   const personalizedRejected = related.filter((item) => ["no_asistira", "rechazado"].includes(item.estado)).length;
   const publicConfirmed = relatedConfirmations.filter((item) => item.asistira).length;
   const publicRejected = relatedConfirmations.filter((item) => !item.asistira).length;
-  const filteredGuests = related.filter((item) =>
-    [item.nombre, item.telefono, item.correo, item.codigo]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase()
-      .includes(guestSearch.trim().toLowerCase())
-  );
   const modality = normalizeInvitationModality(invite?.modalidad);
   const modalityFeatures = modalityCapabilities(modality);
   const personalized = modalityFeatures.personalizedPasses;
@@ -343,25 +310,6 @@ export default function MiCuenta() {
     },
   ] : [];
 
-  function toggleGuestSelection(guestId: string) {
-    setSelectedGuestIds((current) =>
-      current.includes(guestId)
-        ? current.filter((id) => id !== guestId)
-        : [...current, guestId]
-    );
-  }
-
-  function toggleAllFilteredGuests() {
-    const filteredIds = filteredGuests.map((guest) => guest.id);
-    const allSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedGuestIds.includes(id));
-
-    setSelectedGuestIds((current) =>
-      allSelected
-        ? current.filter((id) => !filteredIds.includes(id))
-        : Array.from(new Set([...current, ...filteredIds]))
-    );
-  }
-
   function requestDeleteGuests(items: Guest[]) {
     if (!items.length) return;
     setGuestsToDelete(items);
@@ -388,7 +336,6 @@ export default function MiCuenta() {
     }
 
     setGuestsToDelete([]);
-    setSelectedGuestIds((current) => current.filter((id) => !ids.includes(id)));
     await load();
   }
 
@@ -469,6 +416,7 @@ export default function MiCuenta() {
         </a>
         <nav>
           <a href="#evento">Mi evento</a>
+          {invite && <a href="#invitados">Invitados</a>}
           {modalityFeatures.publicRsvp && <a href="#confirmaciones">Confirmaciones</a>}
           <a href="/mi-cuenta/biblioteca">Biblioteca</a>
           <a href="#compartir">Compartir</a>
@@ -561,125 +509,17 @@ export default function MiCuenta() {
             />
           )}
 
-          {invite && personalized && (
-            <section className="client-guests-panel">
-              <div className="client-guests-heading">
-                <div>
-                  <p className="eyebrow">Distribución</p>
-                  <h2>{personalized ? "Pases personalizados" : "Lista de invitados"}</h2>
-                  <p>
-                    Importa tu lista desde CSV y comparte la invitación con cada invitado por
-                    WhatsApp.
-                  </p>
-                </div>
-                <div className="client-guests-actions">
-                  <button className="client-secondary" onClick={() => setCsvImport(true)}>
-                    Importar CSV
-                  </button>
-                  <button className="client-primary" onClick={() => setSharingPublic(true)}>
-                    Compartir enlace general
-                  </button>
-                </div>
-              </div>
-
-              <label className="client-guest-search">
-                <span>⌕</span>
-                <input
-                  value={guestSearch}
-                  onChange={(event) => setGuestSearch(event.target.value)}
-                  placeholder="Buscar invitado, teléfono o código"
-                />
-              </label>
-
-              {filteredGuests.length > 0 && (
-                <div className="client-guest-bulkbar">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={
-                        filteredGuests.length > 0 &&
-                        filteredGuests.every((guest) => selectedGuestIds.includes(guest.id))
-                      }
-                      onChange={toggleAllFilteredGuests}
-                    />
-                    <span>Seleccionar todos</span>
-                  </label>
-                  <span>{selectedGuestIds.length} seleccionado(s)</span>
-                  <button
-                    type="button"
-                    className="client-danger"
-                    disabled={!selectedGuestIds.length}
-                    onClick={() =>
-                      requestDeleteGuests(related.filter((guest) => selectedGuestIds.includes(guest.id)))
-                    }
-                  >
-                    Eliminar seleccionados
-                  </button>
-                </div>
-              )}
-
-              {filteredGuests.length ? (
-                <div className="client-guest-list">
-                  {filteredGuests.map((guest) => (
-                    <article key={guest.id} className={selectedGuestIds.includes(guest.id) ? "is-selected" : ""}>
-                      <label className="client-guest-checkbox" aria-label={`Seleccionar ${guest.nombre}`}>
-                        <input
-                          type="checkbox"
-                          checked={selectedGuestIds.includes(guest.id)}
-                          onChange={() => toggleGuestSelection(guest.id)}
-                        />
-                      </label>
-                      <span className="client-guest-avatar">{initials(guest.nombre)}</span>
-                      <div className="client-guest-info">
-                        <strong>{guest.nombre}</strong>
-                        <small>
-                          {guest.telefono || "Sin teléfono"}
-                          {personalized ? ` · Código ${guest.codigo}` : ""}
-                        </small>
-                        <span>
-                          {guest.adultos_permitidos} adulto(s) · {guest.ninos_permitidos} niño(s)
-                          {guest.mesa ? ` · ${guest.mesa}` : ""}
-                        </span>
-                      </div>
-                      <span className={`client-guest-status status-${guest.estado}`}>
-                        {guest.estado.replace("_", " ")}
-                      </span>
-                      <div className="client-guest-row-actions">
-                        <button
-                          type="button"
-                          className="client-secondary"
-                          onClick={() => setCrmGuest(guest)}
-                        >
-                          Ver ficha
-                        </button>
-                        <button
-                          type="button"
-                          className="client-secondary"
-                          onClick={() => setSharingGuest(guest)}
-                        >
-                          WhatsApp
-                        </button>
-                        <button
-                          type="button"
-                          className="client-danger-outline"
-                          onClick={() => requestDeleteGuests([guest])}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className="client-guest-empty">
-                  <strong>No hay invitados cargados</strong>
-                  <p>Importa un CSV para crear la lista y compartir los enlaces.</p>
-                  <button className="client-primary" onClick={() => setCsvImport(true)}>
-                    Importar invitados
-                  </button>
-                </div>
-              )}
-            </section>
+          {invite && (
+            <GuestManagementCenter
+              invitationTitle={invite.titulo}
+              guests={related}
+              onImport={() => setCsvImport(true)}
+              onShareGeneral={() => setSharingPublic(true)}
+              onOpenGuest={(guest) => setCrmGuest(guest)}
+              onShareGuest={(guest) => setSharingGuest(guest)}
+              onDeleteGuests={requestDeleteGuests}
+              onExport={exportGuestReport}
+            />
           )}
         </>
       )}
@@ -753,6 +593,7 @@ export default function MiCuenta() {
         <GuestCsvImportModal
           open={csvImport}
           invitations={[invite as unknown as Invitacion]}
+          existingGuests={related}
           onClose={() => setCsvImport(false)}
           onImported={load}
         />
