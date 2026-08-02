@@ -1,3 +1,12 @@
+## 2.34.0 — Centro de Mensajes
+
+- Se agregó un módulo dedicado para consultar y moderar el Buzón de deseos.
+- Se añadieron filtros por pendientes, aprobados y destacados, además de búsqueda y exportación CSV.
+- Los anfitriones pueden aprobar, ocultar, destacar y eliminar mensajes.
+- Los mensajes nuevos aparecen en tiempo real y se integran en la actividad reciente del Dashboard.
+- El Dashboard muestra el total de mensajes recibidos y el menú indica mensajes pendientes.
+- Se añadió la columna `mensajes_deseos.destacado` mediante una migración segura.
+
 # CHANGELOG
 
 ## [2.33.1.1] - 2026-08-01

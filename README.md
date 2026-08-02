@@ -236,3 +236,8 @@ El portal del cliente incluye un módulo de RSVP con respuestas en tiempo real, 
 ## Gestión unificada de invitados
 
 El Centro de Gestión combina la lista importada o creada manualmente con las respuestas de RSVP público. Las coincidencias se enlazan por identificador, teléfono o nombre para evitar duplicados visuales y mantener consistentes las métricas entre Dashboard, Confirmaciones y Gestión de Invitados.
+
+
+### Centro de Mensajes
+
+Permite moderar, aprobar, destacar, buscar y exportar los mensajes enviados desde el Buzón de deseos.

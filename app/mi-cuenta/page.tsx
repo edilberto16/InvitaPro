@@ -6,6 +6,7 @@ import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal"
 import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
 import GuestManagementCenter, { type ManagedGuest } from "../../components/guests/guest-management-center";
 import ConfirmationsCenter, { type ConfirmationRecord } from "../../components/guests/confirmations-center";
+import MessagesCenter, { type WishMessageRecord } from "../../components/messages/messages-center";
 import { buildUnifiedGuests, type BaseGuestRecord } from "../../lib/services/guest-unified.service";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
@@ -53,6 +54,8 @@ export default function MiCuenta() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [confirmations, setConfirmations] = useState<ConfirmationRecord[]>([]);
+  const [wishMessages, setWishMessages] = useState<WishMessageRecord[]>([]);
+  const [busyWishId, setBusyWishId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sharingPublic, setSharingPublic] = useState(false);
@@ -116,6 +119,7 @@ export default function MiCuenta() {
       setInvites([]);
       setGuests([]);
       setConfirmations([]);
+      setWishMessages([]);
       setLoading(false);
       return;
     }
@@ -140,6 +144,7 @@ export default function MiCuenta() {
     if (!currentInvites.length) {
       setGuests([]);
       setConfirmations([]);
+      setWishMessages([]);
       setActivityRows([]);
       setAlbumCount(0);
       setLoading(false);
@@ -167,7 +172,7 @@ export default function MiCuenta() {
     setActivityRows(((activityResult.data || []) as ActivityRow[]));
     setAlbumCount(albumResult.count || 0);
 
-    const [guestResult, confirmationResult] = await Promise.all([
+    const [guestResult, confirmationResult, wishesResult] = await Promise.all([
       supabase
         .from("invitados")
         .select(
@@ -188,12 +193,22 @@ export default function MiCuenta() {
           currentInvites.map((item) => item.id)
         )
         .order("updated_at", { ascending: false }),
+      supabase
+        .from("mensajes_deseos")
+        .select("id,invitacion_id,nombre,mensaje,aprobado,destacado,created_at")
+        .in(
+          "invitacion_id",
+          currentInvites.map((item) => item.id)
+        )
+        .order("created_at", { ascending: false }),
     ]);
 
     if (guestResult.error) setError(guestResult.error.message);
     if (confirmationResult.error) setError(confirmationResult.error.message);
+    if (wishesResult.error) setError(wishesResult.error.message);
     setGuests((guestResult.data || []) as Guest[]);
     setConfirmations((confirmationResult.data || []) as unknown as ConfirmationRecord[]);
+    setWishMessages((wishesResult.data || []) as WishMessageRecord[]);
     setLoading(false);
   }
 
@@ -210,6 +225,7 @@ export default function MiCuenta() {
   const invite = invites.find((item) => item.evento_id === next?.id);
   const related = guests.filter((item) => item.invitacion_id === invite?.id);
   const relatedConfirmations = confirmations.filter((item) => item.invitacion_id === invite?.id);
+  const relatedWishMessages = wishMessages.filter((item) => item.invitacion_id === invite?.id);
   const unifiedGuests = buildUnifiedGuests(related, relatedConfirmations);
   const personalizedConfirmed = related.filter((item) => item.estado === "confirmado").length;
   const personalizedPending = related.filter((item) => item.estado === "pendiente").length;
@@ -258,8 +274,28 @@ export default function MiCuenta() {
     };
   }, [invite?.id, supabase]);
 
+  useEffect(() => {
+    if (!invite?.id) return;
+    const channel = supabase
+      .channel(`client-wishes-${invite.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "mensajes_deseos",
+          filter: `invitacion_id=eq.${invite.id}`,
+        },
+        () => void load()
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [invite?.id, supabase]);
 
-  const dashboardActivities: DashboardActivity[] = activityRows.map((item) => {
+  const dashboardActivities: DashboardActivity[] = [
+    ...activityRows.map((item) => {
     const details = item.detalles || {};
     const person = typeof details.nombre === "string" ? details.nombre : "Un invitado";
     const labels: Record<string, { title: string; detail: string; tone: DashboardActivity["tone"] }> = {
@@ -270,12 +306,25 @@ export default function MiCuenta() {
     };
     const fallback = { title: item.accion.replaceAll("_", " "), detail: person, tone: "neutral" as const };
     const copy = labels[item.accion] || fallback;
-    return {
-      id: item.id,
-      ...copy,
+      return {
+        id: item.id,
+        ...copy,
+        createdAt: item.created_at,
+        time: new Date(item.created_at).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
+      };
+    }),
+    ...relatedWishMessages.map((item) => ({
+      id: `wish-${item.id}`,
+      title: `${item.nombre} dejó un mensaje`,
+      detail: item.mensaje,
+      tone: "neutral" as const,
+      createdAt: item.created_at,
       time: new Date(item.created_at).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
-    };
-  });
+    })),
+  ]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 8)
+    .map(({ createdAt: _createdAt, ...item }) => item);
 
   const dashboardTasks: DashboardTask[] = invite ? [
     {
@@ -405,6 +454,39 @@ export default function MiCuenta() {
     URL.revokeObjectURL(href);
   }
 
+  async function updateWishMessage(id: string, values: Partial<Pick<WishMessageRecord, "aprobado" | "destacado">>) {
+    setBusyWishId(id);
+    setError("");
+    const { error: updateError } = await supabase
+      .from("mensajes_deseos")
+      .update(values)
+      .eq("id", id)
+      .eq("invitacion_id", invite?.id || "");
+    setBusyWishId(null);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    setWishMessages((current) => current.map((item) => item.id === id ? { ...item, ...values } : item));
+  }
+
+  async function deleteWishMessage(item: WishMessageRecord) {
+    if (!invite || !confirm(`¿Eliminar el mensaje de ${item.nombre}?`)) return;
+    setBusyWishId(item.id);
+    setError("");
+    const { error: deleteError } = await supabase
+      .from("mensajes_deseos")
+      .delete()
+      .eq("id", item.id)
+      .eq("invitacion_id", invite.id);
+    setBusyWishId(null);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
+    }
+    setWishMessages((current) => current.filter((message) => message.id !== item.id));
+  }
+
   if (loading) {
     return (
       <main className="client-portal">
@@ -424,6 +506,7 @@ export default function MiCuenta() {
           <a href="#evento">Mi evento</a>
           {invite && <a href="#invitados">Invitados</a>}
           {modalityFeatures.publicRsvp && <a href="#confirmaciones">Confirmaciones</a>}
+          {invite && <a href="#mensajes">Mensajes{relatedWishMessages.filter((item) => !item.aprobado).length ? ` (${relatedWishMessages.filter((item) => !item.aprobado).length})` : ""}</a>}
           <a href="/mi-cuenta/biblioteca">Biblioteca</a>
           <a href="#compartir">Compartir</a>
           <button onClick={salir}>Salir</button>
@@ -496,6 +579,7 @@ export default function MiCuenta() {
               expectedPeople={personalized ? expectedPeople : confirmedPeople}
               arrivedPeople={arrivedPeople}
               albumCount={albumCount}
+              wishCount={relatedWishMessages.length}
               activities={dashboardActivities}
               tasks={dashboardTasks}
               onShare={() => setSharingPublic(true)}
@@ -512,6 +596,18 @@ export default function MiCuenta() {
                 const guest = related.find((item) => item.id === guestId);
                 if (guest) setCrmGuest(guest);
               }}
+            />
+          )}
+
+          {invite && (
+            <MessagesCenter
+              invitationTitle={invite.titulo}
+              messages={relatedWishMessages}
+              busyId={busyWishId}
+              onApprove={(item) => void updateWishMessage(item.id, { aprobado: true })}
+              onHide={(item) => void updateWishMessage(item.id, { aprobado: false })}
+              onToggleFeatured={(item) => void updateWishMessage(item.id, { destacado: !item.destacado })}
+              onDelete={(item) => void deleteWishMessage(item)}
             />
           )}
 

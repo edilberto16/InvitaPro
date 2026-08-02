@@ -38,6 +38,7 @@ type EventDashboardProps = {
   expectedPeople: number;
   arrivedPeople: number;
   albumCount: number;
+  wishCount: number;
   activities: DashboardActivity[];
   tasks: DashboardTask[];
   onShare: () => void;
@@ -73,6 +74,7 @@ export default function EventDashboard({
   expectedPeople,
   arrivedPeople,
   albumCount,
+  wishCount,
   activities,
   tasks,
   onShare,
@@ -139,6 +141,11 @@ export default function EventDashboard({
           <span>Álbum</span>
           <strong>{albumCount}</strong>
           <small>Fotos recibidas</small>
+        </article>
+        <article>
+          <span>Mensajes</span>
+          <strong>{wishCount}</strong>
+          <small>Deseos recibidos</small>
         </article>
       </section>
 
