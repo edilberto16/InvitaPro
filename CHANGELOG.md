@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## [2.33.1.1] - 2026-08-01
+
+### Corregido
+- Se reorganizó la barra de selección masiva del Centro de Gestión de Invitados.
+- El checkbox **Seleccionar visibles** ahora permanece junto a su etiqueta.
+- El contador muestra correctamente singular y plural, con separación visual.
+- El botón **Eliminar seleccionados** queda alineado y muestra un estado deshabilitado claro cuando no hay selección.
+- La barra se adapta a pantallas móviles sin separar controles ni provocar desbordamiento.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- No modifica la lógica de selección o eliminación de invitados.
+- Se mantiene un único `CHANGELOG.md`.
+
+## [2.33.1] - 2026-08-01
+
+### Añadido
+- Nueva capa `guest-unified.service.ts` para combinar invitados importados/manuales con respuestas de RSVP público.
+- Gestión de Invitados ahora muestra también las confirmaciones públicas aunque no exista un registro previo en `invitados`.
+- Las respuestas enlazadas por `invitado_id`, teléfono o nombre se fusionan con el invitado existente para evitar duplicados visuales.
+- Los comentarios RSVP y el origen `RSVP público` aparecen dentro del Centro de Gestión de Invitados.
+
+### Corregido
+- Las métricas de Gestión de Invitados ahora coinciden con el Centro de Confirmaciones.
+- Los registros generados únicamente desde RSVP público se muestran como solo lectura y no intentan eliminar filas inexistentes de `invitados`.
+- Se mantiene la compatibilidad con CSV, altas manuales y pases personalizados.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- No modifica el panel administrativo, el Studio ni la invitación pública.
+- Se mantiene un único `CHANGELOG.md`.
+
 ## [2.33.0.1] - 2026-08-01
 
 ### Corregido

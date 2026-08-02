@@ -6,6 +6,7 @@ import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal"
 import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
 import GuestManagementCenter, { type ManagedGuest } from "../../components/guests/guest-management-center";
 import ConfirmationsCenter, { type ConfirmationRecord } from "../../components/guests/confirmations-center";
+import { buildUnifiedGuests, type BaseGuestRecord } from "../../lib/services/guest-unified.service";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
@@ -42,7 +43,7 @@ type ActivityRow = {
   created_at: string;
 };
 
-type Guest = ManagedGuest;
+type Guest = BaseGuestRecord;
 
 
 export default function MiCuenta() {
@@ -209,6 +210,7 @@ export default function MiCuenta() {
   const invite = invites.find((item) => item.evento_id === next?.id);
   const related = guests.filter((item) => item.invitacion_id === invite?.id);
   const relatedConfirmations = confirmations.filter((item) => item.invitacion_id === invite?.id);
+  const unifiedGuests = buildUnifiedGuests(related, relatedConfirmations);
   const personalizedConfirmed = related.filter((item) => item.estado === "confirmado").length;
   const personalizedPending = related.filter((item) => item.estado === "pendiente").length;
   const personalizedRejected = related.filter((item) => ["no_asistira", "rechazado"].includes(item.estado)).length;
@@ -363,7 +365,7 @@ export default function MiCuenta() {
   }
 
   function exportGuestReport() {
-    if (!invite || !related.length) return;
+    if (!invite || !unifiedGuests.length) return;
     const headers = [
       "Invitado",
       "Teléfono",
@@ -375,9 +377,11 @@ export default function MiCuenta() {
       "Adultos ingresaron",
       "Niños ingresaron",
       "Última llegada",
+      "Origen",
+      "Comentario RSVP",
     ];
     const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
-    const rows = related.map((guest) => [
+    const rows = unifiedGuests.map((guest) => [
       guest.nombre,
       guest.telefono || "",
       guest.codigo,
@@ -388,6 +392,8 @@ export default function MiCuenta() {
       guest.checkin_adultos,
       guest.checkin_ninos,
       guest.ultimo_checkin_at || guest.checkin_at || "",
+      guest.source === "confirmation" ? "RSVP público" : "Lista de invitados",
+      guest.mensaje || "",
     ]);
     const csv = [headers, ...rows].map((row) => row.map(quote).join(",")).join("\n");
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
@@ -512,12 +518,20 @@ export default function MiCuenta() {
           {invite && (
             <GuestManagementCenter
               invitationTitle={invite.titulo}
-              guests={related}
+              guests={unifiedGuests}
               onImport={() => setCsvImport(true)}
               onShareGeneral={() => setSharingPublic(true)}
-              onOpenGuest={(guest) => setCrmGuest(guest)}
-              onShareGuest={(guest) => setSharingGuest(guest)}
-              onDeleteGuests={requestDeleteGuests}
+              onOpenGuest={(guest) => {
+                if (guest.readonly_record) {
+                  const linked = related.find((item) => item.id === guest.guest_id);
+                  if (linked) setCrmGuest(linked);
+                  return;
+                }
+                const linked = related.find((item) => item.id === guest.id);
+                if (linked) setCrmGuest(linked);
+              }}
+              onShareGuest={(guest) => setSharingGuest(guest as unknown as Guest)}
+              onDeleteGuests={(items) => requestDeleteGuests(items.filter((item) => !item.readonly_record) as unknown as Guest[])}
               onExport={exportGuestReport}
             />
           )}

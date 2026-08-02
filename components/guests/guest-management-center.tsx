@@ -1,24 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import type { UnifiedGuestRecord } from '../../lib/services/guest-unified.service';
 
-export type ManagedGuest = {
-  id: string;
-  invitacion_id: string;
-  nombre: string;
-  telefono: string | null;
-  correo: string | null;
-  estado: string;
-  adultos_permitidos: number;
-  ninos_permitidos: number;
-  mesa: string | null;
-  codigo: string;
-  checkin_adultos: number;
-  checkin_ninos: number;
-  checkin_at: string | null;
-  ultimo_checkin_at: string | null;
-  notas: string | null;
-};
+export type ManagedGuest = UnifiedGuestRecord;
 
 type Segment = 'todos' | 'pendientes' | 'confirmados' | 'rechazados' | 'sin_telefono' | 'con_mesa' | 'checkin';
 
@@ -91,7 +76,7 @@ export default function GuestManagementCenter({
   }, [guests, search, segment]);
 
   const allVisibleSelected = filteredGuests.length > 0 && filteredGuests.every((guest) => selectedIds.includes(guest.id));
-  const selectedGuests = guests.filter((guest) => selectedIds.includes(guest.id));
+  const selectedGuests = guests.filter((guest) => selectedIds.includes(guest.id) && !guest.readonly_record);
 
   function toggleGuest(id: string) {
     setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
@@ -151,12 +136,16 @@ export default function GuestManagementCenter({
 
       {filteredGuests.length > 0 && (
         <div className="client-guest-bulkbar guest-management-bulkbar">
-          <label>
-            <input type="checkbox" checked={allVisibleSelected} onChange={toggleVisible} />
-            <span>Seleccionar visibles</span>
-          </label>
-          <span>{selectedIds.length} seleccionado(s)</span>
-          <button type="button" className="client-danger" disabled={!selectedGuests.length} onClick={() => onDeleteGuests(selectedGuests)}>
+          <div className="guest-management-bulkbar-summary">
+            <label className="guest-management-select-visible">
+              <input type="checkbox" checked={allVisibleSelected} onChange={toggleVisible} />
+              <span>Seleccionar visibles</span>
+            </label>
+            <span className="guest-management-selected-count">
+              <strong>{selectedIds.length}</strong> {selectedIds.length === 1 ? 'seleccionado' : 'seleccionados'}
+            </span>
+          </div>
+          <button type="button" className="client-danger guest-management-delete-selected" disabled={!selectedGuests.length} onClick={() => onDeleteGuests(selectedGuests)}>
             Eliminar seleccionados
           </button>
         </div>
@@ -167,19 +156,21 @@ export default function GuestManagementCenter({
           {filteredGuests.map((guest) => (
             <article key={guest.id} className={selectedIds.includes(guest.id) ? 'is-selected' : ''}>
               <label className="client-guest-checkbox" aria-label={`Seleccionar ${guest.nombre}`}>
-                <input type="checkbox" checked={selectedIds.includes(guest.id)} onChange={() => toggleGuest(guest.id)} />
+                <input type="checkbox" checked={selectedIds.includes(guest.id)} disabled={guest.readonly_record} onChange={() => toggleGuest(guest.id)} />
               </label>
               <span className="client-guest-avatar">{initials(guest.nombre)}</span>
               <div className="client-guest-info">
                 <strong>{guest.nombre}</strong>
                 <small>{guest.telefono || 'Sin teléfono'}{guest.correo ? ` · ${guest.correo}` : ''}</small>
-                <span>{guest.adultos_permitidos} adulto(s) · {guest.ninos_permitidos} niño(s){guest.mesa ? ` · ${guest.mesa}` : ''} · Código {guest.codigo}</span>
+                <span>{guest.adultos_permitidos} adulto(s) · {guest.ninos_permitidos} niño(s){guest.mesa ? ` · ${guest.mesa}` : ''}{guest.codigo ? ` · Código ${guest.codigo}` : ''}</span>
+                {guest.mensaje?.trim() && <span className="guest-management-comment">“{guest.mensaje.trim()}”</span>}
+                {guest.source === 'confirmation' && <span className="guest-management-origin">RSVP público</span>}
               </div>
               <span className={`client-guest-status status-${guest.estado}`}>{normalizedStatus(guest.estado)}</span>
               <div className="guest-management-row-actions">
-                <button type="button" className="client-secondary" onClick={() => onOpenGuest(guest)}>Ver ficha</button>
+                {!guest.readonly_record && <button type="button" className="client-secondary" onClick={() => onOpenGuest(guest)}>Ver ficha</button>}
                 <button type="button" className="client-secondary" onClick={() => onShareGuest(guest)} disabled={!guest.telefono}>WhatsApp</button>
-                <button type="button" className="client-danger-outline" onClick={() => onDeleteGuests([guest])}>Eliminar</button>
+                {!guest.readonly_record && <button type="button" className="client-danger-outline" onClick={() => onDeleteGuests([guest])}>Eliminar</button>}
               </div>
             </article>
           ))}

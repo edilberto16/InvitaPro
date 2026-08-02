@@ -232,3 +232,7 @@ Cada invitado dispone de una ficha con contacto, pases, RSVP, check-in, notas in
 ## Centro de Confirmaciones
 
 El portal del cliente incluye un módulo de RSVP con respuestas en tiempo real, filtros, comentarios, asistentes, exportación CSV y acceso al CRM de invitados.
+
+## Gestión unificada de invitados
+
+El Centro de Gestión combina la lista importada o creada manualmente con las respuestas de RSVP público. Las coincidencias se enlazan por identificador, teléfono o nombre para evitar duplicados visuales y mantener consistentes las métricas entre Dashboard, Confirmaciones y Gestión de Invitados.
