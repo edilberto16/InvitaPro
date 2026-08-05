@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [2.36.1] - 2026-08-05
+
+- Álbum Inteligente: eliminación definitiva de fotografía y archivo en Storage con ConfirmDialog.
+- Invitación pública: corrección responsive para títulos grandes en celulares.
+- RSVP: evita respuestas duplicadas por teléfono y actualiza la respuesta existente.
+- Incluye migración `20260805_v2_36_1_rsvp_sin_duplicados.sql`.
+
 ## [2.36.0] - 2026-08-05
 
 ### Añadido
