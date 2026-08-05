@@ -1,13 +1,76 @@
-## 2.34.0 — Centro de Mensajes
+# CHANGELOG
 
+## [2.35.4] - 2026-08-04
+
+### Corregido
+- Se normalizan fechas en formato `YYYY-MM-DD` y `MM/DD/YYYY` antes de mostrarlas o usarlas en la cuenta regresiva.
+- Se convierten horas de 12 horas (`06:00 PM`) y 24 horas (`18:00`) a un valor seguro antes de calcular el evento.
+- `longDate()` deja de lanzar `RangeError: Invalid time value`; cuando el dato no es válido muestra **Fecha por definir**.
+- La vista previa lateral del Studio ya no se rompe mientras el usuario cambia la fecha o la hora.
+- El selector del Álbum colaborativo usa un botón real conectado mediante referencia al `input[type=file]`, evitando fallos de clic por `label`, capas o estilos.
+- El álbum permanece disponible antes, durante y después del evento siempre que la invitación esté publicada y el bloque esté visible.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- Conserva el bucket `guest-album` y las políticas existentes, que ya permiten subir mientras la invitación esté publicada y el álbum activo.
+- Se mantiene un único `CHANGELOG.md`.
+
+## [2.35.3] - 2026-08-02
+
+### Corregido
+- El selector de fotografías del Álbum colaborativo ahora abre correctamente el explorador de archivos.
+- Se separó el campo **Tu nombre (opcional)** del control de archivo para evitar que el `label` activara el campo equivocado.
+- Se añadieron estados visibles de selección, carga, éxito y error durante la subida.
+- Si falla el registro en `album_colaborativo_fotos`, el archivo recién subido se elimina de Storage para evitar archivos huérfanos.
+- El Centro de Mensajes dejó de usar `window.confirm()` y ahora reutiliza el `ConfirmDialog` del Design System.
+- El modal de eliminación de mensajes incluye nombre, contenido, estado de carga y advertencia de acción irreversible.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- Conserva el bucket `guest-album` y la tabla `album_colaborativo_fotos` existentes.
+- Se mantiene un único `CHANGELOG.md`.
+
+## [2.35.2] - 2026-08-02
+
+### Corregido
+- La actividad RSVP eliminada deja de mostrarse en el Dashboard cuando su confirmación de origen ya no existe.
+- El Timeline valida la relación `actividad.entidad_id` con las confirmaciones activas para evitar registros históricos huérfanos en la interfaz.
+- El indicador verde fue sustituido por un icono compacto, alineado y contenido dentro de la tarjeta.
+- Se añadieron iconos diferenciados para RSVP, mensajes y check-in.
+- Se mejoraron la alineación, el espaciado, la fecha y el comportamiento responsive de Actividad reciente.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- No elimina el historial técnico almacenado en `actividad`; únicamente evita mostrar referencias cuyo registro de origen ya fue eliminado.
+- Se mantiene un único `CHANGELOG.md`.
+
+## [2.35.1] - 2026-08-01
+
+### Añadido
+- Nuevo componente reutilizable `components/ui/confirm-dialog.tsx` para confirmaciones destructivas consistentes.
+- El diálogo se monta mediante portal sobre `document.body`, evitando que quede atrapado dentro del layout del portal.
+- Soporte para cerrar con `Esc`, bloquear el scroll de fondo y mostrar hasta cinco registros afectados.
+
+### Corregido
+- Eliminar un invitado o varios ahora abre un modal centrado con fondo oscuro y desenfoque.
+- Los mensajes distinguen correctamente entre singular y plural.
+- Los botones **Cancelar** y **Eliminar invitado(s)** mantienen una jerarquía visual consistente.
+- El modal se adapta a pantallas pequeñas y conserva visibles sus acciones.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+- No cambia la lógica de eliminación individual o masiva.
+- Se mantiene un único `CHANGELOG.md`.
+
+## [2.34.0] - 2026-08-01
+
+### Añadido
 - Se agregó un módulo dedicado para consultar y moderar el Buzón de deseos.
 - Se añadieron filtros por pendientes, aprobados y destacados, además de búsqueda y exportación CSV.
 - Los anfitriones pueden aprobar, ocultar, destacar y eliminar mensajes.
 - Los mensajes nuevos aparecen en tiempo real y se integran en la actividad reciente del Dashboard.
 - El Dashboard muestra el total de mensajes recibidos y el menú indica mensajes pendientes.
 - Se añadió la columna `mensajes_deseos.destacado` mediante una migración segura.
-
-# CHANGELOG
 
 ## [2.33.1.1] - 2026-08-01
 
@@ -698,3 +761,15 @@ git push origin main
 - La importación CSV ahora detecta teléfonos, correos y códigos duplicados dentro del archivo y contra invitados existentes.
 - No requiere migración de Supabase.
 
+
+## 2.35.0 — Gestión de Invitados PRO
+
+- Se habilitó la importación CSV tanto para RSVP público como para pases personalizados.
+- Se corrigió la apertura del importador CSV desde Gestión de Invitados.
+- Se habilitó la eliminación de respuestas RSVP públicas desde la misma gestión unificada.
+- La eliminación masiva ahora separa correctamente registros de `invitados` y `confirmaciones`.
+- Se agregó eliminación individual para invitados y respuestas públicas.
+- Se mejoró la confirmación de eliminación para describir qué tipo de registros serán removidos.
+- Se corrigió el indicador de Actividad reciente para que no se desborde del contenedor.
+- Se mejoró el estado visual del botón “Eliminar seleccionados”.
+- No requiere migración de Supabase.

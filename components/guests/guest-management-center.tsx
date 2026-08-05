@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { UnifiedGuestRecord } from '../../lib/services/guest-unified.service';
 
 export type ManagedGuest = UnifiedGuestRecord;
@@ -49,6 +49,11 @@ export default function GuestManagementCenter({
   const [segment, setSegment] = useState<Segment>('todos');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  useEffect(() => {
+    const availableIds = new Set(guests.map((guest) => guest.id));
+    setSelectedIds((current) => current.filter((id) => availableIds.has(id)));
+  }, [guests]);
+
   const stats = useMemo(() => {
     const confirmed = guests.filter((guest) => guest.estado === 'confirmado').length;
     const rejected = guests.filter((guest) => ['no_asistira', 'rechazado'].includes(guest.estado)).length;
@@ -76,7 +81,7 @@ export default function GuestManagementCenter({
   }, [guests, search, segment]);
 
   const allVisibleSelected = filteredGuests.length > 0 && filteredGuests.every((guest) => selectedIds.includes(guest.id));
-  const selectedGuests = guests.filter((guest) => selectedIds.includes(guest.id) && !guest.readonly_record);
+  const selectedGuests = guests.filter((guest) => selectedIds.includes(guest.id));
 
   function toggleGuest(id: string) {
     setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
@@ -156,7 +161,7 @@ export default function GuestManagementCenter({
           {filteredGuests.map((guest) => (
             <article key={guest.id} className={selectedIds.includes(guest.id) ? 'is-selected' : ''}>
               <label className="client-guest-checkbox" aria-label={`Seleccionar ${guest.nombre}`}>
-                <input type="checkbox" checked={selectedIds.includes(guest.id)} disabled={guest.readonly_record} onChange={() => toggleGuest(guest.id)} />
+                <input type="checkbox" checked={selectedIds.includes(guest.id)} onChange={() => toggleGuest(guest.id)} />
               </label>
               <span className="client-guest-avatar">{initials(guest.nombre)}</span>
               <div className="client-guest-info">
@@ -170,7 +175,7 @@ export default function GuestManagementCenter({
               <div className="guest-management-row-actions">
                 {!guest.readonly_record && <button type="button" className="client-secondary" onClick={() => onOpenGuest(guest)}>Ver ficha</button>}
                 <button type="button" className="client-secondary" onClick={() => onShareGuest(guest)} disabled={!guest.telefono}>WhatsApp</button>
-                {!guest.readonly_record && <button type="button" className="client-danger-outline" onClick={() => onDeleteGuests([guest])}>Eliminar</button>}
+                <button type="button" className="client-danger-outline" onClick={() => onDeleteGuests([guest])}>{guest.source === 'confirmation' ? 'Eliminar respuesta' : 'Eliminar'}</button>
               </div>
             </article>
           ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ShareInvitationModal from "../../components/share-invitation-modal";
+import ConfirmDialog from "../../components/ui/confirm-dialog";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
 import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
 import GuestManagementCenter, { type ManagedGuest } from "../../components/guests/guest-management-center";
@@ -39,6 +40,8 @@ type Invite = {
 
 type ActivityRow = {
   id: string;
+  entidad: string;
+  entidad_id: string | null;
   accion: string;
   detalles: Record<string, unknown> | null;
   created_at: string;
@@ -56,12 +59,13 @@ export default function MiCuenta() {
   const [confirmations, setConfirmations] = useState<ConfirmationRecord[]>([]);
   const [wishMessages, setWishMessages] = useState<WishMessageRecord[]>([]);
   const [busyWishId, setBusyWishId] = useState<string | null>(null);
+  const [wishToDelete, setWishToDelete] = useState<WishMessageRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sharingPublic, setSharingPublic] = useState(false);
   const [sharingGuest, setSharingGuest] = useState<Guest | null>(null);
   const [csvImport, setCsvImport] = useState(false);
-  const [guestsToDelete, setGuestsToDelete] = useState<Guest[]>([]);
+  const [guestsToDelete, setGuestsToDelete] = useState<ManagedGuest[]>([]);
   const [deletingGuests, setDeletingGuests] = useState(false);
   const [activityRows, setActivityRows] = useState<ActivityRow[]>([]);
   const [albumCount, setAlbumCount] = useState(0);
@@ -157,7 +161,7 @@ export default function MiCuenta() {
       activeEventId
         ? supabase
             .from("actividad")
-            .select("id,accion,detalles,created_at")
+            .select("id,entidad,entidad_id,accion,detalles,created_at")
             .eq("evento_id", activeEventId)
             .order("created_at", { ascending: false })
             .limit(8)
@@ -294,32 +298,74 @@ export default function MiCuenta() {
     };
   }, [invite?.id, supabase]);
 
+  const activeConfirmationIds = new Set(relatedConfirmations.map((item) => item.id));
   const dashboardActivities: DashboardActivity[] = [
-    ...activityRows.map((item) => {
-    const details = item.detalles || {};
-    const person = typeof details.nombre === "string" ? details.nombre : "Un invitado";
-    const labels: Record<string, { title: string; detail: string; tone: DashboardActivity["tone"] }> = {
-      rsvp_confirmado: { title: `${person} confirmó asistencia`, detail: "Nueva respuesta RSVP", tone: "success" },
-      rsvp_rechazado: { title: `${person} no asistirá`, detail: "Respuesta RSVP actualizada", tone: "warning" },
-      checkin: { title: `${person} ingresó al evento`, detail: "Check-in registrado", tone: "success" },
-      checkin_revertido: { title: `Se revirtió un check-in`, detail: person, tone: "warning" },
-    };
-    const fallback = { title: item.accion.replaceAll("_", " "), detail: person, tone: "neutral" as const };
-    const copy = labels[item.accion] || fallback;
-      return {
-        id: item.id,
-        ...copy,
-        createdAt: item.created_at,
-        time: new Date(item.created_at).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
-      };
-    }),
+    ...activityRows
+      .filter((item) => {
+        if (item.entidad !== "confirmaciones") return true;
+        return Boolean(item.entidad_id && activeConfirmationIds.has(item.entidad_id));
+      })
+      .map((item) => {
+        const details = item.detalles || {};
+        const person = typeof details.nombre === "string" ? details.nombre : "Un invitado";
+        const labels: Record<string, Omit<DashboardActivity, "id" | "time">> = {
+          rsvp_confirmado: {
+            title: `${person} confirmó asistencia`,
+            detail: "Nueva respuesta RSVP",
+            tone: "success",
+            kind: "rsvp",
+          },
+          rsvp_rechazado: {
+            title: `${person} no asistirá`,
+            detail: "Respuesta RSVP actualizada",
+            tone: "warning",
+            kind: "rsvp",
+          },
+          checkin: {
+            title: `${person} ingresó al evento`,
+            detail: "Check-in registrado",
+            tone: "success",
+            kind: "checkin",
+          },
+          checkin_revertido: {
+            title: "Se revirtió un check-in",
+            detail: person,
+            tone: "warning",
+            kind: "checkin",
+          },
+        };
+        const fallback = {
+          title: item.accion.replaceAll("_", " "),
+          detail: person,
+          tone: "neutral" as const,
+          kind: "neutral" as const,
+        };
+        const copy = labels[item.accion] || fallback;
+        return {
+          id: item.id,
+          ...copy,
+          createdAt: item.created_at,
+          time: new Date(item.created_at).toLocaleString("es-MX", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+      }),
     ...relatedWishMessages.map((item) => ({
       id: `wish-${item.id}`,
       title: `${item.nombre} dejó un mensaje`,
       detail: item.mensaje,
       tone: "neutral" as const,
+      kind: "message" as const,
       createdAt: item.created_at,
-      time: new Date(item.created_at).toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
+      time: new Date(item.created_at).toLocaleString("es-MX", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     })),
   ]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -361,7 +407,7 @@ export default function MiCuenta() {
     },
   ] : [];
 
-  function requestDeleteGuests(items: Guest[]) {
+  function requestDeleteGuests(items: ManagedGuest[]) {
     if (!items.length) return;
     setGuestsToDelete(items);
   }
@@ -372,20 +418,47 @@ export default function MiCuenta() {
     setDeletingGuests(true);
     setError("");
 
-    const ids = guestsToDelete.map((guest) => guest.id);
-    const { error: deleteError } = await supabase
-      .from("invitados")
-      .delete()
-      .in("id", ids)
-      .eq("invitacion_id", invite.id);
+    const confirmationIds = Array.from(
+      new Set(guestsToDelete.map((guest) => guest.confirmation_id).filter(Boolean) as string[])
+    );
+    const guestIds = Array.from(
+      new Set(
+        guestsToDelete
+          .filter((guest) => guest.source === "guest")
+          .map((guest) => guest.guest_id || guest.id)
+          .filter(Boolean)
+      )
+    );
 
-    setDeletingGuests(false);
+    if (confirmationIds.length) {
+      const { error: confirmationDeleteError } = await supabase
+        .from("confirmaciones")
+        .delete()
+        .in("id", confirmationIds)
+        .eq("invitacion_id", invite.id);
 
-    if (deleteError) {
-      setError(deleteError.message);
-      return;
+      if (confirmationDeleteError) {
+        setDeletingGuests(false);
+        setError(confirmationDeleteError.message);
+        return;
+      }
     }
 
+    if (guestIds.length) {
+      const { error: guestDeleteError } = await supabase
+        .from("invitados")
+        .delete()
+        .in("id", guestIds)
+        .eq("invitacion_id", invite.id);
+
+      if (guestDeleteError) {
+        setDeletingGuests(false);
+        setError(guestDeleteError.message);
+        return;
+      }
+    }
+
+    setDeletingGuests(false);
     setGuestsToDelete([]);
     await load();
   }
@@ -470,21 +543,26 @@ export default function MiCuenta() {
     setWishMessages((current) => current.map((item) => item.id === id ? { ...item, ...values } : item));
   }
 
-  async function deleteWishMessage(item: WishMessageRecord) {
-    if (!invite || !confirm(`¿Eliminar el mensaje de ${item.nombre}?`)) return;
-    setBusyWishId(item.id);
+  function deleteWishMessage(item: WishMessageRecord) {
+    setWishToDelete(item);
+  }
+
+  async function confirmDeleteWishMessage() {
+    if (!invite || !wishToDelete) return;
+    setBusyWishId(wishToDelete.id);
     setError("");
     const { error: deleteError } = await supabase
       .from("mensajes_deseos")
       .delete()
-      .eq("id", item.id)
+      .eq("id", wishToDelete.id)
       .eq("invitacion_id", invite.id);
     setBusyWishId(null);
     if (deleteError) {
       setError(deleteError.message);
       return;
     }
-    setWishMessages((current) => current.filter((message) => message.id !== item.id));
+    setWishMessages((current) => current.filter((message) => message.id !== wishToDelete.id));
+    setWishToDelete(null);
   }
 
   if (loading) {
@@ -627,37 +705,46 @@ export default function MiCuenta() {
                 if (linked) setCrmGuest(linked);
               }}
               onShareGuest={(guest) => setSharingGuest(guest as unknown as Guest)}
-              onDeleteGuests={(items) => requestDeleteGuests(items.filter((item) => !item.readonly_record) as unknown as Guest[])}
+              onDeleteGuests={requestDeleteGuests}
               onExport={exportGuestReport}
             />
           )}
         </>
       )}
 
-      {guestsToDelete.length > 0 && (
-        <div className="client-modal-backdrop" onMouseDown={() => !deletingGuests && setGuestsToDelete([])}>
-          <section className="client-delete-modal" onMouseDown={(event) => event.stopPropagation()}>
-            <div className="client-delete-icon">✕</div>
-            <p className="eyebrow">Eliminar invitados</p>
-            <h2>¿Eliminar {guestsToDelete.length === 1 ? guestsToDelete[0].nombre : `${guestsToDelete.length} invitados`}?</h2>
-            <p>Esta acción eliminará sus pases y confirmaciones asociadas. No se puede deshacer.</p>
-            <div className="client-delete-list">
-              {guestsToDelete.slice(0, 5).map((guest) => (
-                <span key={guest.id}>{guest.nombre}</span>
-              ))}
-              {guestsToDelete.length > 5 && <span>y {guestsToDelete.length - 5} más…</span>}
-            </div>
-            <div className="client-delete-actions">
-              <button type="button" className="client-secondary" disabled={deletingGuests} onClick={() => setGuestsToDelete([])}>
-                Cancelar
-              </button>
-              <button type="button" className="client-danger" disabled={deletingGuests} onClick={deleteGuests}>
-                {deletingGuests ? "Eliminando…" : "Sí, eliminar"}
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
+      <ConfirmDialog
+        open={Boolean(wishToDelete)}
+        eyebrow="Eliminar mensaje"
+        title={`¿Eliminar el mensaje de ${wishToDelete?.nombre || "este invitado"}?`}
+        description="El mensaje se eliminará del Buzón de deseos y no podrá recuperarse."
+        itemNames={wishToDelete ? [wishToDelete.mensaje] : []}
+        confirmLabel="Eliminar mensaje"
+        busy={Boolean(wishToDelete && busyWishId === wishToDelete.id)}
+        onCancel={() => {
+          if (!busyWishId) setWishToDelete(null);
+        }}
+        onConfirm={confirmDeleteWishMessage}
+      />
+
+      <ConfirmDialog
+        open={guestsToDelete.length > 0}
+        eyebrow={guestsToDelete.length === 1 ? "Eliminar invitado" : "Eliminar invitados"}
+        title={
+          guestsToDelete.length === 1
+            ? `¿Eliminar a ${guestsToDelete[0]?.nombre || "este invitado"}?`
+            : `¿Eliminar ${guestsToDelete.length} invitados?`
+        }
+        description={
+          guestsToDelete.length === 1
+            ? "Se eliminará este invitado o su respuesta RSVP asociada. Esta acción no se puede deshacer."
+            : `Se eliminarán ${guestsToDelete.length} registros y sus respuestas RSVP asociadas. Esta acción no se puede deshacer.`
+        }
+        itemNames={guestsToDelete.map((guest) => guest.nombre)}
+        confirmLabel={guestsToDelete.length === 1 ? "Eliminar invitado" : "Eliminar invitados"}
+        busy={deletingGuests}
+        onCancel={() => setGuestsToDelete([])}
+        onConfirm={deleteGuests}
+      />
 
       {invite && crmGuest && (
         <GuestCrmDrawer
@@ -699,7 +786,7 @@ export default function MiCuenta() {
         />
       )}
 
-      {invite && csvImport && modalityFeatures.csvImport && (
+      {invite && csvImport && (
         <GuestCsvImportModal
           open={csvImport}
           invitations={[invite as unknown as Invitacion]}

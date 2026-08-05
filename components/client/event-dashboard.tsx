@@ -8,6 +8,7 @@ export type DashboardActivity = {
   detail: string;
   time: string;
   tone?: "success" | "warning" | "neutral";
+  kind?: "rsvp" | "message" | "checkin" | "neutral";
 };
 
 export type DashboardTask = {
@@ -206,8 +207,22 @@ export default function EventDashboard({
           <div className="event-dashboard-activity-list">
             {activities.length ? activities.map((item) => (
               <div key={item.id}>
-                <i className={item.tone || "neutral"} />
-                <div><strong>{item.title}</strong><small>{item.detail}</small></div>
+                <span
+                  className={`event-dashboard-activity-icon ${item.tone || "neutral"}`}
+                  aria-hidden="true"
+                >
+                  {item.kind === "message"
+                    ? "✉"
+                    : item.kind === "checkin"
+                      ? "✓"
+                      : item.tone === "warning"
+                        ? "!"
+                        : "✓"}
+                </span>
+                <div className="event-dashboard-activity-copy">
+                  <strong>{item.title}</strong>
+                  <small>{item.detail}</small>
+                </div>
                 <time>{item.time}</time>
               </div>
             )) : <p className="event-dashboard-empty-copy">La actividad del evento aparecerá aquí.</p>}

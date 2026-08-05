@@ -629,3 +629,167 @@
 .messages-center-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.messages-center-actions button{white-space:nowrap}
 @media(max-width:980px){.messages-center-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.messages-center-toolbar{grid-template-columns:1fr}.messages-center-filters{justify-content:flex-start}.messages-center-list>article{grid-template-columns:48px minmax(0,1fr)}.messages-center-actions{grid-column:2;justify-content:flex-start}}
 @media(max-width:680px){.messages-center{margin:18px 16px 0;padding:20px}.messages-center-heading{align-items:flex-start;flex-direction:column}.messages-center-heading button{width:100%}.messages-center-stats{grid-template-columns:1fr 1fr}.messages-center-list>article{grid-template-columns:42px minmax(0,1fr);padding:14px}.messages-center-avatar{width:42px;height:42px}.messages-center-copy>div:first-child{align-items:flex-start;flex-direction:column;gap:3px}.messages-center-actions button{flex:1}.messages-center-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px}.messages-center-filters button{flex:0 0 auto}}
+
+/* v2.35.0 — Gestión de Invitados PRO */
+.event-dashboard-activity-list>div{overflow:hidden;grid-template-columns:12px minmax(0,1fr) auto}
+.event-dashboard-activity-marker{display:block!important;position:static!important;inset:auto!important;width:10px!important;height:10px!important;min-width:10px!important;max-width:10px!important;margin:0!important;border:0!important;border-radius:999px!important;background:#9b8891;box-shadow:none!important;transform:none!important}
+.event-dashboard-activity-marker.success{background:#39a86b}
+.event-dashboard-activity-marker.warning{background:#d49b34}
+.event-dashboard-activity-list>div>div{min-width:0}
+.event-dashboard-activity-list strong,.event-dashboard-activity-list small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.guest-management-delete-selected:not(:disabled){background:#b8324b;color:#fff;border-color:#b8324b;opacity:1}
+.guest-management-delete-selected:not(:disabled):hover{background:#96273d;border-color:#96273d}
+
+/* InvitaPro Design System — ConfirmDialog */
+.ip-dialog-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(24,14,20,.58);
+  -webkit-backdrop-filter:blur(7px);
+  backdrop-filter:blur(7px);
+  animation:ip-dialog-fade-in .18s ease-out;
+}
+.ip-confirm-dialog{
+  width:min(100%,520px);
+  max-height:min(720px,calc(100vh - 48px));
+  overflow:auto;
+  border:1px solid rgba(118,68,88,.18);
+  border-radius:24px;
+  background:#fff;
+  color:#2d2027;
+  box-shadow:0 28px 80px rgba(28,12,21,.28);
+  padding:28px;
+  animation:ip-dialog-pop-in .2s ease-out;
+}
+.ip-confirm-dialog-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  margin-bottom:18px;
+  border-radius:50%;
+  background:#fff0f2;
+  color:#b8324b;
+  font-size:25px;
+  font-weight:800;
+  line-height:1;
+}
+.ip-confirm-dialog-copy .eyebrow{margin:0 0 7px;color:#9c3850}
+.ip-confirm-dialog-copy h2{margin:0;color:#24181f;font-size:clamp(1.35rem,3vw,1.75rem);line-height:1.2}
+.ip-confirm-dialog-copy>p:last-child{margin:12px 0 0;color:#71616a;line-height:1.6}
+.ip-confirm-dialog-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:20px 0 0;
+  padding:14px;
+  border:1px solid #eddfe5;
+  border-radius:16px;
+  background:#fcf8fa;
+}
+.ip-confirm-dialog-list span{
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:5px 10px;
+  border-radius:999px;
+  background:#fff;
+  color:#58464f;
+  box-shadow:0 1px 0 rgba(36,24,31,.05);
+  font-size:.84rem;
+  font-weight:700;
+}
+.ip-confirm-dialog-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:24px;
+}
+.ip-confirm-dialog-actions button{min-width:132px;min-height:44px}
+.ip-confirm-dialog-danger{background:#b8324b!important;border-color:#b8324b!important;color:#fff!important}
+.ip-confirm-dialog-danger:hover:not(:disabled){background:#96273d!important;border-color:#96273d!important}
+.ip-confirm-dialog-danger:disabled{opacity:.62;cursor:wait}
+@keyframes ip-dialog-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ip-dialog-pop-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:640px){
+  .ip-dialog-backdrop{padding:14px;align-items:end}
+  .ip-confirm-dialog{width:100%;max-height:calc(100vh - 28px);padding:22px;border-radius:22px 22px 18px 18px}
+  .ip-confirm-dialog-actions{flex-direction:column-reverse}
+  .ip-confirm-dialog-actions button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.ip-dialog-backdrop,.ip-confirm-dialog{animation:none}}
+
+/* InvitaPro v2.35.2 · Timeline profesional y actividad RSVP consistente */
+.event-dashboard-activity-list{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.event-dashboard-activity-list>div{
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  min-height:72px;
+  padding:14px 16px;
+  overflow:hidden;
+  border:1px solid #eadfe5;
+  border-radius:16px;
+  background:#fff;
+}
+.event-dashboard-activity-icon{
+  display:grid!important;
+  place-items:center;
+  position:static!important;
+  inset:auto!important;
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  max-width:36px!important;
+  margin:0!important;
+  border:1px solid #e6dce1!important;
+  border-radius:12px!important;
+  background:#f3edf0!important;
+  color:#765e6b!important;
+  font-size:16px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.event-dashboard-activity-icon.success{
+  border-color:#cbead7!important;
+  background:#e5f7ec!important;
+  color:#238250!important;
+}
+.event-dashboard-activity-icon.warning{
+  border-color:#f0dfbd!important;
+  background:#fff5df!important;
+  color:#a66d11!important;
+}
+.event-dashboard-activity-copy{
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+.event-dashboard-activity-copy strong,
+.event-dashboard-activity-copy small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.event-dashboard-activity-list time{
+  align-self:start;
+  padding-top:2px;
+  white-space:nowrap;
+  color:#927d87;
+  font-size:10px;
+}
+@media(max-width:720px){
+  .event-dashboard-activity-list{grid-template-columns:1fr}
+  .event-dashboard-activity-list>div{grid-template-columns:36px minmax(0,1fr);align-items:center}
+  .event-dashboard-activity-list time{grid-column:2;justify-self:start;padding-top:0}
+}

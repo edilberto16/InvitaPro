@@ -241,3 +241,23 @@ El Centro de Gestión combina la lista importada o creada manualmente con las re
 ### Centro de Mensajes
 
 Permite moderar, aprobar, destacar, buscar y exportar los mensajes enviados desde el Buzón de deseos.
+
+
+## Gestión de Invitados PRO
+
+- Importación CSV disponible para RSVP público y pases personalizados.
+- Eliminación individual y masiva de invitados o respuestas RSVP.
+- Vista unificada entre invitados y confirmaciones.
+- Validación de duplicados por teléfono, correo y código.
+
+### Design System
+
+InvitaPro incorpora componentes visuales reutilizables para mantener consistencia entre el portal del cliente y el panel administrativo. Desde la versión `2.35.1`, las confirmaciones destructivas utilizan `components/ui/confirm-dialog.tsx`, con accesibilidad, comportamiento responsive y mensajes diferenciados para operaciones individuales o masivas. Desde `2.35.2`, el Timeline del Dashboard usa iconos consistentes y oculta actividades RSVP cuyo registro de confirmación ya fue eliminado.
+
+### Álbum colaborativo y confirmaciones destructivas
+
+Desde la versión `2.35.3`, el Álbum colaborativo separa el nombre del invitado y el selector de fotografía, muestra errores reales de Supabase Storage y limpia archivos huérfanos cuando falla el registro de metadatos. El Centro de Mensajes utiliza el mismo `ConfirmDialog` accesible del Design System en lugar de los diálogos nativos del navegador.
+### Fechas seguras y disponibilidad del álbum
+
+Desde la versión `2.35.4`, la invitación normaliza fechas y horas antes de renderizar la cuenta regresiva y la vista previa. El Álbum colaborativo puede recibir fotografías antes, durante y después del evento, siempre que la invitación esté publicada y el bloque del álbum permanezca visible.
+

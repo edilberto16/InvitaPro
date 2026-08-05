@@ -5241,10 +5241,16 @@ a { color: inherit; }
 .premium-wishes-card button{border:0;border-radius:999px;padding:14px 20px;background:var(--template-primary);color:#fff;font-weight:900;cursor:pointer}
 .premium-wishes-success,.premium-album-success{margin-top:24px;padding:16px;border-radius:14px;background:#eef8f0;color:#226a35;font-weight:800}
 .premium-album-icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;margin:0 auto 18px;background:color-mix(in srgb,var(--template-primary) 12%,transparent);color:var(--template-primary);font-size:24px}
-.premium-album-upload{display:grid;gap:7px;margin-top:26px;padding:24px;border:1px dashed color-mix(in srgb,var(--template-primary) 35%,transparent);border-radius:16px;cursor:pointer;background:color-mix(in srgb,var(--template-primary) 4%,transparent)}
-.premium-album-upload input{display:none}
+.premium-album-uploader{display:grid;gap:12px;margin-top:26px;text-align:left}
+.premium-album-author{width:100%;padding:13px 15px;border:1px solid color-mix(in srgb,var(--template-primary) 24%,transparent);border-radius:12px;background:var(--template-surface);color:var(--template-text);font:inherit;outline:none}
+.premium-album-author:focus{border-color:var(--template-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--template-primary) 12%,transparent)}
+.premium-album-file-input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.premium-album-upload{display:grid;width:100%;gap:7px;padding:24px;border:1px dashed color-mix(in srgb,var(--template-primary) 35%,transparent);border-radius:16px;cursor:pointer;background:color-mix(in srgb,var(--template-primary) 4%,transparent);color:inherit;font:inherit;text-align:center;appearance:none;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.premium-album-upload:hover{transform:translateY(-1px);border-color:var(--template-primary);background:color-mix(in srgb,var(--template-primary) 8%,transparent)}
+.premium-album-upload.is-uploading,.premium-album-upload:disabled{cursor:not-allowed;opacity:.72;pointer-events:none}
 .premium-album-upload span{font-weight:900;color:var(--template-primary)}
-.premium-album-upload small{color:var(--template-muted)}
+.premium-album-upload small{color:var(--template-muted);overflow-wrap:anywhere}
+.premium-album-error{padding:12px 14px;border:1px solid rgba(185,28,28,.22);border-radius:12px;background:#fff1f2;color:#9f1239;font-size:13px;font-weight:700;text-align:left}
 .premium-album-privacy{margin-top:16px;font-size:11px;color:var(--template-muted)}
 
 
