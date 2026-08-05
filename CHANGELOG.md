@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [2.36.0] - 2026-08-05
+
+### Añadido
+- Centro de Compartir con enlace, compartir nativo, WhatsApp y descarga de código QR.
+- Selección de invitados por segmento y cola de envío asistido uno por uno.
+- Plantilla editable con variables para nombre, evento, fecha, ubicación, mesa, pases y enlace.
+- Enlaces personalizados para invitaciones con pases.
+- Estados locales de envío: pendiente, abierto, enviado y omitido.
+
+### Cambiado
+- El botón Compartir ahora abre un centro completo en lugar del modal básico.
+
 ## [2.35.4] - 2026-08-04
 
 ### Corregido

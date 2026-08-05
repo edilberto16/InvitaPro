@@ -261,3 +261,8 @@ Desde la versión `2.35.3`, el Álbum colaborativo separa el nombre del invitado
 
 Desde la versión `2.35.4`, la invitación normaliza fechas y horas antes de renderizar la cuenta regresiva y la vista previa. El Álbum colaborativo puede recibir fotografías antes, durante y después del evento, siempre que la invitación esté publicada y el bloque del álbum permanezca visible.
 
+
+
+## Centro de Compartir
+
+InvitaPro incluye copia de enlace, descarga de QR y envío asistido por WhatsApp con mensajes personalizados y control local de progreso, sin requerir una API de pago.

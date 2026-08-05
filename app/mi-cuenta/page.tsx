@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ShareInvitationModal from "../../components/share-invitation-modal";
+import ShareCenterModal from "../../components/share-center-modal";
 import ConfirmDialog from "../../components/ui/confirm-dialog";
 import GuestCsvImportModal from "../../components/guests/guest-csv-import-modal";
 import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
@@ -762,11 +763,15 @@ export default function MiCuenta() {
       )}
 
       {invite && (
-        <ShareInvitationModal
+        <ShareCenterModal
           open={sharingPublic}
           onClose={() => setSharingPublic(false)}
-          title={invite.titulo}
-          path={`/invitacion/${invite.slug}`}
+          invitationTitle={invite.titulo}
+          invitationSlug={invite.slug}
+          eventDate={next?.fecha}
+          venue={next?.lugar}
+          guests={unifiedGuests}
+          personalized={personalized}
         />
       )}
 
