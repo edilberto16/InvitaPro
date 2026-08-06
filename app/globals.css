@@ -5695,3 +5695,19 @@ a { color: inherit; }
  .activation-summary{grid-template-columns:1fr}
  .activation-summary-benefits{grid-template-columns:1fr}
 }
+
+/* v2.36.3.1 — catálogo público de campamentos */
+.marketing-template-campamento .marketing-template-image{background-color:#17372b;background-position:center;background-size:cover}
+.marketing-template-campamento .marketing-template-image::after{background:linear-gradient(180deg,rgba(8,31,23,.04) 28%,rgba(8,24,18,.9) 100%)}
+.inspiration-card--campforest .inspiration-card-media{border-radius:30px;background-color:#244b38}
+.inspiration-card--campforest .inspiration-card-media:after{background:linear-gradient(180deg,rgba(15,52,37,.02),rgba(8,35,25,.92))}
+.inspiration-card--campforest .inspiration-card-overlay h2{font-family:Georgia,'Times New Roman',serif;color:#fff3d7}
+.inspiration-card--campforest .inspiration-category,.inspiration-card--campforest .inspiration-card-overlay a{background:#d9e8c8;color:#244a35;border-color:#edf6e4}
+.inspiration-card--campforest .inspiration-eyebrow{color:#d8edbf}
+.inspiration-card--campfire .inspiration-card-media{border-radius:30px;background-color:#2b1720}
+.inspiration-card--campfire .inspiration-card-media:after{background:linear-gradient(180deg,rgba(45,19,26,.02),rgba(28,11,12,.93))}
+.inspiration-card--campfire .inspiration-card-overlay h2{font-family:Georgia,'Times New Roman',serif;color:#ffe1b4;text-shadow:0 0 28px rgba(255,130,48,.35)}
+.inspiration-card--campfire .inspiration-category,.inspiration-card--campfire .inspiration-card-overlay a{background:#ffcf91;color:#5a2517;border-color:#ffe6bd}
+.inspiration-card--campfire .inspiration-eyebrow{color:#ffbd75}
+.experience-theme--campforest{--experience-accent:#bfd896;--experience-dark:#102c20}
+.experience-theme--campfire{--experience-accent:#ff9b4a;--experience-dark:#211014}

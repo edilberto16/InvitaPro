@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Noche de Fogata</title><desc id="desc">Fogata bajo un cielo estrellado y bosque oscuro.</desc>
+  <defs><linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#15143a"/><stop offset=".6" stop-color="#301a2d"/><stop offset="1" stop-color="#120d0c"/></linearGradient><radialGradient id="glow"><stop stop-color="#fff1a0"/><stop offset=".22" stop-color="#ff9f32"/><stop offset=".58" stop-color="#e34a22" stop-opacity=".7"/><stop offset="1" stop-color="#e34a22" stop-opacity="0"/></radialGradient></defs>
+  <rect width="1600" height="1000" fill="url(#night)"/>
+  <g fill="#fff7dc" opacity=".9"><circle cx="150" cy="120" r="3"/><circle cx="330" cy="90" r="4"/><circle cx="520" cy="165" r="2"/><circle cx="720" cy="80" r="3"/><circle cx="980" cy="130" r="4"/><circle cx="1210" cy="75" r="2"/><circle cx="1440" cy="150" r="4"/><circle cx="1360" cy="240" r="2"/><circle cx="260" cy="260" r="2"/></g>
+  <path d="M0 690 280 460 560 710 880 430 1190 690 1440 500 1600 630 1600 1000 0 1000Z" fill="#161f1a"/>
+  <g fill="#07120d"><path d="M40 920 170 500 300 920Z"/><path d="M230 920 360 450 500 920Z"/><path d="M1110 930 1260 430 1410 930Z"/><path d="M1320 930 1460 500 1580 930Z"/></g>
+  <circle cx="800" cy="760" r="240" fill="url(#glow)"/>
+  <g transform="translate(800 760)"><path d="M-72 115 0-80 75 115Z" fill="#f14d26"/><path d="M-38 110 3-20 40 110Z" fill="#ffca56"/><path d="M-15 95 8 25 28 95Z" fill="#fff1a0"/><rect x="-110" y="100" width="220" height="22" rx="11" fill="#6f4027" transform="rotate(9)"/><rect x="-110" y="100" width="220" height="22" rx="11" fill="#6f4027" transform="rotate(-9)"/></g>
+  <g fill="#fff4e7" text-anchor="middle"><text x="800" y="150" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="9">CAMPAMENTOS Y RETIROS</text><text x="800" y="265" font-family="Georgia,serif" font-size="106" font-weight="700">Noche de Fogata</text><text x="800" y="330" font-family="Arial,sans-serif" font-size="30">Adoración · testimonios · comunidad</text></g>
+</svg>

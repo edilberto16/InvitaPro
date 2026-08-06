@@ -2,7 +2,12 @@
 
 # 💌 InvitaPro
 
-### Plataforma para crear, administrar y publicar invitaciones digitales profesionales
+#
+## Catálogo público unificado
+
+La landing, el catálogo de inspiración y el Studio comparten los mismos identificadores de plantilla. Las experiencias públicas incluyen Bodas, XV años, Infantil, Empresarial y Campamentos y retiros.
+
+## Plataforma para crear, administrar y publicar invitaciones digitales profesionales
 
 Studio visual · Plantillas · RSVP · Invitados · Álbum · Check-in · WhatsApp
 

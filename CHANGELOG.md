@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [2.36.3.1] - 2026-08-05
+
+### Corregido
+- Las tarjetas públicas de Campamento Bosque y Noche de Fogata ya muestran arte visual en lugar de fondos grises.
+- La landing elimina duplicados del catálogo público usando `inspirationSlug` o `id` como clave única.
+- La sección Inspiración incorpora la categoría Campamentos y retiros con dos experiencias navegables.
+- Landing, Inspiración y Studio vuelven a compartir identificadores de plantilla consistentes.
+
+### Añadido
+- Experiencias públicas completas para Campamento Bosque y Noche de Fogata.
+- Miniaturas SVG ligeras y responsive para ambas experiencias.
+
+### Compatibilidad
+- No requiere migración de Supabase.
+
+
 ## [2.36.3] - 2026-08-05
 
 ### Cambiado

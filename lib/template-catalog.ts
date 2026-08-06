@@ -32,8 +32,8 @@ export const TEMPLATE_COLLECTIONS = [
 ] as const;
 
 export const TEMPLATE_CATALOG: TemplateDefinition[] = [
-  { id:'campamento-bosque', name:'Campamento Bosque', collection:'campamento', badge:'Disponible', available:true, premium:true, familyName:'Campamentos de Fe', variantName:'Bosque y fogata', color:'#2f6b45', description:'Una experiencia juvenil entre pinos, montañas y fogata para campamentos cristianos, retiros y encuentros de iglesia.', layout:'camp-forest', features:['Programa por días','Lista de qué llevar','Registro y transporte'], searchTerms:['cristiano','iglesia','retiro espiritual','jóvenes','jovenes','fogata','montaña','montana','bosque','campamento juvenil','alabanza'], publicFeatured:true },
-  { id:'noche-de-fogata', name:'Noche de Fogata', collection:'campamento', badge:'Disponible', available:true, premium:true, familyName:'Campamentos de Fe', variantName:'Fuego y comunidad', color:'#d86d2d', description:'Una noche cálida de adoración, testimonios y amistad alrededor de la fogata.', layout:'camp-fire', features:['Programa nocturno','Versículo destacado','Playlist de adoración'], searchTerms:['fogata','fuego','adoración','adoracion','testimonios','comunidad','campamento cristiano','jóvenes','jovenes'], publicFeatured:true },
+  { id:'campamento-bosque', name:'Campamento Bosque', previewImage:'/inspiracion/campamento-bosque.svg', inspirationSlug:'campamento-bosque', collection:'campamento', badge:'Disponible', available:true, premium:true, familyName:'Campamentos de Fe', variantName:'Bosque y fogata', color:'#2f6b45', description:'Una experiencia juvenil entre pinos, montañas y fogata para campamentos cristianos, retiros y encuentros de iglesia.', layout:'camp-forest', features:['Programa por días','Lista de qué llevar','Registro y transporte'], searchTerms:['cristiano','iglesia','retiro espiritual','jóvenes','jovenes','fogata','montaña','montana','bosque','campamento juvenil','alabanza'], publicFeatured:true },
+  { id:'noche-de-fogata', name:'Noche de Fogata', previewImage:'/inspiracion/noche-de-fogata.svg', inspirationSlug:'noche-de-fogata', collection:'campamento', badge:'Disponible', available:true, premium:true, familyName:'Campamentos de Fe', variantName:'Fuego y comunidad', color:'#d86d2d', description:'Una noche cálida de adoración, testimonios y amistad alrededor de la fogata.', layout:'camp-fire', features:['Programa nocturno','Versículo destacado','Playlist de adoración'], searchTerms:['fogata','fuego','adoración','adoracion','testimonios','comunidad','campamento cristiano','jóvenes','jovenes'], publicFeatured:true },
   { id:'retiro-en-la-montana', name:'Retiro en la Montaña', collection:'campamento', badge:'Disponible', available:true, premium:true, familyName:'Campamentos de Fe', variantName:'Altura y propósito', color:'#55788c', description:'Montañas, aire fresco y una estética contemplativa para retiros espirituales y encuentros de liderazgo.', layout:'camp-mountain', features:['Agenda por sesiones','Conferencistas','Hospedaje y ubicación'], searchTerms:['montaña','montana','retiro','liderazgo','conferencistas','propósito','proposito','iglesia','naturaleza'] },
   { id:'amanecer-con-dios', name:'Amanecer con Dios', collection:'campamento', badge:'Disponible', available:true, premium:false, familyName:'Campamentos de Fe', variantName:'Luz y esperanza', color:'#e9a75d', description:'Una propuesta luminosa con amanecer, naturaleza y mensajes de esperanza para retiros familiares o juveniles.', layout:'camp-sunrise', features:['Cuenta regresiva','Devocional del día','Registro familiar'], searchTerms:['amanecer','esperanza','devocional','familia','jóvenes','jovenes','retiro familiar','luz'] },
   { id:'bajo-las-estrellas', name:'Bajo las Estrellas', collection:'campamento', badge:'Disponible', available:true, premium:true, signature:true, familyName:'Campamentos de Fe', variantName:'Noche de adoración', color:'#6d72c8', description:'Cielo profundo, constelaciones y una experiencia inmersiva para noches de adoración y encuentros juveniles.', layout:'camp-stars', features:['Hero inmersivo','Animación de estrellas','Galería nocturna'], searchTerms:['estrellas','noche','adoración','adoracion','constelaciones','jóvenes','jovenes','campamento nocturno'] },
@@ -130,7 +130,13 @@ export function getAvailableTemplates(collection?: TemplateCollectionId) {
 }
 
 export function getPublicFeaturedTemplates() {
-  return TEMPLATE_CATALOG.filter((template) => template.available && template.publicFeatured);
+  const unique = new Map<string, TemplateDefinition>();
+  for (const template of TEMPLATE_CATALOG) {
+    if (!template.available || !template.publicFeatured) continue;
+    const key = template.inspirationSlug || template.id;
+    if (!unique.has(key)) unique.set(key, template);
+  }
+  return Array.from(unique.values());
 }
 
 

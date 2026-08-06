@@ -1,6 +1,6 @@
 export type InspirationItem = {
   slug: string;
-  category: 'Bodas' | 'XV años' | 'Cumpleaños' | 'Baby shower' | 'Empresarial';
+  category: 'Bodas' | 'XV años' | 'Cumpleaños' | 'Baby shower' | 'Empresarial' | 'Campamentos y retiros';
   title: string;
   eyebrow: string;
   description: string;
@@ -10,12 +10,27 @@ export type InspirationItem = {
   date: string;
   venue: string;
   story: string;
-  theme: 'luxury' | 'garden' | 'princess' | 'dino' | 'baby' | 'corporate';
+  theme: 'luxury' | 'garden' | 'princess' | 'dino' | 'baby' | 'corporate' | 'campforest' | 'campfire';
   ceremonyLabel: string;
   primaryAction: string;
 };
 
 export const inspirationItems: InspirationItem[] = [
+
+  {
+    slug: 'campamento-bosque', category: 'Campamentos y retiros', title: 'Campamento Bosque', eyebrow: 'Naturaleza y fe',
+    description: 'Una experiencia juvenil entre pinos, montañas y comunidad.', image: '/inspiracion/campamento-bosque.svg',
+    tags: ['Bosque', 'Juventud', 'Retiro'], names: 'Campamento Senderos 2027', date: '16 · Julio · 2027',
+    venue: 'Sierra de Arteaga', story: 'Una experiencia para desconectarse del ruido, convivir en comunidad y renovar la fe entre senderos, fogatas y naturaleza.',
+    theme: 'campforest', ceremonyLabel: 'Campamento y retiro', primaryAction: 'Explorar el campamento'
+  },
+  {
+    slug: 'noche-de-fogata', category: 'Campamentos y retiros', title: 'Noche de Fogata', eyebrow: 'Fuego y comunidad',
+    description: 'Una noche de adoración, testimonios y amistad alrededor del fuego.', image: '/inspiracion/noche-de-fogata.svg',
+    tags: ['Fogata', 'Alabanza', 'Comunidad'], names: 'Noche de Encuentro', date: '17 · Julio · 2027',
+    venue: 'Campamento El Roble', story: 'Una invitación cálida y envolvente para reunir a jóvenes, familias o grupos de iglesia en una noche de música, reflexión y comunidad.',
+    theme: 'campfire', ceremonyLabel: 'Noche de adoración', primaryAction: 'Entrar a la fogata'
+  },
   {
     slug: 'boda-luxury-gold', category: 'Bodas', title: 'Luxury Gold', eyebrow: 'Elegante',
     description: 'Elegancia atemporal con detalles dorados.', image: '/inspiracion/boda-luxury-gold.webp',
@@ -60,7 +75,7 @@ export const inspirationItems: InspirationItem[] = [
   },
 ];
 
-export const categories = ['Todos', 'Bodas', 'XV años', 'Cumpleaños', 'Baby shower', 'Empresarial'] as const;
+export const categories = ['Todos', 'Bodas', 'XV años', 'Cumpleaños', 'Baby shower', 'Empresarial', 'Campamentos y retiros'] as const;
 
 export function getInspiration(slug: string) {
   return inspirationItems.find((item) => item.slug === slug);

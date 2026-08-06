@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Campamento Bosque</title><desc id="desc">Montañas, bosque y fogata al atardecer.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5b96f"/><stop offset=".48" stop-color="#9b5d42"/><stop offset="1" stop-color="#163b31"/></linearGradient>
+    <radialGradient id="sun"><stop stop-color="#fff7bf"/><stop offset=".3" stop-color="#ffb13b"/><stop offset="1" stop-color="#ef5a24" stop-opacity="0"/></radialGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0c261c" stop-opacity="0"/><stop offset="1" stop-color="#081a13" stop-opacity=".9"/></linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1220" cy="340" r="170" fill="url(#sun)"/>
+  <path d="M0 650 310 390 610 660 930 340 1260 610 1600 300 1600 1000 0 1000Z" fill="#315744" opacity=".84"/>
+  <path d="M0 730 260 500 540 760 840 470 1180 700 1430 510 1600 640 1600 1000 0 1000Z" fill="#173f31"/>
+  <g fill="#0b2d22"><path d="M90 870 190 560 290 870Z"/><path d="M230 900 340 520 455 900Z"/><path d="M1190 910 1310 490 1440 910Z"/><path d="M1370 900 1480 550 1580 900Z"/></g>
+  <g transform="translate(800 790)"><path d="M-50 80 0-40 50 80Z" fill="#f36c2c"/><path d="M-28 78 3 0 30 78Z" fill="#ffd061"/><rect x="-75" y="72" width="150" height="18" rx="9" fill="#6b3c28" transform="rotate(10)"/><rect x="-75" y="72" width="150" height="18" rx="9" fill="#6b3c28" transform="rotate(-10)"/></g>
+  <rect width="1600" height="1000" fill="url(#shade)"/>
+  <g fill="#fff7e7" text-anchor="middle"><text x="800" y="150" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="9">CAMPAMENTOS Y RETIROS</text><text x="800" y="260" font-family="Georgia,serif" font-size="100" font-weight="700">Campamento Bosque</text><text x="800" y="320" font-family="Arial,sans-serif" font-size="30">Naturaleza · comunidad · fe</text></g>
+</svg>

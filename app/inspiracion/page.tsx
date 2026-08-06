@@ -4,7 +4,7 @@ import { InspirationGallery } from '@/components/inspiracion/inspiration-gallery
 
 export const metadata = {
   title: 'Inspiración | InvitaPro',
-  description: 'Explora experiencias de invitaciones digitales para bodas, XV años, cumpleaños, baby shower y eventos empresariales.',
+  description: 'Explora experiencias de invitaciones digitales para bodas, XV años, cumpleaños, baby shower, eventos empresariales, campamentos y retiros.',
 };
 
 export default function InspirationPage() {
