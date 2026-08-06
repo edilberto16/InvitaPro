@@ -5679,3 +5679,19 @@ a { color: inherit; }
   .premium-hero-date,.premium-scroll-link{max-width:100%;box-sizing:border-box;}
   .theme-superheroes .premium-hero h1,.theme-modern-editorial .premium-hero h1,.theme-lanzamiento .premium-hero-content h1{font-size:clamp(42px,13vw,66px);max-width:100%;overflow-wrap:anywhere;}
 }
+
+/* v2.36.3 — Planes comerciales unificados */
+.activation-plans button{min-height:285px;display:flex;flex-direction:column}
+.activation-plans button.current:not(.selected){border-color:#c9a9ba}
+.activation-plans button ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:7px}
+.activation-plans button li{font-size:12px;line-height:1.35;color:#62545c}
+.activation-plans button.selected li{color:#4f3744}
+.activation-plans button em{max-width:130px;text-align:center}
+.activation-summary{grid-template-columns:minmax(0,1fr) minmax(320px,1.15fr)}
+.activation-summary-benefits{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:12px}
+.activation-summary-benefits i{font-style:normal;font-size:11px;line-height:1.35;color:#5e4e56}
+@media(max-width:800px){
+ .activation-plans button{min-height:auto}
+ .activation-summary{grid-template-columns:1fr}
+ .activation-summary-benefits{grid-template-columns:1fr}
+}

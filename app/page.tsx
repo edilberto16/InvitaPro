@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { InvitaProLogo } from '@/components/marketing/invitapro-logo';
-import { DEFAULT_COMMERCIAL_PLANS, CommercialPlan, moneyMXN } from '@/lib/commercial-plans';
+import { DEFAULT_COMMERCIAL_PLANS, CommercialPlan, commercialPlanBenefits, moneyMXN } from '@/lib/commercial-plans';
 import { createClient } from '@/lib/supabase/server';
 import { getPublicFeaturedTemplates, TEMPLATE_COLLECTIONS } from '@/lib/template-catalog';
 
@@ -21,18 +21,6 @@ const steps = [
   ['03', 'Comparte', 'Envía el enlace o pase personalizado por WhatsApp, correo o redes.'],
   ['04', 'Administra', 'Consulta confirmaciones e invitados desde tu panel InvitaPro.'],
 ];
-
-function featuresForPlan(plan: CommercialPlan) {
-  const features: string[] = [];
-  features.push(plan.limite_invitados === null ? 'Invitados ilimitados' : `Hasta ${plan.limite_invitados} invitados`);
-  if (plan.permite_rsvp) features.push('Confirmaciones RSVP');
-  if (plan.permite_musica) features.push(`Música y galería de hasta ${plan.limite_galeria ?? 'fotos ilimitadas'} fotos`);
-  else features.push(`Galería de hasta ${plan.limite_galeria ?? 'fotos ilimitadas'} fotos`);
-  if (plan.permite_signature) features.push('Experiencias Signature exclusivas');
-  else if (plan.permite_plantillas_premium) features.push('Plantillas Premium');
-  else features.push('Ubicación, agenda y cuenta regresiva');
-  return features;
-}
 
 async function loadCommercialPlans(): Promise<CommercialPlan[]> {
   try {
@@ -232,7 +220,7 @@ export default async function Home() {
                   </div>
                   <p>{plan.descripcion}</p>
                   <ul>
-                    {featuresForPlan(plan).map((feature) => <li key={feature}><span>✓</span>{feature}</li>)}
+                    {commercialPlanBenefits(plan).map((feature) => <li key={feature}><span>✓</span>{feature}</li>)}
                   </ul>
                   <Link className={`marketing-button${featured ? '' : ' marketing-button-ghost'}`} href={`/registro?plan=${plan.clave}`}>
                     Elegir {plan.nombre} <span>→</span>

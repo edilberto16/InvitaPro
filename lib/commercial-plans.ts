@@ -25,6 +25,44 @@ export function moneyMXN(value:number){return new Intl.NumberFormat('es-MX',{sty
 export function planByKey(plans:CommercialPlan[],key:string){return plans.find(p=>p.clave===key)||DEFAULT_COMMERCIAL_PLANS.find(p=>p.clave===key)||DEFAULT_COMMERCIAL_PLANS[0]}
 
 
+export function commercialPlanBenefits(plan:CommercialPlan):string[]{
+  const guests=plan.limite_invitados===null?'Invitados ilimitados':`Hasta ${plan.limite_invitados} invitados`;
+  const gallery=plan.limite_galeria===null?'Álbum y galería sin límite':`Álbum y galería de hasta ${plan.limite_galeria} fotografías`;
+
+  if(plan.clave==='signature'){
+    return [
+      guests,
+      'Todo lo incluido en Premium',
+      gallery,
+      'Pases personalizados y códigos individuales',
+      'Check-in para control de acceso',
+      'Diseños Signature y soporte prioritario',
+    ];
+  }
+
+  if(plan.clave==='premium'){
+    return [
+      guests,
+      'Confirmaciones RSVP y Centro de Mensajes',
+      'Importación CSV y envío asistido por WhatsApp',
+      gallery,
+      'Música, plantillas y temas Premium',
+    ];
+  }
+
+  return [
+    guests,
+    'Confirmaciones RSVP públicas',
+    gallery,
+    'Ubicación, itinerario y cuenta regresiva',
+    'Plantillas estándar · sin música Premium',
+  ];
+}
+
+export function commercialPlanLabel(plan:CommercialPlan):string{
+  return `${plan.nombre} · ${moneyMXN(plan.precio_mxn)}`;
+}
+
 export function normalizeCommercialPlanKey(value:unknown):CommercialPlanKey|null{
   return value==='clasico'||value==='premium'||value==='signature'?value:null;
 }

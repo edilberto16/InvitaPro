@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [2.36.3] - 2026-08-05
+
+### Cambiado
+- Landing, Studio y modal de publicación usan la misma definición central de beneficios por plan.
+- El plan seleccionado se identifica claramente como `Plan seleccionado`; el plan vigente se muestra como `Plan actual`.
+- El resumen de activación muestra precio, pago por transferencia y todos los beneficios incluidos.
+- El botón de activación indica explícitamente el plan que se solicitará.
+- Clásico, Premium y Signature comunican de forma consistente sus límites y funciones comerciales.
+
+### Técnico
+- `lib/commercial-plans.ts` es la fuente única para precios, límites y beneficios visibles.
+- No requiere migración de Supabase.
+
+
 ## [2.36.2] - 2026-08-05
 
 ### Corregido
