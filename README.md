@@ -289,3 +289,12 @@ La Gestión de Invitados y la ficha CRM comparten el mismo estado RSVP. Los pase
 - Demo completa de cada plantilla antes de aplicarla.
 
 Las operaciones administrativas de Auth requieren `SUPABASE_SERVICE_ROLE_KEY` en el servidor.
+
+
+## Cambios recientes
+
+### v2.37.1.1
+
+- Avatar del panel administrativo alineado con los avatares predeterminados y fotografías de perfil.
+- Mejoras de tamaño, recorte, contraste y distribución en la barra lateral.
+

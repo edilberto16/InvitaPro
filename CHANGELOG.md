@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2.37.1.1 — Avatar del panel administrativo
+
+- El panel Admin usa correctamente el componente compartido `AccountAvatar`.
+- Se corrigieron tamaño, recorte, centrado y contraste del avatar del administrador.
+- Los avatares predeterminados, fotografías e iniciales ahora se renderizan de forma consistente.
+- Se agregó el rol “Administrador” y se mejoró la alineación del bloque de sesión.
+- Los nombres largos se recortan sin romper la barra lateral.
+- No requiere migración de Supabase.
+
 ## 2.37.1 — Avatares predeterminados y perfil consistente
 
 - Se agregaron ocho avatares predeterminados para cuentas nuevas o sin fotografía.
