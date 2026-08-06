@@ -3,6 +3,10 @@
 # 💌 InvitaPro
 
 #
+## Perfil de cuenta
+
+La cuenta admite fotografía personalizada, iniciales automáticas y una galería de avatares predeterminados. La selección se conserva en `profiles.avatar_url` y se muestra tanto en Mi InvitaPro como en el panel administrativo.
+
 ## Catálogo público unificado
 
 La landing, el catálogo de inspiración y el Studio comparten los mismos identificadores de plantilla. Las experiencias públicas incluyen Bodas, XV años, Infantil, Empresarial y Campamentos y retiros.

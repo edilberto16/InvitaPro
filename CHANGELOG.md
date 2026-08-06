@@ -1,3 +1,14 @@
+# CHANGELOG
+
+## 2.37.1 — Avatares predeterminados y perfil consistente
+
+- Se agregaron ocho avatares predeterminados para cuentas nuevas o sin fotografía.
+- El usuario puede elegir un avatar desde Mi perfil y reemplazarlo después por una foto propia.
+- Los avatares se guardan usando el campo existente `profiles.avatar_url`; no se requiere migración.
+- El avatar predeterminado también se renderiza correctamente en el panel administrativo.
+- Se conserva el fallback por iniciales cuando no existe avatar seleccionado.
+- Se mejoró la adaptación móvil de la galería de avatares.
+
 # Changelog
 
 ## 2.37.0 — Gestión de cuentas, avatar y demos de plantillas
