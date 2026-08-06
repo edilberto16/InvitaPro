@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [2.36.2] - 2026-08-05
+
+### Corregido
+- La ficha CRM utiliza el mismo registro unificado que Gestión de Invitados y muestra el estado confirmado en tiempo real.
+- Los pases asignados desde CSV ya no se sustituyen por las cantidades confirmadas.
+- La ficha separa pases asignados, asistentes confirmados y check-in.
+- Se muestran el comentario y la fecha de la respuesta RSVP en la ficha del invitado.
+- RSVP público vincula la respuesta con un invitado importado cuando coincide el teléfono.
+- La función SQL rechaza cantidades superiores a los pases de adulto o niño asignados.
+- Una reconfirmación actualiza la respuesta existente y sincroniza `invitados.estado`.
+
+### Migración
+- Añadida `20260805_v2_36_2_limites_pases_crm.sql`.
+
 ## [2.36.1] - 2026-08-05
 
 - Álbum Inteligente: eliminación definitiva de fotografía y archivo en Storage con ConfirmDialog.

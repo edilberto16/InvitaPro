@@ -25,6 +25,9 @@ export type UnifiedGuestRecord = BaseGuestRecord & {
   mensaje: string | null;
   updated_at: string | null;
   readonly_record: boolean;
+  adultos_confirmados: number;
+  ninos_confirmados: number;
+  confirmacion_at: string | null;
 };
 
 function normalizePhone(value: string | null | undefined) {
@@ -99,12 +102,9 @@ export function buildUnifiedGuests(
       updated_at: confirmation?.updated_at || null,
       readonly_record: false,
       estado: confirmation ? statusFromConfirmation(confirmation) : guest.estado,
-      adultos_permitidos: confirmation?.asistira
-        ? Math.max(confirmation.adultos || 0, guest.adultos_permitidos || 0)
-        : guest.adultos_permitidos,
-      ninos_permitidos: confirmation?.asistira
-        ? Math.max(confirmation.ninos || 0, guest.ninos_permitidos || 0)
-        : guest.ninos_permitidos,
+      adultos_confirmados: confirmation?.asistira ? confirmation.adultos || 0 : 0,
+      ninos_confirmados: confirmation?.asistira ? confirmation.ninos || 0 : 0,
+      confirmacion_at: confirmation?.updated_at || confirmation?.created_at || null,
       telefono: guest.telefono || confirmationPhone(confirmation),
     };
   });
@@ -131,6 +131,9 @@ export function buildUnifiedGuests(
     mensaje: confirmation.mensaje || null,
     updated_at: confirmation.updated_at,
     readonly_record: true,
+    adultos_confirmados: confirmation.asistira ? confirmation.adultos || 0 : 0,
+    ninos_confirmados: confirmation.asistira ? confirmation.ninos || 0 : 0,
+    confirmacion_at: confirmation.updated_at || confirmation.created_at || null,
   }));
 
   return [...mergedGuests, ...publicResponses].sort((a, b) =>

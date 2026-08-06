@@ -17,6 +17,10 @@ type GuestCrmRecord = {
   checkin_at: string | null;
   ultimo_checkin_at: string | null;
   notas: string | null;
+  adultos_confirmados?: number;
+  ninos_confirmados?: number;
+  confirmacion_at?: string | null;
+  mensaje?: string | null;
 };
 
 type Props = {
@@ -69,13 +73,18 @@ export default function GuestCrmDrawer({
   }, [guest.id, guest.notas]);
 
   const expected = (guest.adultos_permitidos || 0) + (guest.ninos_permitidos || 0);
+  const confirmedAdults = guest.adultos_confirmados || 0;
+  const confirmedChildren = guest.ninos_confirmados || 0;
+  const confirmedPeople = confirmedAdults + confirmedChildren;
   const arrived = (guest.checkin_adultos || 0) + (guest.checkin_ninos || 0);
   const timeline = useMemo(() => {
     const items = [
       {
         title: statusLabel(guest.estado),
-        detail: guest.estado === "confirmado" ? "RSVP confirmado" : "Estado actual del RSVP",
-        time: "Actual",
+        detail: guest.estado === "confirmado"
+          ? `${confirmedAdults} adulto(s) · ${confirmedChildren} niño(s) confirmados`
+          : "Estado actual del RSVP",
+        time: guest.confirmacion_at ? formatDate(guest.confirmacion_at) : "Actual",
         tone: guest.estado === "confirmado" ? "success" : guest.estado === "pendiente" ? "neutral" : "warning",
       },
     ];
@@ -96,7 +105,7 @@ export default function GuestCrmDrawer({
       });
     }
     return items;
-  }, [arrived, expected, guest]);
+  }, [arrived, confirmedAdults, confirmedChildren, expected, guest]);
 
   if (!open) return null;
 
@@ -113,10 +122,18 @@ export default function GuestCrmDrawer({
         </header>
 
         <section className="guest-crm-summary">
-          <article><span>Pases</span><strong>{expected}</strong><small>{guest.adultos_permitidos} adultos · {guest.ninos_permitidos} niños</small></article>
+          <article><span>Pases asignados</span><strong>{expected}</strong><small>{guest.adultos_permitidos} adultos · {guest.ninos_permitidos} niños</small></article>
+          <article><span>Confirmados</span><strong>{guest.estado === "confirmado" ? confirmedPeople : "—"}</strong><small>{guest.estado === "confirmado" ? `${confirmedAdults} adultos · ${confirmedChildren} niños` : "Sin confirmación positiva"}</small></article>
           <article><span>Check-in</span><strong>{personalized ? arrived : "—"}</strong><small>{personalized ? `${guest.checkin_adultos} adultos · ${guest.checkin_ninos} niños` : "No aplica"}</small></article>
           <article><span>Mesa</span><strong>{guest.mesa || "—"}</strong><small>{guest.codigo ? `Código ${guest.codigo}` : "Sin código"}</small></article>
         </section>
+
+        {guest.mensaje?.trim() && (
+          <section className="guest-crm-section">
+            <div className="guest-crm-section-heading"><h3>Comentario RSVP</h3></div>
+            <p className="guest-crm-rsvp-message">“{guest.mensaje.trim()}”</p>
+          </section>
+        )}
 
         <section className="guest-crm-section">
           <div className="guest-crm-section-heading"><h3>Información de contacto</h3><button type="button" onClick={onShare}>WhatsApp</button></div>

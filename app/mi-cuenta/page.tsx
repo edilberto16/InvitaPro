@@ -9,7 +9,7 @@ import GuestCrmDrawer from "../../components/guests/guest-crm-drawer";
 import GuestManagementCenter, { type ManagedGuest } from "../../components/guests/guest-management-center";
 import ConfirmationsCenter, { type ConfirmationRecord } from "../../components/guests/confirmations-center";
 import MessagesCenter, { type WishMessageRecord } from "../../components/messages/messages-center";
-import { buildUnifiedGuests, type BaseGuestRecord } from "../../lib/services/guest-unified.service";
+import { buildUnifiedGuests, type BaseGuestRecord, type UnifiedGuestRecord } from "../../lib/services/guest-unified.service";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
@@ -70,7 +70,7 @@ export default function MiCuenta() {
   const [deletingGuests, setDeletingGuests] = useState(false);
   const [activityRows, setActivityRows] = useState<ActivityRow[]>([]);
   const [albumCount, setAlbumCount] = useState(0);
-  const [crmGuest, setCrmGuest] = useState<Guest | null>(null);
+  const [crmGuest, setCrmGuest] = useState<UnifiedGuestRecord | null>(null);
   const [savingGuestNotes, setSavingGuestNotes] = useState(false);
 
   async function load() {
@@ -672,8 +672,8 @@ export default function MiCuenta() {
               confirmations={relatedConfirmations}
               personalized={personalized}
               onOpenGuest={(guestId) => {
-                const guest = related.find((item) => item.id === guestId);
-                if (guest) setCrmGuest(guest);
+                const guest = unifiedGuests.find((item) => item.guest_id === guestId || item.id === guestId);
+                if (guest && !guest.readonly_record) setCrmGuest(guest);
               }}
             />
           )}
@@ -697,13 +697,7 @@ export default function MiCuenta() {
               onImport={() => setCsvImport(true)}
               onShareGeneral={() => setSharingPublic(true)}
               onOpenGuest={(guest) => {
-                if (guest.readonly_record) {
-                  const linked = related.find((item) => item.id === guest.guest_id);
-                  if (linked) setCrmGuest(linked);
-                  return;
-                }
-                const linked = related.find((item) => item.id === guest.id);
-                if (linked) setCrmGuest(linked);
+                if (!guest.readonly_record) setCrmGuest(guest);
               }}
               onShareGuest={(guest) => setSharingGuest(guest as unknown as Guest)}
               onDeleteGuests={requestDeleteGuests}

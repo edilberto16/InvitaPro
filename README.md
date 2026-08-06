@@ -6,7 +6,7 @@
 
 Studio visual · Plantillas · RSVP · Invitados · Álbum · Check-in · WhatsApp
 
-![Version](https://img.shields.io/badge/version-v2.29.0-72264f)
+![Version](https://img.shields.io/badge/version-v2.36.2-72264f)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![React](https://img.shields.io/badge/React-19-149eca)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
@@ -266,3 +266,8 @@ Desde la versión `2.35.4`, la invitación normaliza fechas y horas antes de ren
 ## Centro de Compartir
 
 InvitaPro incluye copia de enlace, descarga de QR y envío asistido por WhatsApp con mensajes personalizados y control local de progreso, sin requerir una API de pago.
+
+
+### v2.36.2 — Pases y CRM sincronizados
+
+La Gestión de Invitados y la ficha CRM comparten el mismo estado RSVP. Los pases importados por CSV permanecen como límites máximos y la confirmación guarda por separado cuántos adultos y niños asistirán. Las respuestas públicas que coinciden con un teléfono importado quedan vinculadas al invitado y respetan sus límites.
