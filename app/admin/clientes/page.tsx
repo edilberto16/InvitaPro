@@ -5,6 +5,7 @@ import { Cliente, initials, messageFromError } from '@/lib/invitapro';
 import { useCurrentUser } from '@/lib/use-current-user';
 import { EditActionIcon, TrashActionIcon } from '@/components/admin/action-icons';
 import { ActionButton, ActionGroup, EmptyState, StatusBadge } from '@/components/admin/admin-ui';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 
 type ClientForm={nombre:string;empresa:string;telefono:string;correo:string;direccion:string;notas:string;estado:'activo'|'inactivo'};
 const EMPTY:ClientForm = { nombre: '', empresa: '', telefono: '', correo: '', direccion: '', notas: '', estado: 'activo' };
@@ -20,6 +21,8 @@ export default function ClientesPage() {
   const [deleting, setDeleting] = useState<Cliente | null>(null); const [form, setForm] = useState(EMPTY); const [error, setError] = useState(''); const [saving, setSaving] = useState(false);
   const [accessClient, setAccessClient] = useState<Cliente | null>(null);
   const [accessBusy, setAccessBusy] = useState(false);
+  const [accountBusy, setAccountBusy] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<Cliente | null>(null);
   const [accessResult, setAccessResult] = useState<{status:string;message:string;email?:string}|null>(null);
   async function load() { setLoading(true); const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }); if (error) setError(messageFromError(error)); else setClientes((data ?? []) as Cliente[]); setLoading(false); }
   useEffect(() => { void load(); }, []);
@@ -49,6 +52,31 @@ export default function ClientesPage() {
   function openAccess(c: Cliente) {
     setAccessClient(c); setAccessResult(null); setError('');
   }
+  async function updateAccount(active: boolean) {
+    if (!accessClient?.user_id) return;
+    setAccountBusy(true); setAccessResult(null);
+    const response = await fetch(`/api/admin/accounts/${accessClient.user_id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setAccountBusy(false);
+    setAccessResult({ status: response.ok ? (active ? 'activated' : 'suspended') : 'error', message: result.message || 'No fue posible actualizar la cuenta.' });
+    if (response.ok) await load();
+  }
+
+  async function deleteAccount() {
+    if (!accountToDelete?.user_id) return;
+    setAccountBusy(true);
+    const response = await fetch(`/api/admin/accounts/${accountToDelete.user_id}`, { method: 'DELETE' });
+    const result = await response.json().catch(() => ({}));
+    setAccountBusy(false);
+    if (!response.ok) { setError(result.message || 'No fue posible eliminar la cuenta.'); setAccountToDelete(null); return; }
+    setAccountToDelete(null); setAccessClient(null);
+    await load();
+  }
+
   const filtered=useMemo(()=>{const q=busqueda.toLowerCase().trim(); return q?clientes.filter(c=>[c.nombre,c.empresa,c.telefono,c.correo].join(' ').toLowerCase().includes(q)):clientes;},[clientes,busqueda]);
   return <div className="page-stack">
     <section className="page-heading"><div><p className="eyebrow">Gestión comercial</p><h1>Clientes</h1><p>Administra la información y el seguimiento de tus clientes.</p></div><button className="button button-primary" onClick={openNew}>+ Nuevo cliente</button></section>
@@ -63,8 +91,9 @@ export default function ClientesPage() {
       {accessClient.user_id&&!accessResult?<div className="delete-warning" style={{background:'#effaf3'}}><strong>Acceso activo ✓</strong><p>Este cliente ya tiene una cuenta vinculada y puede entrar a Mi InvitaPro.</p></div>:null}
       {!accessClient.user_id&&!accessResult?<><div className="delete-warning"><strong>¿Cómo funciona?</strong><p>InvitaPro buscará una cuenta registrada con el mismo correo del cliente. Si existe, la vinculará de forma segura y sus eventos aparecerán automáticamente en Mi InvitaPro.</p></div><p style={{fontSize:14,color:'#6b6270'}}>Si todavía no tiene cuenta, pídele que se registre usando exactamente <strong>{accessClient.correo||'su correo registrado'}</strong>.</p></>:null}
       {accessResult&&<div className="delete-warning" style={{background:accessResult.status==='activated'||accessResult.status==='already_active'?'#effaf3':'#fff6e8'}}><strong>{accessResult.status==='activated'?'Acceso activado ✓':accessResult.status==='already_active'?'Acceso ya activo':accessResult.status==='account_not_found'?'Cuenta aún no registrada':'No se pudo activar'}</strong><p>{accessResult.message}</p></div>}
-      <footer className="modal-actions"><button type="button" className="button button-ghost" onClick={()=>setAccessClient(null)}>Cerrar</button>{!accessClient.user_id&&<button type="button" className="button button-primary" disabled={accessBusy||!accessClient.correo} onClick={activateAccess}>{accessBusy?'Buscando cuenta…':'Activar Mi InvitaPro'}</button>}</footer>
+      <footer className="modal-actions account-admin-actions"><button type="button" className="button button-ghost" onClick={()=>setAccessClient(null)}>Cerrar</button>{!accessClient.user_id?<button type="button" className="button button-primary" disabled={accessBusy||!accessClient.correo} onClick={activateAccess}>{accessBusy?'Buscando cuenta…':'Activar Mi InvitaPro'}</button>:<><button type="button" className="button button-outline" disabled={accountBusy} onClick={()=>void updateAccount(false)}>Suspender cuenta</button><button type="button" className="button button-primary" disabled={accountBusy} onClick={()=>void updateAccount(true)}>Reactivar</button><button type="button" className="button button-danger" disabled={accountBusy} onClick={()=>setAccountToDelete(accessClient)}>Eliminar cuenta</button></>}</footer>
     </div></section></div>}
     {deleting&&<div className="modal-backdrop delete-backdrop"><section className="delete-modal"><div className="delete-icon">✕</div><div className="delete-heading"><h2>Eliminar cliente</h2><p>Esta acción eliminará el cliente de forma permanente.</p></div><div className="delete-client-summary"><span className="client-avatar delete-avatar">{initials(deleting.nombre)}</span><div className="delete-client-details"><strong>{deleting.nombre}</strong><span>{deleting.correo||deleting.telefono||'Sin contacto'}</span></div></div><div className="delete-warning"><strong>Importante</strong><p>Si tiene eventos relacionados, primero deberás eliminarlos o reasignarlos.</p></div><div className="delete-actions"><button className="button button-outline" onClick={()=>setDeleting(null)}>Cancelar</button><button className="button button-danger" onClick={remove}>Sí, eliminar</button></div></section></div>}
+    <ConfirmDialog open={Boolean(accountToDelete)} eyebrow="Administración de acceso" title={`¿Eliminar la cuenta de ${accountToDelete?.nombre || 'este cliente'}?`} description="Se eliminará su acceso a Mi InvitaPro y su usuario de autenticación. El registro comercial, eventos e invitaciones permanecerán disponibles para el administrador." confirmLabel="Eliminar cuenta de acceso" busy={accountBusy} onCancel={()=>!accountBusy&&setAccountToDelete(null)} onConfirm={deleteAccount}/>
   </div>;
 }

@@ -1,3 +1,19 @@
+# Changelog
+
+## 2.37.0 — Gestión de cuentas, avatar y demos de plantillas
+
+- Avatar editable para la cuenta del cliente con respaldo por iniciales.
+- Avatar real disponible también en el encabezado administrativo.
+- Perfil básico para cambiar nombre y fotografía.
+- Zona de peligro para eliminar la invitación actual y comenzar un evento nuevo.
+- Limpieza de álbum y archivos de la Biblioteca al eliminar el evento.
+- Admin puede suspender, reactivar o eliminar la cuenta de acceso de un cliente.
+- La eliminación de acceso conserva el registro comercial y sus eventos para administración.
+- Protección contra eliminar la propia cuenta o el último administrador activo.
+- Botones “Ver demo completa” y acceso al demo antes de aplicar una plantilla.
+- Nuevo bucket `avatars` con límite de 2 MB y formatos JPG, PNG y WEBP.
+- Requiere `SUPABASE_SERVICE_ROLE_KEY` únicamente del lado servidor.
+
 # CHANGELOG
 
 ## [2.36.3.1] - 2026-08-05

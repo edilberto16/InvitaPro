@@ -5711,3 +5711,7 @@ a { color: inherit; }
 .inspiration-card--campfire .inspiration-eyebrow{color:#ffbd75}
 .experience-theme--campforest{--experience-accent:#bfd896;--experience-dark:#102c20}
 .experience-theme--campfire{--experience-accent:#ff9b4a;--experience-dark:#211014}
+
+/* v2.37.0 · Avatares y acciones administrativas */
+.user-avatar{overflow:hidden}.user-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.account-admin-actions{flex-wrap:wrap}.account-admin-actions .button-danger{margin-left:auto}

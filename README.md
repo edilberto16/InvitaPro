@@ -276,3 +276,12 @@ InvitaPro incluye copia de enlace, descarga de QR y envío asistido por WhatsApp
 ### v2.36.2 — Pases y CRM sincronizados
 
 La Gestión de Invitados y la ficha CRM comparten el mismo estado RSVP. Los pases importados por CSV permanecen como límites máximos y la confirmación guarda por separado cuántos adultos y niños asistirán. Las respuestas públicas que coinciden con un teléfono importado quedan vinculadas al invitado y respetan sus límites.
+
+## Gestión de cuenta
+
+- Perfil con nombre y avatar.
+- Eliminación segura de la invitación actual desde Mi InvitaPro.
+- Suspensión, reactivación y eliminación de cuentas de acceso desde Admin.
+- Demo completa de cada plantilla antes de aplicarla.
+
+Las operaciones administrativas de Auth requieren `SUPABASE_SERVICE_ROLE_KEY` en el servidor.

@@ -11,6 +11,7 @@ import ConfirmationsCenter, { type ConfirmationRecord } from "../../components/g
 import MessagesCenter, { type WishMessageRecord } from "../../components/messages/messages-center";
 import { buildUnifiedGuests, type BaseGuestRecord, type UnifiedGuestRecord } from "../../lib/services/guest-unified.service";
 import EventDashboard, { type DashboardActivity, type DashboardTask } from "../../components/client/event-dashboard";
+import ProfileMenu from "../../components/account/profile-menu";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
 import {
@@ -54,6 +55,7 @@ type Guest = BaseGuestRecord;
 export default function MiCuenta() {
   const supabase = useMemo(() => createClient(), []);
   const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -88,11 +90,12 @@ export default function MiCuenta() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("nombre")
+      .select("nombre,avatar_url")
       .eq("id", user.id)
       .maybeSingle();
 
     setName(profile?.nombre || user.email?.split("@")[0] || "");
+    setAvatarUrl(profile?.avatar_url || null);
 
     const { data: client } = await supabase
       .from("clientes")
@@ -588,6 +591,14 @@ export default function MiCuenta() {
           {invite && <a href="#mensajes">Mensajes{relatedWishMessages.filter((item) => !item.aprobado).length ? ` (${relatedWishMessages.filter((item) => !item.aprobado).length})` : ""}</a>}
           <a href="/mi-cuenta/biblioteca">Biblioteca</a>
           <a href="#compartir">Compartir</a>
+          <ProfileMenu
+            name={name}
+            avatarUrl={avatarUrl}
+            invitationId={invite?.id}
+            invitationTitle={invite?.titulo}
+            onProfileUpdated={(profile) => { setName(profile.name); setAvatarUrl(profile.avatarUrl); }}
+            onEventDeleted={() => { window.location.href = "/mi-cuenta"; }}
+          />
           <button onClick={salir}>Salir</button>
         </nav>
       </header>
