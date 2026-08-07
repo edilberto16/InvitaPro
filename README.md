@@ -1,4 +1,4 @@
-> Versión actual: **v2.38.0.1**
+> Versión actual: **v2.38.0.2**
 
 <div align="center">
 

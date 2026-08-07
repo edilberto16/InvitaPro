@@ -1,3 +1,11 @@
+# v2.38.0.2 — Administración de usuarios Supabase Auth
+
+- El panel Clientes ahora muestra las cuentas reales de Supabase Authentication.
+- Permite eliminar usuarios de Auth aunque todavía no estén vinculados a `clientes`.
+- Protege la sesión del administrador actual.
+- Conserva el registro comercial, eventos e invitaciones al eliminar únicamente el acceso.
+- Requiere `SUPABASE_SERVICE_ROLE_KEY` en el servidor.
+
 # CHANGELOG
 
 ## [2.38.0.1] - 2026-08-06
