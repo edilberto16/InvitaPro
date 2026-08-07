@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [2.38.0.1] - 2026-08-06
+
+### Fix sidebar del panel administrativo
+- El perfil del administrador y el botón **Cerrar sesión** permanecen visibles en escritorio.
+- La navegación lateral ahora hace scroll de forma independiente cuando la altura de la pantalla es reducida.
+- El bloque de sesión se separó de la navegación para evitar que quede cortado fuera del viewport.
+- Se mejoró el botón de cierre de sesión y su comportamiento en el sidebar compacto.
+- No requiere migración de Supabase.
+
 ## [2.38.0] - 2026-08-06
 
 ### Dashboard Inteligente

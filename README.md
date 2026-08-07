@@ -1,3 +1,5 @@
+> Versión actual: **v2.38.0.1**
+
 <div align="center">
 
 # 💌 InvitaPro
