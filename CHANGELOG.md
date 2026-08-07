@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [2.38.0] - 2026-08-06
+
+### Dashboard Inteligente
+- Nueva bienvenida con avatar, nombre, plan y estado de la cuenta.
+- Tarjeta principal del evento con acciones prioritarias.
+- Métricas unificadas de invitados, confirmaciones, mensajes, álbum y check-in.
+- Siguiente paso recomendado según el estado real del evento.
+- Acciones rápidas contextuales y check-in deshabilitado cuando no aplica.
+- Actividad reciente compacta, alineada y responsive.
+- Centro de compartir destacado dentro del dashboard.
+- Diseño responsive optimizado para escritorio, tableta y celular.
+
+
 ## 2.37.1.1 — Avatar del panel administrativo
 
 - El panel Admin usa correctamente el componente compartido `AccountAvatar`.

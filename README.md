@@ -298,3 +298,8 @@ Las operaciones administrativas de Auth requieren `SUPABASE_SERVICE_ROLE_KEY` en
 - Avatar del panel administrativo alineado con los avatares predeterminados y fotografías de perfil.
 - Mejoras de tamaño, recorte, contraste y distribución en la barra lateral.
 
+
+
+## Dashboard Inteligente
+
+La pantalla principal del cliente centraliza el estado del evento, métricas, siguientes pasos, actividad reciente, accesos rápidos y herramientas para compartir.

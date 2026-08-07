@@ -14,6 +14,7 @@ import EventDashboard, { type DashboardActivity, type DashboardTask } from "../.
 import ProfileMenu from "../../components/account/profile-menu";
 import { createClient } from "../../lib/supabase/client";
 import type { Invitacion } from "../../lib/invitapro";
+import { DEFAULT_COMMERCIAL_PLANS, resolveInvitationCommercialPlanKey } from "../../lib/commercial-plans";
 import {
   invitationModalityLabel,
   modalityCapabilities,
@@ -603,12 +604,6 @@ export default function MiCuenta() {
         </nav>
       </header>
 
-      <section className="client-hero">
-        <p className="eyebrow">Mi InvitaPro</p>
-        <h1>Hola{name ? `, ${name}` : ""} 👋</h1>
-        <p>Todo lo importante de tu evento, en un solo lugar.</p>
-      </section>
-
       {error && <p className="client-error">{error}</p>}
 
       {!next ? (
@@ -651,6 +646,9 @@ export default function MiCuenta() {
         <>
           {invite && (
             <EventDashboard
+              userName={name}
+              avatarUrl={avatarUrl}
+              planName={DEFAULT_COMMERCIAL_PLANS.find((plan) => plan.clave === resolveInvitationCommercialPlanKey(invite.design_json))?.nombre || "Clásico"}
               eventName={next.nombre}
               eventType={next.tipo}
               date={next.fecha}
@@ -670,6 +668,7 @@ export default function MiCuenta() {
               arrivedPeople={arrivedPeople}
               albumCount={albumCount}
               wishCount={relatedWishMessages.length}
+              pendingWishCount={relatedWishMessages.filter((item) => !item.aprobado).length}
               activities={dashboardActivities}
               tasks={dashboardTasks}
               onShare={() => setSharingPublic(true)}
