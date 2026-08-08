@@ -15,8 +15,7 @@ function safeFileName(name:string){return name.toLowerCase().normalize('NFD').re
 export default function MediaLibraryPicker({open,eventId,kind,multiple=false,maxSelected=1,selectedUrls=[],onClose,onSelect}:Props){
   const supabase=useMemo(()=>createClient(),[]);
   const inputRef=useRef<HTMLInputElement|null>(null);
-  const selectedUrlsRef=useRef(selectedUrls);
-  selectedUrlsRef.current=selectedUrls;
+  const selectedUrlsKey=JSON.stringify(selectedUrls);
   const[items,setItems]=useState<MediaItem[]>([]);const[loading,setLoading]=useState(false);const[error,setError]=useState('');const[search,setSearch]=useState('');const[selected,setSelected]=useState<string[]>([]);const[uploading,setUploading]=useState(false);const[dragging,setDragging]=useState(false);
   function urlFor(item:MediaItem){return supabase.storage.from(item.bucket).getPublicUrl(item.path).data.publicUrl}
   const loadItems=useCallback(async()=>{
@@ -30,13 +29,14 @@ export default function MediaLibraryPicker({open,eventId,kind,multiple=false,max
   useEffect(()=>{
     if(!open)return;
     const timer=window.setTimeout(()=>{
-      setSelected(multiple?selectedUrlsRef.current.slice(0,maxSelected):[]);
+      const initialSelected=JSON.parse(selectedUrlsKey) as string[];
+      setSelected(multiple?initialSelected.slice(0,maxSelected):[]);
       setSearch('');
       setDragging(false);
       void loadItems();
     },0);
     return()=>window.clearTimeout(timer);
-  },[open,multiple,maxSelected,loadItems]);
+  },[open,multiple,maxSelected,loadItems,selectedUrlsKey]);
   const filtered=useMemo(()=>items.filter(item=>(item.nombre_original||'').toLowerCase().includes(search.trim().toLowerCase())),[items,search]);
   function choose(url:string){if(!multiple){onSelect([url]);onClose();return}setSelected(current=>current.includes(url)?current.filter(item=>item!==url):current.length>=maxSelected?current:[...current,url])}
 
