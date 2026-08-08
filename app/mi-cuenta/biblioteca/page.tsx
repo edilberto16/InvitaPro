@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {ChangeEvent,useEffect,useMemo,useRef,useState} from "react";
+import {ChangeEvent,useCallback,useEffect,useMemo,useRef,useState} from "react";
 import {createClient} from "@/lib/supabase/client";
 import {messageFromError} from "@/lib/invitapro";
 
@@ -30,7 +30,7 @@ export default function ClientLibraryPage(){
  const[error,setError]=useState("");
  const[notice,setNotice]=useState("");
 
- async function load(){
+ const load=useCallback(async()=>{
   setLoading(true);setError("");
   const[{data:media,error:mediaError},{data:eventData,error:eventError}]=await Promise.all([
    supabase.from("media").select("id,evento_id,tipo,bucket,path,nombre_original,mime_type,size_bytes,created_at").order("created_at",{ascending:false}),
@@ -39,8 +39,11 @@ export default function ClientLibraryPage(){
   if(mediaError)setError(messageFromError(mediaError));else setItems((media??[]) as MediaItem[]);
   if(eventError)setError(current=>current||messageFromError(eventError));else{const list=(eventData??[]) as EventOption[];setEvents(list);setEventId(current=>current||list[0]?.id||"")}
   setLoading(false);
- }
- useEffect(()=>{void load()},[]);
+ },[supabase]);
+ useEffect(()=>{
+  const timer=window.setTimeout(()=>{void load()},0);
+  return()=>window.clearTimeout(timer);
+ },[load]);
 
  const filtered=useMemo(()=>items.filter(item=>!eventId||item.evento_id===eventId).filter(item=>type==="todos"||item.tipo===type).filter(item=>(item.nombre_original||"").toLowerCase().includes(search.trim().toLowerCase())),[items,eventId,type,search]);
  function publicUrl(item:MediaItem){return supabase.storage.from(item.bucket).getPublicUrl(item.path).data.publicUrl}
@@ -72,7 +75,7 @@ export default function ClientLibraryPage(){
  }
 
  async function removeItem(item:MediaItem){
-  if(!confirm(`¿Eliminar "${item.nombre_original||"este archivo"}"?`))return;
+  if(!confirm(`¿Eliminar \"${item.nombre_original||"este archivo"}\"?`))return;
   setError("");
   const storageResult=await supabase.storage.from(item.bucket).remove([item.path]);
   if(storageResult.error){setError(messageFromError(storageResult.error));return}
