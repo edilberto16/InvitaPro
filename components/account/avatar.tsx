@@ -30,6 +30,8 @@ export function AccountAvatar({ value, name, className = "" }: { value?: string 
   if (preset) {
     return <span className={`preset-avatar ${className}`} style={{ background: preset.background }} role="img" aria-label={preset.label}>{preset.emoji}</span>;
   }
+  // Avatar URLs can be arbitrary user-provided or signed URLs, so keep the native image element.
+  // eslint-disable-next-line @next/next/no-img-element
   if (value) return <img className={className} src={value} alt={`Avatar de ${name}`} />;
   return <span className={`initials-avatar ${className}`}>{initials(name)}</span>;
 }
