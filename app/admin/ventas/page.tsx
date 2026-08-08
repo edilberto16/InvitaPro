@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {createClient} from '@/lib/supabase/client';
 import {moneyMXN} from '@/lib/commercial-plans';
@@ -14,7 +14,7 @@ export default function VentasPage(){
  const[loading,setLoading]=useState(true);
  const[error,setError]=useState('');
 
- async function load(){
+ const load=useCallback(async()=>{
   setLoading(true);setError('');
   const[sales,pipeline]=await Promise.all([
    supabase.from('ventas_invitaciones').select('*, invitaciones(titulo,slug,eventos(nombre,clientes(nombre)))').order('created_at',{ascending:false}),
@@ -25,8 +25,11 @@ export default function VentasPage(){
   setItems((sales.data??[]) as unknown as Sale[]);
   setPending((pipeline.data??[]) as unknown as Pending[]);
   setLoading(false);
- }
- useEffect(()=>{void load()},[]);
+ },[supabase]);
+ useEffect(()=>{
+  const timer=window.setTimeout(()=>{void load()},0);
+  return()=>window.clearTimeout(timer);
+ },[load]);
 
  const income=items.filter(x=>x.estado_pago==='confirmado').reduce((s,x)=>s+Number(x.importe_pagado||0),0);
  const listValue=items.reduce((s,x)=>s+Number(x.precio_lista||0),0);
