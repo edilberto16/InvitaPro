@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 
 type Props = {
   open: boolean;
@@ -16,6 +16,18 @@ function normalizePhone(value?: string | null) {
   return (value || '').replace(/\D/g, '');
 }
 
+function subscribeToOrigin() {
+  return () => {};
+}
+
+function getOriginSnapshot() {
+  return window.location.origin;
+}
+
+function getOriginServerSnapshot() {
+  return '';
+}
+
 export default function ShareInvitationModal({
   open,
   onClose,
@@ -25,14 +37,8 @@ export default function ShareInvitationModal({
   phone,
   personalized = false,
 }: Props) {
-  const [origin, setOrigin] = useState('');
+  const origin = useSyncExternalStore(subscribeToOrigin, getOriginSnapshot, getOriginServerSnapshot);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setOrigin(window.location.origin);
-    setCopied(false);
-  }, [open]);
 
   const url = `${origin}${path}`;
   const greeting = recipient ? `Hola ${recipient} 😊` : 'Hola 😊';
