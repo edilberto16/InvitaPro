@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { UnifiedGuestRecord } from '../../lib/services/guest-unified.service';
 
 export type ManagedGuest = UnifiedGuestRecord;
@@ -48,11 +48,8 @@ export default function GuestManagementCenter({
   const [search, setSearch] = useState('');
   const [segment, setSegment] = useState<Segment>('todos');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    const availableIds = new Set(guests.map((guest) => guest.id));
-    setSelectedIds((current) => current.filter((id) => availableIds.has(id)));
-  }, [guests]);
+  const availableIds = useMemo(() => new Set(guests.map((guest) => guest.id)), [guests]);
+  const availableSelectedIds = selectedIds.filter((id) => availableIds.has(id));
 
   const stats = useMemo(() => {
     const confirmed = guests.filter((guest) => guest.estado === 'confirmado').length;
@@ -80,20 +77,24 @@ export default function GuestManagementCenter({
     });
   }, [guests, search, segment]);
 
-  const allVisibleSelected = filteredGuests.length > 0 && filteredGuests.every((guest) => selectedIds.includes(guest.id));
-  const selectedGuests = guests.filter((guest) => selectedIds.includes(guest.id));
+  const allVisibleSelected = filteredGuests.length > 0 && filteredGuests.every((guest) => availableSelectedIds.includes(guest.id));
+  const selectedGuests = guests.filter((guest) => availableSelectedIds.includes(guest.id));
 
   function toggleGuest(id: string) {
-    setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+    setSelectedIds((current) => {
+      const availableCurrent = current.filter((item) => availableIds.has(item));
+      return availableCurrent.includes(id) ? availableCurrent.filter((item) => item !== id) : [...availableCurrent, id];
+    });
   }
 
   function toggleVisible() {
     const visibleIds = filteredGuests.map((guest) => guest.id);
-    setSelectedIds((current) =>
-      allVisibleSelected
-        ? current.filter((id) => !visibleIds.includes(id))
-        : Array.from(new Set([...current, ...visibleIds]))
-    );
+    setSelectedIds((current) => {
+      const availableCurrent = current.filter((id) => availableIds.has(id));
+      return allVisibleSelected
+        ? availableCurrent.filter((id) => !visibleIds.includes(id))
+        : Array.from(new Set([...availableCurrent, ...visibleIds]));
+    });
   }
 
   return (
@@ -147,7 +148,7 @@ export default function GuestManagementCenter({
               <span>Seleccionar visibles</span>
             </label>
             <span className="guest-management-selected-count">
-              <strong>{selectedIds.length}</strong> {selectedIds.length === 1 ? 'seleccionado' : 'seleccionados'}
+              <strong>{availableSelectedIds.length}</strong> {availableSelectedIds.length === 1 ? 'seleccionado' : 'seleccionados'}
             </span>
           </div>
           <button type="button" className="client-danger guest-management-delete-selected" disabled={!selectedGuests.length} onClick={() => onDeleteGuests(selectedGuests)}>
@@ -159,9 +160,9 @@ export default function GuestManagementCenter({
       {filteredGuests.length ? (
         <div className="guest-management-list">
           {filteredGuests.map((guest) => (
-            <article key={guest.id} className={selectedIds.includes(guest.id) ? 'is-selected' : ''}>
+            <article key={guest.id} className={availableSelectedIds.includes(guest.id) ? 'is-selected' : ''}>
               <label className="client-guest-checkbox" aria-label={`Seleccionar ${guest.nombre}`}>
-                <input type="checkbox" checked={selectedIds.includes(guest.id)} onChange={() => toggleGuest(guest.id)} />
+                <input type="checkbox" checked={availableSelectedIds.includes(guest.id)} onChange={() => toggleGuest(guest.id)} />
               </label>
               <span className="client-guest-avatar">{initials(guest.nombre)}</span>
               <div className="client-guest-info">
