@@ -53,7 +53,13 @@ export function InspirationExperience({ theme }: { theme: InspirationTheme }) {
       <section className="experience-gallery">
         <div className="experience-section-heading"><span>Momentos</span><h2>Una historia contada en imágenes</h2></div>
         <div className="experience-gallery-grid">
-          {theme.gallery.map((image, index) => <figure key={image} className={index === 0 ? 'is-large' : ''}><img src={image} alt={`Inspiración ${theme.title} ${index + 1}`} /></figure>)}
+          {theme.gallery.map((image, index) => (
+            <figure key={image} className={index === 0 ? 'is-large' : ''}>
+              {/* Gallery sources are theme-defined external URLs; keep native img until image domains are centralized. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image} alt={`Inspiración ${theme.title} ${index + 1}`} />
+            </figure>
+          ))}
         </div>
       </section>
 
