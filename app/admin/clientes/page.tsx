@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Cliente, initials, messageFromError } from '@/lib/invitapro';
 import { useCurrentUser } from '@/lib/use-current-user';
@@ -26,9 +26,9 @@ export default function ClientesPage() {
   const [accountToDelete, setAccountToDelete] = useState<Cliente | null>(null);
   const [authUsers,setAuthUsers]=useState<AuthUser[]>([]); const [authLoading,setAuthLoading]=useState(false); const [authDelete,setAuthDelete]=useState<AuthUser|null>(null);
   const [accessResult, setAccessResult] = useState<{status:string;message:string;email?:string}|null>(null);
-  async function loadAuthUsers(){ setAuthLoading(true); const response=await fetch('/api/admin/accounts',{cache:'no-store'}); const result=await response.json().catch(()=>({})); setAuthLoading(false); if(response.ok)setAuthUsers(result.users??[]); else setError(result.message||'No fue posible consultar Supabase Auth.'); }
-  async function load() { setLoading(true); const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }); if (error) setError(messageFromError(error)); else setClientes((data ?? []) as Cliente[]); setLoading(false); }
-  useEffect(() => { void load(); void loadAuthUsers(); }, []);
+  const loadAuthUsers=useCallback(async()=>{ setAuthLoading(true); const response=await fetch('/api/admin/accounts',{cache:'no-store'}); const result=await response.json().catch(()=>({})); setAuthLoading(false); if(response.ok)setAuthUsers(result.users??[]); else setError(result.message||'No fue posible consultar Supabase Auth.'); },[]);
+  const load=useCallback(async()=>{ setLoading(true); const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }); if (error) setError(messageFromError(error)); else setClientes((data ?? []) as Cliente[]); setLoading(false); },[supabase]);
+  useEffect(() => { const timer=window.setTimeout(()=>{void load();void loadAuthUsers()},0); return()=>window.clearTimeout(timer); }, [load,loadAuthUsers]);
   function openNew() { setEditing(null); setForm(EMPTY); setError(''); setModal(true); }
   function openEdit(c: Cliente) { setEditing(c); setForm({ nombre:c.nombre, empresa:c.empresa??'', telefono:c.telefono??'', correo:c.correo??'', direccion:c.direccion??'', notas:c.notas??'', estado:c.estado }); setError(''); setModal(true); }
   async function save(e: FormEvent) { e.preventDefault(); if (!userId) return setError('No hay una sesión válida.'); if (!form.nombre.trim()) return setError('El nombre es obligatorio.'); if (form.correo && !/^\S+@\S+\.\S+$/.test(form.correo)) return setError('Escribe un correo válido.'); setSaving(true); setError(''); const payload={ nombre:form.nombre.trim(), empresa:form.empresa.trim()||null, telefono:form.telefono.trim()||null, correo:form.correo.trim()||null, direccion:form.direccion.trim()||null, notas:form.notas.trim()||null, estado:form.estado };
