@@ -127,13 +127,16 @@ export default function MigracionPage() {
   const [progreso, setProgreso] = useState<MigrationCounts>(EMPTY_COUNTS);
 
   useEffect(() => {
-    setDatos({
-      clientes: readArray(KEYS.clientes),
-      eventos: readArray(KEYS.eventos),
-      invitaciones: readArray(KEYS.invitaciones),
-      invitados: readArray(KEYS.invitados),
-      confirmaciones: readArray(KEYS.confirmaciones),
-    });
+    const timer = window.setTimeout(() => {
+      setDatos({
+        clientes: readArray(KEYS.clientes),
+        eventos: readArray(KEYS.eventos),
+        invitaciones: readArray(KEYS.invitaciones),
+        invitados: readArray(KEYS.invitados),
+        confirmaciones: readArray(KEYS.confirmaciones),
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const total = useMemo(
