@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useState} from 'react';
 import {createClient} from '@/lib/supabase/client';
 import {CommercialPlan,moneyMXN} from '@/lib/commercial-plans';
 
@@ -11,13 +11,16 @@ export default function PlanesPage(){
  const[loading,setLoading]=useState(true);
  const[error,setError]=useState('');
 
- async function load(){
+ const load=useCallback(async()=>{
   setLoading(true);setError('');
   const{data,error}=await supabase.from('planes_comerciales').select('*').order('orden');
   if(error){setError(error.message);setPlans([])}else setPlans((data??[]) as EditablePlan[]);
   setLoading(false);
- }
- useEffect(()=>{void load()},[]);
+ },[supabase]);
+ useEffect(()=>{
+  const timer=window.setTimeout(()=>{void load()},0);
+  return()=>window.clearTimeout(timer);
+ },[load]);
 
  function updateLocal(id:string,patch:Partial<EditablePlan>){
   setPlans(current=>current.map(p=>p.id===id?{...p,...patch}:p));
