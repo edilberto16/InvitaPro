@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { THEME_REGISTRY } from "@/lib/themes/theme-registry";
 
 type Props = {
@@ -23,16 +23,16 @@ export default function StudioThemeSelector({ value, onPreview, onChange, onClos
   const [selectedTheme, setSelectedTheme] = useState(value);
   const [query, setQuery] = useState("");
   const [collection, setCollection] = useState("Todos");
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
 
-  useEffect(() => {
     try {
       const saved = window.localStorage.getItem(FAVORITES_KEY);
-      if (saved) setFavorites(JSON.parse(saved));
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      setFavorites([]);
+      return [];
     }
-  }, []);
+  });
 
   const collections = useMemo(
     () => ["Todos", "Favoritos", ...Array.from(new Set(THEME_REGISTRY.map((theme) => theme.collection)))],
