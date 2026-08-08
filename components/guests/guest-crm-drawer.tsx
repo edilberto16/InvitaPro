@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type GuestCrmRecord = {
   id: string;
@@ -66,11 +66,16 @@ export default function GuestCrmDrawer({
   onShare,
   onSaveNotes,
 }: Props) {
-  const [notes, setNotes] = useState(guest.notas || "");
-
-  useEffect(() => {
-    setNotes(guest.notas || "");
-  }, [guest.id, guest.notas]);
+  const guestNotes = guest.notas || "";
+  const [notesDraft, setNotesDraft] = useState(() => ({
+    guestId: guest.id,
+    sourceNotes: guestNotes,
+    notes: guestNotes,
+  }));
+  const notes =
+    notesDraft.guestId === guest.id && notesDraft.sourceNotes === guestNotes
+      ? notesDraft.notes
+      : guestNotes;
 
   const expected = (guest.adultos_permitidos || 0) + (guest.ninos_permitidos || 0);
   const confirmedAdults = guest.adultos_confirmados || 0;
@@ -160,10 +165,20 @@ export default function GuestCrmDrawer({
 
         <section className="guest-crm-section guest-crm-notes">
           <div className="guest-crm-section-heading"><h3>Notas internas</h3><small>Solo visibles para el equipo del evento</small></div>
-          <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Alergias, preferencias, transporte, ubicación de mesa o cualquier detalle importante…" />
+          <textarea
+            value={notes}
+            onChange={(event) =>
+              setNotesDraft({
+                guestId: guest.id,
+                sourceNotes: guestNotes,
+                notes: event.target.value,
+              })
+            }
+            placeholder="Alergias, preferencias, transporte, ubicación de mesa o cualquier detalle importante…"
+          />
           <div className="guest-crm-note-actions">
             <span>{notes.length} caracteres</span>
-            <button type="button" className="client-primary" disabled={saving || notes === (guest.notas || "")} onClick={() => onSaveNotes(notes)}>
+            <button type="button" className="client-primary" disabled={saving || notes === guestNotes} onClick={() => onSaveNotes(notes)}>
               {saving ? "Guardando…" : "Guardar notas"}
             </button>
           </div>
