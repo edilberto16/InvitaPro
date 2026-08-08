@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useMemo,useState} from "react";
 import {createClient} from "@/lib/supabase/client";
 
 type Solicitud={
@@ -16,14 +16,17 @@ export default function SolicitudesPage(){
  const [deleting,setDeleting]=useState<Solicitud|null>(null);
  const [deletingBusy,setDeletingBusy]=useState(false);
 
- async function load(){
+ const load=useCallback(async()=>{
   setLoading(true);
   const {data,error}=await supabase.from("solicitudes").select("*").order("created_at",{ascending:false});
   if(error)setError(error.message);else setItems((data??[]) as Solicitud[]);
   setLoading(false);
- }
+ },[supabase]);
 
- useEffect(()=>{void load()},[]);
+ useEffect(()=>{
+  const timer=window.setTimeout(()=>{void load()},0);
+  return()=>window.clearTimeout(timer);
+ },[load]);
 
  async function setEstado(id:string,estado:string){
   const {error}=await supabase.from("solicitudes").update({estado}).eq("id",id);
