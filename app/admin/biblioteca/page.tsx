@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { messageFromError } from '@/lib/invitapro';
 
@@ -44,7 +44,7 @@ export default function MediaLibraryPage(){
   const[notice,setNotice]=useState('');
   const[deleting,setDeleting]=useState<MediaItem|null>(null);
 
-  async function load(){
+  const load=useCallback(async()=>{
     setLoading(true);setError('');
     const[{data:media,error:mediaError},{data:eventData,error:eventError}]=await Promise.all([
       supabase.from('media').select('*,eventos(nombre),invitaciones(titulo)').order('created_at',{ascending:false}),
@@ -59,8 +59,11 @@ export default function MediaLibraryPage(){
       setUploadEventId(current=>current||list[0]?.id||'');
     }
     setLoading(false);
-  }
-  useEffect(()=>{void load()},[]);
+  },[supabase]);
+  useEffect(()=>{
+    const timer=window.setTimeout(()=>{void load()},0);
+    return()=>window.clearTimeout(timer);
+  },[load]);
 
   const filtered=useMemo(()=>items.filter(item=>type==='todos'||item.tipo===type).filter(item=>eventId==='todos'||item.evento_id===eventId).filter(item=>{
     const haystack=[item.nombre_original,item.eventos?.nombre,item.invitaciones?.titulo,item.mime_type].join(' ').toLowerCase();
