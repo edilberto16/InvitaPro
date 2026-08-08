@@ -756,7 +756,7 @@
   display:flex;
   justify-content:space-between;
   gap:12px;
-  align-items:start;
+  align-items:flex-start;
 }
 .commercial-plan-admin-card>header>div{
   display:grid;

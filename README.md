@@ -305,3 +305,10 @@ Las operaciones administrativas de Auth requieren `SUPABASE_SERVICE_ROLE_KEY` en
 ## Dashboard Inteligente
 
 La pantalla principal del cliente centraliza el estado del evento, métricas, siguientes pasos, actividad reciente, accesos rápidos y herramientas para compartir.
+
+
+## Estado actual
+
+Versión: `2.38.0.3`
+
+- Limpieza de warning CSS de Autoprefixer en el panel administrativo.

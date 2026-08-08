@@ -1,12 +1,20 @@
-# v2.38.0.2 — Administración de usuarios Supabase Auth
+# CHANGELOG
 
-- El panel Clientes ahora muestra las cuentas reales de Supabase Authentication.
+## [2.38.0.3] - 2026-08-07
+
+### Limpieza de warning CSS en Admin
+- Se corrigió `align-items: start` por `align-items: flex-start` en `app/admin/activation-v2.7.1.css`.
+- Elimina el warning de Autoprefixer que provocaba el mensaje secundario de caché `PackFileCacheStrategy`.
+- No cambia el diseño ni requiere migración de Supabase.
+
+## [2.38.0.2] - 2026-08-06
+
+### Administración de usuarios Supabase Auth
+- El panel Clientes muestra las cuentas reales de Supabase Authentication.
 - Permite eliminar usuarios de Auth aunque todavía no estén vinculados a `clientes`.
 - Protege la sesión del administrador actual.
 - Conserva el registro comercial, eventos e invitaciones al eliminar únicamente el acceso.
 - Requiere `SUPABASE_SERVICE_ROLE_KEY` en el servidor.
-
-# CHANGELOG
 
 ## [2.38.0.1] - 2026-08-06
 
