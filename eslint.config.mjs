@@ -20,17 +20,14 @@ export default defineConfig([
     // externally generated QR images. Their hosts are dynamic at runtime, so
     // forcing next/image would require broad remotePatterns and can break
     // previews when the URL host changes. Keep native <img> intentionally.
+    // Dynamic route segments use glob patterns because [] is special in minimatch.
     files: [
       "app/admin/album/page.tsx",
       "app/admin/biblioteca/page.tsx",
       "app/admin/invitaciones/page.tsx",
-      "app/invitacion/[slug]/[codigo]/page.tsx",
-      "app/invitacion/[slug]/page.tsx",
-      "app/mi-cuenta/album/page.tsx",
+      "app/invitacion/**/page.tsx",
       "app/mi-cuenta/biblioteca/page.tsx",
-      "app/mi-cuenta/studio/[id]/page.tsx",
-      "components/media/media-library-picker.tsx",
-      "components/share-center-modal.tsx",
+      "app/mi-cuenta/studio/**/page.tsx",
     ],
     rules: {
       "@next/next/no-img-element": "off",
