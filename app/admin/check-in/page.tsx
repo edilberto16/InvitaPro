@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 type Invitation = { id: string; titulo: string; slug: string; estado: string };
@@ -90,7 +90,7 @@ export default function CheckInPage() {
   const [filter, setFilter] = useState<Filter>('todos');
   const [tableFilter, setTableFilter] = useState('');
 
-  async function loadInvitations() {
+  const loadInvitations = useCallback(async () => {
     setLoading(true);
     const { data, error: nextError } = await supabase
       .from('invitaciones')
@@ -102,9 +102,9 @@ export default function CheckInPage() {
     setInvitations(rows);
     setInvitationId((current) => current || rows[0]?.id || '');
     setLoading(false);
-  }
+  }, [supabase]);
 
-  async function loadDashboard(id = invitationId) {
+  const loadDashboard = useCallback(async (id: string) => {
     if (!id) {
       setGuests([]);
       setActivity([]);
@@ -133,15 +133,16 @@ export default function CheckInPage() {
     else setGuests((guestResponse.data || []) as Guest[]);
     if (!activityResponse.error) setActivity((activityResponse.data || []) as Activity[]);
     setClosed(Boolean(configurationResponse.data?.cerrado));
-  }
+  }, [supabase]);
 
   useEffect(() => {
-    void loadInvitations();
-  }, []);
+    const timer = window.setTimeout(() => void loadInvitations(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadInvitations]);
 
   useEffect(() => {
-    void loadDashboard(invitationId);
-    if (!invitationId) return;
+    const timer = window.setTimeout(() => void loadDashboard(invitationId), 0);
+    if (!invitationId) return () => window.clearTimeout(timer);
     const channel = supabase
       .channel(`checkin-dashboard-${invitationId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'invitados', filter: `invitacion_id=eq.${invitationId}` }, () => void loadDashboard(invitationId))
@@ -149,9 +150,10 @@ export default function CheckInPage() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'checkin_configuracion', filter: `invitacion_id=eq.${invitationId}` }, () => void loadDashboard(invitationId))
       .subscribe();
     return () => {
+      window.clearTimeout(timer);
       void supabase.removeChannel(channel);
     };
-  }, [invitationId, supabase]);
+  }, [invitationId, loadDashboard, supabase]);
 
   useEffect(() => () => stopScanner(), []);
 
