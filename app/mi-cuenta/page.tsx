@@ -57,6 +57,8 @@ export default function MiCuenta() {
   const supabase = useMemo(() => createClient(), []);
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -97,6 +99,8 @@ export default function MiCuenta() {
 
     setName(profile?.nombre || user.email?.split("@")[0] || "");
     setAvatarUrl(profile?.avatar_url || null);
+    setAccountEmail(user.email || null);
+    setEmailConfirmed(Boolean(user.email_confirmed_at));
 
     const { data: client } = await supabase
       .from("clientes")
@@ -595,6 +599,8 @@ export default function MiCuenta() {
           <ProfileMenu
             name={name}
             avatarUrl={avatarUrl}
+            email={accountEmail}
+            emailConfirmed={emailConfirmed}
             invitationId={invite?.id}
             invitationTitle={invite?.titulo}
             onProfileUpdated={(profile) => { setName(profile.name); setAvatarUrl(profile.avatarUrl); }}

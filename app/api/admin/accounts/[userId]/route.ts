@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+const ADMIN_ROLES = new Set(["admin", "administrador", "super_admin"]);
+
 async function requireAdmin() {
   const sessionClient = await createServerClient();
   const { data: { user } } = await sessionClient.auth.getUser();
@@ -11,7 +13,7 @@ async function requireAdmin() {
     .select("rol,activo")
     .eq("id", user.id)
     .maybeSingle();
-  if (profile?.rol !== "admin" || profile.activo === false) {
+  if (!ADMIN_ROLES.has(profile?.rol ?? "") || profile?.activo === false) {
     return { error: NextResponse.json({ message: "No tienes permisos de administrador." }, { status: 403 }) };
   }
   return { user };
@@ -40,9 +42,10 @@ export async function DELETE(_request: Request, context: { params: Promise<{ use
   }
   const admin = createAdminClient();
   const { data: target } = await admin.from("profiles").select("rol").eq("id", userId).maybeSingle();
-  if (target?.rol === "admin") {
-    const { count } = await admin.from("profiles").select("id", { count: "exact", head: true }).eq("rol", "admin").eq("activo", true);
-    if ((count ?? 0) <= 1) {
+  if (ADMIN_ROLES.has(target?.rol ?? "")) {
+    const { data: admins } = await admin.from("profiles").select("id,rol,activo").eq("activo", true);
+    const count = (admins ?? []).filter((item) => ADMIN_ROLES.has(item.rol ?? "")).length;
+    if (count <= 1) {
       return NextResponse.json({ message: "No se puede eliminar el último administrador activo." }, { status: 400 });
     }
   }

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [2.39.0] - 2026-08-07
+
+### Cuentas y seguridad
+- Se unificaron los mensajes de Supabase Auth en español para login, registro, recuperación y cambio de contraseña.
+- Registro y login permiten reenviar el correo de confirmación con espera de 60 segundos para evitar rate limits accidentales.
+- El callback de autenticación valida el código, evita destinos inseguros y redirige correctamente después de confirmar el correo.
+- Recuperación y restablecimiento de contraseña usan una experiencia visual consistente con InvitaPro.
+- Mi Perfil permite cambiar la contraseña y muestra el estado del correo de acceso.
+- El Admin diferencia correo confirmado/sin confirmar, cuenta activa/suspendida, cliente vinculado y usuario solo Auth.
+- Los roles `admin`, `administrador` y `super_admin` son reconocidos por las rutas administrativas de Auth.
+- Se mantiene `SUPABASE_SERVICE_ROLE_KEY` exclusivamente del lado servidor.
+- No requiere migración de Supabase.
+
 ## [2.38.0.3] - 2026-08-07
 
 ### Limpieza de warning CSS en Admin
@@ -56,7 +69,6 @@
 - Se conserva el fallback por iniciales cuando no existe avatar seleccionado.
 - Se mejoró la adaptación móvil de la galería de avatares.
 
-# Changelog
 
 ## 2.37.0 — Gestión de cuentas, avatar y demos de plantillas
 
@@ -72,7 +84,6 @@
 - Nuevo bucket `avatars` con límite de 2 MB y formatos JPG, PNG y WEBP.
 - Requiere `SUPABASE_SERVICE_ROLE_KEY` únicamente del lado servidor.
 
-# CHANGELOG
 
 ## [2.36.3.1] - 2026-08-05
 

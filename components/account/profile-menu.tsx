@@ -4,17 +4,20 @@ import { ChangeEvent, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { AccountAvatar, PRESET_AVATARS, presetAvatarValue } from "@/components/account/avatar";
+import { authMessage } from "@/lib/auth/messages";
 
 type Props = {
   name: string;
   avatarUrl?: string | null;
+  email?: string | null;
+  emailConfirmed?: boolean;
   invitationId?: string | null;
   invitationTitle?: string | null;
   onProfileUpdated: (profile: { name: string; avatarUrl: string | null }) => void;
   onEventDeleted: () => void;
 };
 
-export default function ProfileMenu({ name, avatarUrl, invitationId, invitationTitle, onProfileUpdated, onEventDeleted }: Props) {
+export default function ProfileMenu({ name, avatarUrl, email, emailConfirmed = false, invitationId, invitationTitle, onProfileUpdated, onEventDeleted }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -24,6 +27,10 @@ export default function ProfileMenu({ name, avatarUrl, invitationId, invitationT
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordOk, setPasswordOk] = useState("");
 
   async function saveProfile() {
     const clean = draftName.trim();
@@ -69,6 +76,17 @@ export default function ProfileMenu({ name, avatarUrl, invitationId, invitationT
     onProfileUpdated({ name, avatarUrl: publicUrl });
   }
 
+  async function changePassword() {
+    setError(""); setPasswordOk("");
+    if (password.length < 8) return setError("La contraseña debe tener al menos 8 caracteres.");
+    if (password !== passwordConfirm) return setError("Las contraseñas no coinciden.");
+    setPasswordBusy(true);
+    const { error: passwordError } = await supabase.auth.updateUser({ password });
+    setPasswordBusy(false);
+    if (passwordError) return setError(authMessage(passwordError, "No fue posible cambiar la contraseña."));
+    setPassword(""); setPasswordConfirm(""); setPasswordOk("Contraseña actualizada correctamente.");
+  }
+
   async function deleteEvent() {
     if (!invitationId) return;
     setDeleting(true); setError("");
@@ -104,6 +122,16 @@ export default function ProfileMenu({ name, avatarUrl, invitationId, invitationT
           </div>
         </div>
         <label className="account-profile-field"><span>Nombre</span><input value={draftName} onChange={(event) => setDraftName(event.target.value)} /></label>
+        {email && <div className="account-security-status"><div><span>Correo de acceso</span><strong>{email}</strong></div><em className={emailConfirmed ? "is-confirmed" : "is-pending"}>{emailConfirmed ? "Confirmado" : "Sin confirmar"}</em></div>}
+        <section className="account-password-panel">
+          <div><strong>Seguridad</strong><small>Cambia tu contraseña sin salir de Mi InvitaPro.</small></div>
+          <div className="account-password-grid">
+            <label><span>Nueva contraseña</span><input type="password" minLength={8} autoComplete="new-password" value={password} onChange={(event)=>setPassword(event.target.value)} placeholder="Mínimo 8 caracteres" /></label>
+            <label><span>Confirmar contraseña</span><input type="password" minLength={8} autoComplete="new-password" value={passwordConfirm} onChange={(event)=>setPasswordConfirm(event.target.value)} placeholder="Repite la contraseña" /></label>
+          </div>
+          {passwordOk && <p className="account-password-success">{passwordOk}</p>}
+          <button type="button" className="client-secondary" disabled={passwordBusy || !password || !passwordConfirm} onClick={()=>void changePassword()}>{passwordBusy ? "Actualizando…" : "Cambiar contraseña"}</button>
+        </section>
         {error && <p className="client-error">{error}</p>}
         <footer><button type="button" className="client-secondary" onClick={() => setOpen(false)}>Cancelar</button><button type="button" className="client-primary" disabled={saving} onClick={saveProfile}>{saving ? "Guardando…" : "Guardar perfil"}</button></footer>
         {invitationId && <div className="account-danger-zone"><div><strong>Zona de peligro</strong><p>Elimina esta invitación para liberar la cuenta y comenzar un evento nuevo.</p></div><button type="button" onClick={() => setDeleteOpen(true)}>Eliminar invitación</button></div>}

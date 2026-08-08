@@ -1,4 +1,4 @@
-> Versión actual: **v2.38.0.2**
+> Versión actual: **v2.39.0**
 
 <div align="center">
 
@@ -9,6 +9,17 @@
 
 La cuenta admite fotografía personalizada, iniciales automáticas y una galería de avatares predeterminados. La selección se conserva en `profiles.avatar_url` y se muestra tanto en Mi InvitaPro como en el panel administrativo.
 
+
+## Cuentas y seguridad
+
+- Recuperación y restablecimiento de contraseña con Supabase Auth.
+- Cambio de contraseña desde Mi Perfil.
+- Reenvío de confirmación de correo con protección de 60 segundos.
+- Mensajes de autenticación traducidos y amigables.
+- Estado de correo confirmado visible en Mi Perfil y Admin.
+- Rutas privadas protegidas y cuentas suspendidas bloqueadas.
+- Administración segura de usuarios de Supabase Auth mediante `SUPABASE_SERVICE_ROLE_KEY` solo del lado servidor.
+
 ## Catálogo público unificado
 
 La landing, el catálogo de inspiración y el Studio comparten los mismos identificadores de plantilla. Las experiencias públicas incluyen Bodas, XV años, Infantil, Empresarial y Campamentos y retiros.
@@ -17,7 +28,7 @@ La landing, el catálogo de inspiración y el Studio comparten los mismos identi
 
 Studio visual · Plantillas · RSVP · Invitados · Álbum · Check-in · WhatsApp
 
-![Version](https://img.shields.io/badge/version-v2.36.2-72264f)
+![Version](https://img.shields.io/badge/version-v2.39.0-72264f)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![React](https://img.shields.io/badge/React-19-149eca)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
