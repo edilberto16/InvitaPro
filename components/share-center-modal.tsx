@@ -76,18 +76,23 @@ export default function ShareCenterModal({
 
   useEffect(() => {
     if (!open) return;
-    setOrigin(window.location.origin);
-    setCopied(false);
-    setQueue([]);
-    setQueueIndex(0);
-    const saved = window.localStorage.getItem(`invitapro-share-status:${invitationSlug}`);
-    if (saved) {
-      try {
-        setSendStates(JSON.parse(saved) as Record<string, SendState>);
-      } catch {
-        setSendStates({});
+
+    const timer = window.setTimeout(() => {
+      setOrigin(window.location.origin);
+      setCopied(false);
+      setQueue([]);
+      setQueueIndex(0);
+      const saved = window.localStorage.getItem(`invitapro-share-status:${invitationSlug}`);
+      if (saved) {
+        try {
+          setSendStates(JSON.parse(saved) as Record<string, SendState>);
+        } catch {
+          setSendStates({});
+        }
       }
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [open, invitationSlug]);
 
   useEffect(() => {
