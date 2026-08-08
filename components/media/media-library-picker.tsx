@@ -1,6 +1,7 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- Media library URLs are dynamic Supabase resources and must render without remote image configuration. */
 
-import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, DragEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { messageFromError } from '@/lib/invitapro';
 
@@ -14,17 +15,28 @@ function safeFileName(name:string){return name.toLowerCase().normalize('NFD').re
 export default function MediaLibraryPicker({open,eventId,kind,multiple=false,maxSelected=1,selectedUrls=[],onClose,onSelect}:Props){
   const supabase=useMemo(()=>createClient(),[]);
   const inputRef=useRef<HTMLInputElement|null>(null);
+  const selectedUrlsRef=useRef(selectedUrls);
+  selectedUrlsRef.current=selectedUrls;
   const[items,setItems]=useState<MediaItem[]>([]);const[loading,setLoading]=useState(false);const[error,setError]=useState('');const[search,setSearch]=useState('');const[selected,setSelected]=useState<string[]>([]);const[uploading,setUploading]=useState(false);const[dragging,setDragging]=useState(false);
   function urlFor(item:MediaItem){return supabase.storage.from(item.bucket).getPublicUrl(item.path).data.publicUrl}
-  async function loadItems(){
+  const loadItems=useCallback(async()=>{
     setLoading(true);setError('');
     let query=supabase.from('media').select('id,evento_id,tipo,bucket,path,nombre_original,mime_type,size_bytes,created_at').eq('tipo',kind).order('created_at',{ascending:false});
     if(eventId)query=query.eq('evento_id',eventId);
     const{data,error:loadError}=await query;
     if(loadError)setError(messageFromError(loadError));else setItems((data??[]) as MediaItem[]);
     setLoading(false);
-  }
-  useEffect(()=>{if(!open)return;setSelected(multiple?selectedUrls.slice(0,maxSelected):[]);setSearch('');setDragging(false);void loadItems();},[open,eventId,kind,multiple,maxSelected]);
+  },[eventId,kind,supabase]);
+  useEffect(()=>{
+    if(!open)return;
+    const timer=window.setTimeout(()=>{
+      setSelected(multiple?selectedUrlsRef.current.slice(0,maxSelected):[]);
+      setSearch('');
+      setDragging(false);
+      void loadItems();
+    },0);
+    return()=>window.clearTimeout(timer);
+  },[open,multiple,maxSelected,loadItems]);
   const filtered=useMemo(()=>items.filter(item=>(item.nombre_original||'').toLowerCase().includes(search.trim().toLowerCase())),[items,search]);
   function choose(url:string){if(!multiple){onSelect([url]);onClose();return}setSelected(current=>current.includes(url)?current.filter(item=>item!==url):current.length>=maxSelected?current:[...current,url])}
 
