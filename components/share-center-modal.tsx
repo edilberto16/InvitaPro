@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- QR preview is generated dynamically by QuickChart and is not a static app image. */
 
 import { useEffect, useMemo, useState } from 'react';
 import type { ManagedGuest } from './guests/guest-management-center';
