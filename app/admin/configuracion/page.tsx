@@ -53,11 +53,6 @@ export default function Page() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function load() {
     setLoading(true);
     setError('');
@@ -78,6 +73,11 @@ export default function Page() {
     else if (data) setForm({ ...DEFAULTS, ...data });
     setLoading(false);
   }
+
+  useEffect(() => {
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function save(event: FormEvent) {
     event.preventDefault();
